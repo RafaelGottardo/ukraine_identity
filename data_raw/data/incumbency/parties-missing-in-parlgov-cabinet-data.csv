@@ -1,0 +1,22 @@
+﻿closest_or_voted,parlgov_party_id,cabinet_party,prime_minister,notes
+6,2729,0,0,in parlgov election results; not in parlgov cabinet
+11,1210,0,0,in neither parlgov election result nor parlgov cabinet
+14,658,1,0,"parlgov codes ""Union pour un mouvement populaire | Les Republicans"" with different ID than ""Les Republicans"""
+37,2381,0,0,in parlgov election results; not in parlgov cabinet. 
+41,NA,0,0,"in neither parlgov election result nor parlgov cabinet. Seems this party didn't contest national elections in 2023, but did in 2019. very small party. "
+48,NA,0,0,"in neither parlgov election results nor parlgov cabinet. Party contested national elections in 2018, but not 2022. it seems it no longer exist, but it did have a cabinet member under Draghi. "
+65,NA,0,0,"party used to be called what YouGov now calls it. Now called The Citizen List. Seeminly not in parlgov (but there's a party with name ""no seat"" with roughly equal vote share in 2019 election)"
+68,NA,0,0,in neither parlgov election result nor parlgov cabinet
+70,NA,0,0,in neither parlgov election results nor parlgov cabinet. First contested election in 2019 and gained 1.8% of the vote. 
+76,892,0,0,"previously called ""People's Party"""
+90,NA,0,0,in neither parlgov election result nor parlgov cabinet
+91,NA,0,0,
+94,,1,1,
+95,,0,0,
+101,2395,0,0,in parlgov election results; not in parlgov cabinet
+102,2746,0,0,in parlgov election results; not in parlgov cabinet
+108,2659,0,0,in parlgov election results; not in parlgov cabinet
+124,NA,0,0,not in parlgov cabiunet
+135,2751,0,0,in parlgov election results; not in parlgov cabinet
+138,1432,0,0,in parlgov election results; not in parlgov cabinet
+143,NA,0,0,the YG code represents a coalition of three different parties; none are part of the government

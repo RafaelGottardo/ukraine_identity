@@ -1,0 +1,147 @@
+country,Party Name,New_Q59,politico_poll
+United Kingdom,Conservative,1,35
+United Kingdom,Labour,2,39
+United Kingdom,Liberal Democrat,3,9
+United Kingdom,Scottish National Party (SNP),4,5
+United Kingdom,Plaid Cymru,5,1
+United Kingdom,Brexit Party,6,4
+United Kingdom,Green,7,5
+United Kingdom,DUP,8,4
+United Kingdom,Sinn Fein,9,
+United Kingdom,SDLP,10,39
+United Kingdom,UUP,11,35
+France,Alliance Party,12,
+France,La République en marche,13,27
+France,Les Républicains,14,10
+France,Front national,15,20
+France,La France insoumise,16,15
+France,Parti socialiste,17,2
+France,Mouvement démocrate,18,27
+Germany,SPD,19,25
+Germany,CDU/CSU,20,25
+Germany,Bundnis 90/Die Grunen,21,17
+Germany,AfD,22,10
+Germany,FDP,23,9
+Germany,Die Linke,24,5
+Spain,PSOE,25,26
+Spain,PP,26,25
+Spain,Vox,27,19
+Spain,Unidas Podemos+Podemos EU,28,11
+Spain,Ciudadanos,29,2
+Spain,ERC-Sobiranistes,30,3
+Spain,En Comu Podem,31,11
+Spain,Junts-JuntsxCat,32,2
+Spain,Más País-Equo,33,3
+Spain,EAJ-PNV,34,2
+Spain,EH Bildu,35,1
+Spain,CUP-PR,36,1
+Spain,PACMA,37,1
+Spain,Més Compromís,38,3
+Spain,BNG,39,1
+Spain,CCa-NC,40,1
+Spain,PRC,41,
+Italy,Movimento 5 Stelle,42,13
+Italy,Lega,43,17
+Italy,Forza Italia,44,8
+Italy,Fratelli d’Italia,45,21
+Italy,Partito Democratico,46,21
+Italy,#NAME?,47,5
+Italy,Liberi e Uguali,48,3
+Netherlands,Volkspartij voor Vrijheid en Democratie (VVD),49,27
+Netherlands,Partij voor de Vrijheid (PVV),50,14
+Netherlands,Christen Democratisch Appèl (CDA),51,9
+Netherlands,Democraten 66 (D66),52,18
+Netherlands,GroenLinks,53,11
+Netherlands,Socialistische Partij (SP),54,7
+Netherlands,Partij van de Arbeid (PvdA),55,11
+Netherlands,ChristenUnie/SGP,56,4
+Netherlands,50PLUS,57,1
+Netherlands,Partij voor de Dieren,58,8
+Netherlands,Denk,59,3
+Netherlands,Forum voor Democratie,60,4
+Denmark,Socialdemokratiet,61,27
+Denmark,Radikale Venstre,62,7
+Denmark,Det Konservative Folkeparti,63,16
+Denmark,Nye Borgerlige,64,6
+Denmark,Partiet Klaus Riskær Pedersen,65,1
+Denmark,Socialistisk Folkeparti,66,9
+Denmark,Liberal Alliance,67,3
+Denmark,Kristendemokraterne,68,1
+Denmark,Dansk Folkeparti,69,5
+Denmark,Stram Kurs,70,0.3
+Denmark,Venstre,71,14
+Denmark,Enhedslisten,72,8
+Denmark,Alternativet,73,1
+Denmark,Moderaterna,74,3
+Sweden,Centerpartiet,75,7
+Sweden,Liberalerna,76,2
+Sweden,Kristdemokraterna,77,6
+Sweden,Miljöpartiet,78,21
+Sweden,Socialdemokraterna,79,32
+Sweden,Vänsterpartiet,80,8
+Sweden,Sverigedemokraterna,81,18
+Finland,Keskusta,82,13
+Finland,Kokoomus,83,24
+Finland,"SDP, Sosialidemokraattinen Puolue",84,19
+Finland,Vasemmistoliitto,85,8
+Finland,Vihreä liitto,86,9
+Finland,Kristillisdemokraatit,87,3
+Finland,"RKP, Suomen ruotsalainen kansanpuolue",88,4
+Finland,Perussuomalaiset,89,14
+Finland,Sininen tulevaisuus,90,
+Poland,Koalicja Polska,91,5
+Poland,"Prawo I Sprawiedliwo??, PiS",92,39
+Poland,Lewica,93,8
+Poland,Konfederacja Wolno?? I Niepodleg?o??,94,8
+Poland,"Koalicja Obywatelska, KO",95,27
+Romania,Partidul Social Democrat (PSD),96,35
+Romania,Partidul Na?ional Liberal (PNL),97,19
+Romania,Alian?a 2020 USR-PLUS,98,11
+Romania,Alian?a pentru Unirea Românilor (AUR),99,14
+Romania,Romániai Magyar Demokrata Szövetség (RMDSZ),100,5
+Romania,Partidul Mi?carea Popular? (PMP),101,4
+Romania,PRO România (PRO),102,2
+Hungary,Fidesz–KDNP pártszövetség,103,52
+Hungary,Jobbik Magyarországért Mozgalom (Jobbik),104,38
+Hungary,Magyar Szocialista Párt–Párbeszéd Magyarországért (MSZP–Párbeszéd),105,38
+Hungary,Lehet Más a Politika (LMP),106,38
+Hungary,Demokratikus Koalíció (DK),107,38
+Hungary,Momentum Mozgalom (Momentum),108,4
+Hungary,Együtt – A Korszakváltók Pártja (Együtt),109,
+Lithuania,"T?vyn?s s?junga – Lietuvos krikš?ionys demokratai, TS-LKD",110,18
+Lithuania,"Lietuvos valstie?i? ir žali?j? s?junga, LVŽS",111,9
+Lithuania,"Darbo partija, DP",112,6
+Lithuania,"Lietuvos socialdemokrat? partija, LSDP",113,18
+Lithuania,Laisv?s partija,114,5
+Lithuania,"Lietuvos Respublikos Liberal? s?j?dis, LRLS",115,9
+Lithuania,"Lietuvos lenk? rinkim? akcija – Krikš?ionišk? šeim? s?junga, LLRA–KŠS",116,3
+Lithuania,"Lietuvos region? partija, LRP",117,2
+Greece,??? ?????????? (??),118,36
+Greece,??????,119,26
+Greece,?????? ??????? (?????),120,16
+Greece,????????????? ????? ???????,121,6
+Greece,???????? ????,122,5
+Greece,"?????? ?????????? ??????????? ?????????), MeRA25",123,3
+Greece,????? ????,124,
+Blugaria,??? ????? ?????,125,6.9
+Blugaria,????-???,126,23.5
+Blugaria,??? ?? ????????,127,10.9
+Blugaria,"???????????? ????????, ??",128,6.8
+Blugaria,"???????? ?? ????? ? ???????, ???",129,10.4
+Blugaria,??????? ??.??! ??? ??????!,130,
+Slovakia,"OBY?AJNÍ ?UDIA a nezávislé osobnosti (O?ANO), NOVA, Kres?anská únia (KÚ), ZMENA ZDOLA: O?ANO-NOVA-KÚ-ZMENA ZDOLA",131,9
+Slovakia,"Smer – sociálna demokracia, SMER–SD",132,15
+Slovakia,Sme rodina,133,7
+Slovakia,"?udová strana naše Slovensko, ?SNS",134,4
+Slovakia,Progresívne Slovensko SPOLU – ob?ianska demokracia,135,1
+Slovakia,"Sloboda a solidarita, SaS",136,12
+Slovakia,Za ?udí,137,2
+Slovakai,"Kres?anskodemokratické hnutie, KDH",138,6
+Croatia,"Hrvatska demokratska zajednica, HDZ",139,31
+Croatia,Restart koalicija,140,20
+Croatia,"Domovinski pokret Miroslava Škore, DPMŠ",141,7
+Croatia,Most,142,12
+Croatia,Zeleno–lijeva koalicija,143,14
+Croatia,Centar,144,2
+,None of these,145,
+,Don't know,146,

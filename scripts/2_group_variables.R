@@ -1,6 +1,7 @@
 ##### The code to Create Project Specific Variables ####
 
-
+source("scripts/0_functions.R")
+source("scripts/1_clean_data.R")
 
 EUI_data <- EUI_data %>% 
   mutate(ukraine_groups =  case_when(Q68 == 2 ~ "Anti-Russia",
@@ -22,14 +23,15 @@ table(EUI_data$New_Q78_1)
 EUI_data <- EUI_data %>% 
   mutate(Pro_russia_scale = case_when(Q68 != 2 ~ 1,
                                        TRUE ~ 0),
-         Pro_russia_scale = Pro_russia_scale + (Year < 2025 & Q68 == 3),
+        # Pro_russia_scale = Pro_russia_scale + (Year < 2025 & Q68 == 3),
          Pro_russia_scale = Pro_russia_scale + (Q73 == "European countries should invest more in trade and diplomacy with Russia to improve relations"),
          Pro_russia_scale = Pro_russia_scale + (Q69i == 3),
-         Pro_russia_scale = Pro_russia_scale + (New_Q5_1 %in% c(4,5) | New_Q5_6 %in% c(4, 5)),
+         Pro_russia_scale = Pro_russia_scale + (Q5 < 5),
          Pro_russia_scale = Pro_russia_scale + (Q9i %in% c(2, 3)),
          Pro_russia_scale = Pro_russia_scale + (New_Q43 %in% c(3, 4))
          )
 
+table(EUI_data$Pro_russia_scale)
 EUI_data <- EUI_data %>% 
   mutate(across(starts_with("New_Q78"), \(x)ifelse(x %in% c(4, 5), 1, 0), .names = "{.col}_binary"),
          Aid_support = rowSums(
@@ -41,21 +43,20 @@ EUI_data <- EUI_data %>%
   mutate(
          Pro_russia_scale_short = case_when(Q68 != 2 ~ 1,
                                       TRUE ~ 0),
-         Pro_russia_scale_short = Pro_russia_scale_short + (Year < 2025 & Q68 == 3),
+        # Pro_russia_scale_short = Pro_russia_scale_short + (Year < 2025 & Q68 == 3),
          Pro_russia_scale_short = Pro_russia_scale_short + (Q73 == "European countries should invest more in trade and diplomacy with Russia to improve relations"),
          Pro_russia_scale_short = Pro_russia_scale_short + (Q69i == 3),
-         Pro_russia_scale_short = Pro_russia_scale_short + (New_Q5_1 %in% c(4,5) | New_Q5_6 %in% c(4, 5)),
+         Pro_russia_scale_short = Pro_russia_scale_short + (Q5 < 5),
          Pro_russia_scale_short = Pro_russia_scale_short + (Q9i %in% c(2, 3)),
          Pro_russia_scale_short = Pro_russia_scale_short + (New_Q43 %in% c(3, 4)),
          Pro_russia_scale_short = Pro_russia_scale_short + (EUI_Ukraine_Outcome %in% c(1, 2)),
          Pro_russia_scale_short = Pro_russia_scale_short + (Aid_support < 4)
   )
 
-
+EUI_data$Q69
 EUI_data <- EUI_data %>% 
-  mutate(appease_russia_scale = case_when(Q68 == 2 ~ 1,
+  mutate(appease_russia_scale = case_when(Q68 %in% c(2, 5) ~ 1,
                                       TRUE ~ 0),
-         appease_russia_scale = appease_russia_scale + (Q68 == 5),
          appease_russia_scale = appease_russia_scale + (Q73 == "European countries should invest more in trade and diplomacy with Russia to improve relations"),
          appease_russia_scale = appease_russia_scale + (Q69i == 3),
          appease_russia_scale = appease_russia_scale + (Q70i %in% c(3, 4)),
@@ -69,9 +70,8 @@ EUI_data <- EUI_data %>%
                                      TRUE ~ 0)) 
 
 EUI_data <- EUI_data %>% 
-  mutate(appease_russia_scale_short = case_when(Q68 == 2 ~ 1,
+  mutate(appease_russia_scale_short = case_when(Q68 %in% c(2, 5) ~ 1,
                                           TRUE ~ 0),
-         appease_russia_scale_short = appease_russia_scale_short + (Q68 == 5),
          appease_russia_scale_short = appease_russia_scale_short + (Q73 == "European countries should invest more in trade and diplomacy with Russia to improve relations"),
          appease_russia_scale_short = appease_russia_scale_short + (Q69i == 3),
          appease_russia_scale_short = appease_russia_scale_short + (Q70i %in% c(3, 4)),

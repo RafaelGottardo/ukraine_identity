@@ -1,0 +1,242 @@
+---
+title: "Groups on Russia Preliminary Report"
+author: "Rafael Campos-Gottardo & Alan Nemirovski"
+date: "`r Sys.Date()`"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+source("scripts/2_group_variables.R")
+```
+
+## Creating Group Variables Method 1
+**Pro Russian Long Term**
+0 - 6 scale 
+
+- Respondents gain 1 point if:
+  - They do not think Russia is their countries greatest threat (Q68).
+  - They think that Europeans should pursue trade and diplomacy with Russia (Q73).
+  - They think their country spends too much on defence (Q69)
+  - They do not support democracy (Q5 < 5/10) 
+  - They do not trust the European Union (New_Q43)
+  
+
+```{r}
+hist(EUI_data$Pro_russia_scale)
+```
+
+  
+**Pro Russian Short Term**
+0 - 7 scale 
+
+- Respondents gain 1 point if:
+  - They do not think Russia is their countries greatest threat (Q68).
+  - They think that Europeans should pursue trade and diplomacy with Russia (Q73).
+  - They think their country spends too much on defence (Q69)
+  - They do not support democracy (Q5 < 5/10) 
+  - They do not trust the European Union (New_Q43)
+  - They do want Russia to gain territory in Ukraine (EUI_Ukraine_Outcome)
+  - They do not support Aid to Ukraine (New_Q78, less than 4 on a 0-9 scale)
+  
+Question: Q5 only captures ideological pro Russia not situational.
+
+```{r}
+hist(EUI_data$Pro_russia_scale_short)
+```
+
+**Russian Appeaser Long Term**
+
+0 - 6 scale
+
+- Respondents gain 1 point if:
+  - they think Russia is their country's greatest threat (Q68) or they think Nuclear proliferation is their greatest threat.
+  - They want to trade with Russia (instead of invest in defence) (Q73)
+  - They think their country spends too much on defence (Q69)
+  - They oppose the creation of an integrated European army (Q70)
+  - They think that NATO is not important for their country's defence (Q71)
+  - They would vote to remain in the EU (Q9)
+  
+```{r}
+hist(EUI_data$appease_russia_scale)
+```
+
+
+**Russian Appeaser Short Term**
+
+Only post 2023
+
+- 0 - 8 scale 
+
+- Respondents gain 1 point if:
+  - They do not think Russia is their country's greatest threat (Q68)
+  - They want to trade with Russia (instead of invest in defence) (Q73)
+  - Their country spends too much on defence (Q69)
+  - They oppose the creation of an integrated European army (Q70)
+  - They think that NATO is not important for their country's defence (Q71)
+  - They would vote to remain in the EU (Q9)
+  - Favour a return to the territorial situation before the war (EUI_Ukraine_Outcome)
+  - Support only compromises to end the war (New_Q78_variables)
+  
+  
+```{r cars}
+hist(EUI_data$appease_russia_scale_short)
+```
+
+## Testing Method 1 Variables
+
+### Correlations 
+
+First, I check the correlation of the pro-Russia and appease Russia scales to ensure they are capturing different concepts. 
+
+The long term scales 
+
+```{r}
+cor(EUI_data$Pro_russia_scale, EUI_data$appease_russia_scale, use = "complete.obs")
+```
+
+The short term scales
+
+```{r}
+cor(EUI_data$Pro_russia_scale_short, EUI_data$appease_russia_scale_short,
+    use = "complete.obs")
+```
+
+Both scales are weakly correlated at $r = 0.27$ and $r = 0.35$ respectively. Indicating that the scales are not highly collinear.
+
+### Over time distributions
+
+Long term pro-Russia
+
+```{r}
+EUI_data %>% 
+  filter(Year > 2019) %>% 
+  ggplot(aes(x = Pro_russia_scale, fill = as.factor(Year), group = as.factor(Year))) + 
+  geom_bar(position = "dodge") + 
+  labs(fill = "Year", x = "Long Term Pro-Russia Scale") + 
+  scale_x_continuous(breaks = 0:6) +
+  theme_bw()
+
+```
+
+```{r}
+EUI_data %>% 
+  filter(Year > 2022) %>% 
+  ggplot(aes(x = Pro_russia_scale, fill = as.factor(Year), group = as.factor(Year))) + 
+  geom_bar(position = "dodge") + 
+  labs(fill = "Year", x = "Short Term Pro-Russia Scale") + 
+  scale_x_continuous(breaks = 0:7) +
+  theme_bw()
+```
+Long term Appease Russia
+
+```{r}
+EUI_data %>% 
+  filter(Year > 2019) %>% 
+  ggplot(aes(x = appease_russia_scale, fill = as.factor(Year), group = as.factor(Year))) + 
+  geom_bar(position = "dodge") + 
+  scale_x_continuous(breaks = 0:6) +
+  labs(fill = "Year", x = "Long Term Appease Russia Scale") + 
+  theme_bw()
+```
+```{r}
+
+EUI_data %>% 
+  filter(Year > 2019) %>% 
+  ggplot(aes(x = appease_russia_scale_short, fill = as.factor(Year), group = as.factor(Year))) + 
+  geom_bar(position = "dodge") + 
+  scale_x_continuous(breaks = 0:8) +
+  labs(fill = "Year", x = "Short Term Appease Russia Scale") + 
+  theme_bw()
+
+```
+
+### Average by Country 
+
+Long Term
+
+```{r}
+EUI_data %>% 
+  filter(Year > 2019) %>% 
+  group_by(country) %>% 
+  summarise(`Pro-Russian Scale` = mean(Pro_russia_scale, na.rm = TRUE),
+            `Appease Russia Scale` = mean(appease_russia_scale, na.rm = TRUE) ) %>% 
+    arrange(-`Pro-Russian Scale`) %>% 
+  kable(digits = 2) 
+
+```
+
+```{r}
+EUI_data %>% 
+  filter(Year > 2019) %>% 
+  group_by(country) %>% 
+  summarise(`Pro-Russian Scale` = mean(Pro_russia_scale_short, na.rm = TRUE),
+            `Appease Russia Scale` = mean(appease_russia_scale_short, na.rm = TRUE) ) %>% 
+    arrange(-`Pro-Russian Scale`) %>% 
+  kable(digits = 2) 
+```
+
+## Create group variables
+
+Those who score 3 or less on both scales are considered pro-Europeans, those who score 4 or above on the Russian appeaser scale are considered Russian appeasers and those that score 4 or above on the Pro Russia scale are considered Pro-Russian. 
+
+```{r}
+EUI_data <- EUI_data %>% 
+  mutate(Russia_groups_long = case_when(appease_russia_scale < 4 & Pro_russia_scale < 4 ~ "Anti-Russia",
+                                        appease_russia_scale > 3 ~ "Russia Appeaser",
+                                        Pro_russia_scale > 3 ~ "Pro Russian"),
+         Russia_groups_short = case_when(appease_russia_scale_short < 4 & Pro_russia_scale_short < 4 ~ "Anti-Russia",
+                                        appease_russia_scale_short > 3 ~ "Russia Appeaser",
+                                        Pro_russia_scale_short > 3 ~ "Pro Russian")
+         )
+
+```
+
+
+### Groups over time 
+
+Long term Variable 
+
+```{r}
+EUI_data %>% 
+  filter(Year > 2019) %>% 
+  group_by(Year, Russia_groups_long) %>% 
+  summarise(n = n(), .groups = "drop_last") %>% 
+  filter(!is.na(Russia_groups_long)) %>% 
+  mutate(Percentage = n / sum(n) * 100) %>% 
+  kable(digits = 2)
+```
+
+```{r}
+EUI_data %>% 
+  filter(Year > 2022) %>% 
+  group_by(Year, Russia_groups_short) %>% 
+  summarise(n = n(), .groups = "drop_last") %>% 
+  filter(!is.na(Russia_groups_short)) %>% 
+  mutate(Percentage = n / sum(n) * 100) %>% 
+  kable(digits = 2)
+```
+### Groups by Country 
+
+Long term measure 
+
+```{r}
+EUI_data %>% 
+  filter(Year > 2019) %>% 
+  group_by(country, Russia_groups_long) %>% 
+  summarise(n = n(), .groups = "drop_last") %>% 
+  filter(!is.na(Russia_groups_long)) %>% 
+  mutate(Percentage = n / sum(n) * 100) %>% 
+  kable(digits = 2)
+```
+
+```{r}
+EUI_data %>% 
+  filter(Year > 2022) %>% 
+  group_by(country, Russia_groups_short) %>% 
+  summarise(n = n(), .groups = "drop_last") %>% 
+  filter(!is.na(Russia_groups_short)) %>% 
+  mutate(Percentage = n / sum(n) * 100) %>% 
+  kable(digits = 2)
+```
+

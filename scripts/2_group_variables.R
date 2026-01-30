@@ -87,6 +87,5 @@ cor(EUI_data$appease_russia_scale, EUI_data$Pro_russia_scale, use = "complete.ob
 table(EUI_data$appease_russia_scale)
 table(EUI_data$appease_russia_scale_short)
 
-
 table(EUI_data$Pro_russia_scale)
 table(EUI_data$Pro_russia_scale_short)

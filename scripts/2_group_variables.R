@@ -1,5 +1,7 @@
 ##### The code to Create Project Specific Variables ####
 
+library(tidyverse)
+
 source("scripts/0_functions.R")
 source("scripts/1_clean_data.R")
 
@@ -89,3 +91,36 @@ table(EUI_data$appease_russia_scale_short)
 
 table(EUI_data$Pro_russia_scale)
 table(EUI_data$Pro_russia_scale_short)
+
+
+# Combined (additive) index
+EUI_data <-  EUI_data %>%  
+  mutate(comb_scale = case_when(Q68 != 2 ~ 1, TRUE ~ 0),
+         comb_scale = comb_scale + (Q73 == "European countries should invest more in trade and diplomacy with Russia to improve relations"),
+         comb_scale = comb_scale + (Q69i == 3),
+         comb_scale = comb_scale + (Q5 < 5),
+         comb_scale = comb_scale + (Q9i %in% c(2, 3)),
+         comb_scale = comb_scale + (New_Q43 %in% c(3, 4)),
+         comb_scale = comb_scale + 0.5*(Q70i %in% c(3, 4)),
+         comb_scale = comb_scale + 0.5*(Q71a %in% c(3, 4)),
+         comb_scale = comb_scale + 0.5*(Q9i == 1)
+         )
+
+EUI_data <- EUI_data %>% 
+  mutate(comb_scale_short = case_when(Q68 != 2 ~ 1, TRUE ~ 0),
+         comb_scale_short = comb_scale_short + (Q73 == "European countries should invest more in trade and diplomacy with Russia to improve relations"),
+         comb_scale_short = comb_scale_short + (Q69i == 3),
+         comb_scale_short = comb_scale_short + (Q5 < 5),
+         comb_scale_short = comb_scale_short + (Q9i %in% c(2, 3)),
+         comb_scale_short = comb_scale_short + (New_Q43 %in% c(3, 4)),
+         comb_scale_short = comb_scale_short + 0.5*(Q70i %in% c(3, 4)),
+         comb_scale_short = comb_scale_short + 0.5*(Q71a %in% c(3, 4)),
+         comb_scale_short = comb_scale_short + 0.5*(Q9i == 1),
+         comb_scale_short = comb_scale_short + 0.5*(EUI_Ukraine_Outcome == 3),
+         comb_scale_short = comb_scale_short + 0.5*(appease_conflict == 1),
+         comb_scale_short = comb_scale_short + (EUI_Ukraine_Outcome %in% c(1, 2)),
+         comb_scale_short = comb_scale_short + (Aid_support < 4)
+  )
+
+table(EUI_data$comb_scale)
+table(EUI_data$comb_scale_short)

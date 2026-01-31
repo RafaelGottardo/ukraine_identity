@@ -10,35 +10,33 @@ knitr::opts_chunk$set(echo = TRUE)
 source("scripts/2_group_variables.R")
 ```
 
-## Creating Group Variables Method 1
-**Pro Russian Long Term**
-0 - 6 scale 
+# Method 1: Group-Based Indices
 
-- Respondents gain 1 point if:
-  - They do not think Russia is their countries greatest threat (Q68).
-  - They think that Europeans should pursue trade and diplomacy with Russia (Q73).
-  - They think their country spends too much on defence (Q69)
-  - They do not support democracy (Q5 < 5/10) 
-  - They do not trust the European Union (New_Q43)
-  
+## Creating Group-Based Indices
+
+**Pro Russian Long Term**
+
+0 - 6 scale
+
+Respondents gain 1 point if: - They do not think Russia is their countries greatest threat (Q68). - They think that Europeans should pursue trade and diplomacy with Russia (Q73). - They think their country spends too much on defence (Q69) - They do not support democracy (Q5 \< 5/10) - They do not trust the European Union (New_Q43)
 
 ```{r}
 hist(EUI_data$Pro_russia_scale)
 ```
 
-  
 **Pro Russian Short Term**
-0 - 7 scale 
 
-- Respondents gain 1 point if:
-  - They do not think Russia is their countries greatest threat (Q68).
-  - They think that Europeans should pursue trade and diplomacy with Russia (Q73).
-  - They think their country spends too much on defence (Q69)
-  - They do not support democracy (Q5 < 5/10) 
-  - They do not trust the European Union (New_Q43)
-  - They do want Russia to gain territory in Ukraine (EUI_Ukraine_Outcome)
-  - They do not support Aid to Ukraine (New_Q78, less than 4 on a 0-9 scale)
-  
+0 - 7 scale
+
+-   Respondents gain 1 point if:
+    -   They do not think Russia is their countries greatest threat (Q68).
+    -   They think that Europeans should pursue trade and diplomacy with Russia (Q73).
+    -   They think their country spends too much on defence (Q69)
+    -   They do not support democracy (Q5 \< 5/10)
+    -   They do not trust the European Union (New_Q43)
+    -   They do want Russia to gain territory in Ukraine (EUI_Ukraine_Outcome)
+    -   They do not support Aid to Ukraine (New_Q78, less than 4 on a 0-9 scale)
+
 Question: Q5 only captures ideological pro Russia not situational.
 
 ```{r}
@@ -49,47 +47,37 @@ hist(EUI_data$Pro_russia_scale_short)
 
 0 - 6 scale
 
-- Respondents gain 1 point if:
-  - they think Russia is their country's greatest threat (Q68) or they think Nuclear proliferation is their greatest threat.
-  - They want to trade with Russia (instead of invest in defence) (Q73)
-  - They think their country spends too much on defence (Q69)
-  - They oppose the creation of an integrated European army (Q70)
-  - They think that NATO is not important for their country's defence (Q71)
-  - They would vote to remain in the EU (Q9)
-  
+-   Respondents gain 1 point if:
+    -   they think Russia is their country's greatest threat (Q68) or they think Nuclear proliferation is their greatest threat.
+    -   They want to trade with Russia (instead of invest in defence) (Q73)
+    -   They think their country spends too much on defence (Q69)
+    -   They oppose the creation of an integrated European army (Q70)
+    -   They think that NATO is not important for their country's defence (Q71)
+    -   They would vote to remain in the EU (Q9)
+
 ```{r}
 hist(EUI_data$appease_russia_scale)
 ```
-
 
 **Russian Appeaser Short Term**
 
 Only post 2023
 
-- 0 - 8 scale 
+0 - 8 scale
 
-- Respondents gain 1 point if:
-  - They do not think Russia is their country's greatest threat (Q68)
-  - They want to trade with Russia (instead of invest in defence) (Q73)
-  - Their country spends too much on defence (Q69)
-  - They oppose the creation of an integrated European army (Q70)
-  - They think that NATO is not important for their country's defence (Q71)
-  - They would vote to remain in the EU (Q9)
-  - Favour a return to the territorial situation before the war (EUI_Ukraine_Outcome)
-  - Support only compromises to end the war (New_Q78_variables)
-  
-  
+Respondents gain 1 point if: - They do not think Russia is their country's greatest threat (Q68) - They want to trade with Russia (instead of invest in defence) (Q73) - Their country spends too much on defence (Q69) - They oppose the creation of an integrated European army (Q70) - They think that NATO is not important for their country's defence (Q71) - They would vote to remain in the EU (Q9) - Favour a return to the territorial situation before the war (EUI_Ukraine_Outcome) - Support only compromises to end the war (New_Q78_variables)
+
 ```{r cars}
 hist(EUI_data$appease_russia_scale_short)
 ```
 
 ## Testing Method 1 Variables
 
-### Correlations 
+### Correlations
 
-First, I check the correlation of the pro-Russia and appease Russia scales to ensure they are capturing different concepts. 
+First, I check the correlation of the pro-Russia and appease Russia scales to ensure they are capturing different concepts.
 
-The long term scales 
+The long term scales
 
 ```{r}
 cor(EUI_data$Pro_russia_scale, EUI_data$appease_russia_scale, use = "complete.obs")
@@ -103,6 +91,58 @@ cor(EUI_data$Pro_russia_scale_short, EUI_data$appease_russia_scale_short,
 ```
 
 Both scales are weakly correlated at $r = 0.27$ and $r = 0.35$ respectively. Indicating that the scales are not highly collinear.
+
+# Method 2: Combined index
+
+## Generating combined index
+
+*Long term appeaser-supporter scale*
+
+0 - 7 scale
+
+Respondents get 1 point if:
+
+-   They do not think Russia or nuclear non-proliferation is their countries greatest threat (Q68).
+
+-   They think that Europeans should pursue trade and diplomacy with Russia (Q73).
+
+-   They think their country spends too much on defence (Q69)
+
+-   They do not support democracy (Q5 \< 5/10)
+
+-   They do not trust the European Union (New_Q43)
+
+Respondents get 0.5 points if:
+
+-   **\*INSERT HERE\***
+
+```{r}
+hist(EUI_data$comb_scale)
+```
+
+*Short term appeaser-supporter scale* 0 - 9.5 scale
+
+Respondents get 1 point if:
+
+-   They do not think Russia is their countries greatest threat (Q68).
+
+-   They think that Europeans should pursue trade and diplomacy with Russia (Q73).
+
+-   They think their country spends too much on defence (Q69)
+
+-   They do not support democracy (Q5 \< 5/10)
+
+-   They do not trust the European Union (New_Q43)
+
+Respondents get an additional 0.5 point if:
+
+-   **\*\*INSERT\*\***
+
+```{r}
+hist(EUI_data$comb_scale_short)
+```
+
+# Comparisons of measures
 
 ### Over time distributions
 
@@ -119,6 +159,8 @@ EUI_data %>%
 
 ```
 
+Short term pro-Russia
+
 ```{r}
 EUI_data %>% 
   filter(Year > 2022) %>% 
@@ -128,6 +170,7 @@ EUI_data %>%
   scale_x_continuous(breaks = 0:7) +
   theme_bw()
 ```
+
 Long term Appease Russia
 
 ```{r}
@@ -139,6 +182,9 @@ EUI_data %>%
   labs(fill = "Year", x = "Long Term Appease Russia Scale") + 
   theme_bw()
 ```
+
+Short term Appease Russia
+
 ```{r}
 
 EUI_data %>% 
@@ -151,7 +197,31 @@ EUI_data %>%
 
 ```
 
-### Average by Country 
+Long term Combined Scale
+
+```{r}
+EUI_data %>% 
+  filter(Year > 2019) %>% 
+  ggplot(aes(x = comb_scale, fill = as.factor(Year), group = as.factor(Year))) + 
+  geom_bar(position = "dodge") + 
+  scale_x_continuous(breaks = 0:8) +
+  labs(fill = "Year", x = "Long Term Combined Scale") + 
+  theme_bw()
+```
+
+Short term Combined Scale
+
+```{r}
+EUI_data %>% 
+  filter(Year > 2019) %>% 
+  ggplot(aes(x = comb_scale_short, fill = as.factor(Year), group = as.factor(Year))) + 
+  geom_bar(position = "dodge") + 
+  scale_x_continuous(breaks = 0:8) +
+  labs(fill = "Year", x = "Short Term Combined Scale") + 
+  theme_bw()
+```
+
+### Average Measures (ALL) by Country
 
 Long Term
 
@@ -160,25 +230,29 @@ EUI_data %>%
   filter(Year > 2019) %>% 
   group_by(country) %>% 
   summarise(`Pro-Russian Scale` = mean(Pro_russia_scale, na.rm = TRUE),
-            `Appease Russia Scale` = mean(appease_russia_scale, na.rm = TRUE) ) %>% 
+            `Appease Russia Scale` = mean(appease_russia_scale, na.rm = TRUE),
+            `Combined Scale` = mean(comb_scale, na.rm = TRUE)) %>% 
     arrange(-`Pro-Russian Scale`) %>% 
   kable(digits = 2) 
 
 ```
+
+Short Term
 
 ```{r}
 EUI_data %>% 
   filter(Year > 2019) %>% 
   group_by(country) %>% 
   summarise(`Pro-Russian Scale` = mean(Pro_russia_scale_short, na.rm = TRUE),
-            `Appease Russia Scale` = mean(appease_russia_scale_short, na.rm = TRUE) ) %>% 
+            `Appease Russia Scale` = mean(appease_russia_scale_short, na.rm = TRUE),
+            `Combined Scale` = mean(comb_scale_short, na.rm = TRUE)) %>% 
     arrange(-`Pro-Russian Scale`) %>% 
   kable(digits = 2) 
 ```
 
 ## Create group variables
 
-Those who score 3 or less on both scales are considered pro-Europeans, those who score 4 or above on the Russian appeaser scale are considered Russian appeasers and those that score 4 or above on the Pro Russia scale are considered Pro-Russian. 
+(Using Pro-Russia + Russia Appeaser scales:) Those who score 3 or less on both scales are considered pro-Europeans, those who score 4 or above on the Russian appeaser scale are considered Russian appeasers and those that score 4 or above on the Pro Russia scale are considered Pro-Russian.
 
 ```{r}
 EUI_data <- EUI_data %>% 
@@ -192,10 +266,11 @@ EUI_data <- EUI_data %>%
 
 ```
 
+*Note: A similar grouping measure could be reconstructed with thresholds set on the combined index.*
 
-### Groups over time 
+### Groups over time
 
-Long term Variable 
+Long Term Variable
 
 ```{r}
 EUI_data %>% 
@@ -207,6 +282,8 @@ EUI_data %>%
   kable(digits = 2)
 ```
 
+Short Term Variable
+
 ```{r}
 EUI_data %>% 
   filter(Year > 2022) %>% 
@@ -216,9 +293,10 @@ EUI_data %>%
   mutate(Percentage = n / sum(n) * 100) %>% 
   kable(digits = 2)
 ```
-### Groups by Country 
 
-Long term measure 
+### Groups by Country
+
+Long Term Measure
 
 ```{r}
 EUI_data %>% 
@@ -230,6 +308,8 @@ EUI_data %>%
   kable(digits = 2)
 ```
 
+Short Term Measure
+
 ```{r}
 EUI_data %>% 
   filter(Year > 2022) %>% 
@@ -239,4 +319,3 @@ EUI_data %>%
   mutate(Percentage = n / sum(n) * 100) %>% 
   kable(digits = 2)
 ```
-

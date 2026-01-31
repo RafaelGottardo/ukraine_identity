@@ -65,9 +65,17 @@ Only post 2023
 
 0 - 8 scale
 
-Respondents gain 1 point if: - They do not think Russia is their country's greatest threat (Q68) - They want to trade with Russia (instead of invest in defence) (Q73) - Their country spends too much on defence (Q69) - They oppose the creation of an integrated European army (Q70) - They think that NATO is not important for their country's defence (Q71) - They would vote to remain in the EU (Q9) - Favour a return to the territorial situation before the war (EUI_Ukraine_Outcome) - Support only compromises to end the war (New_Q78_variables)
+Respondents gain 1 point if:
+- They do not think Russia is their country's greatest threat (Q68) 
+- They want to trade with Russia (instead of invest in defence) (Q73)
+- Their country spends too much on defence (Q69)
+- They oppose the creation of an integrated European army (Q70)
+- They think that NATO is not important for their country's defence (Q71) 
+- They would vote to remain in the EU (Q9)
+- Favour a return to the territorial situation before the war (EUI_Ukraine_Outcome)
+- Support only compromises to end the war (New_Q78_variables)
 
-```{r cars}
+```{r}
 hist(EUI_data$appease_russia_scale_short)
 ```
 
@@ -114,7 +122,9 @@ Respondents get 1 point if:
 
 Respondents get 0.5 points if:
 
--   **\*INSERT HERE\***
+- Do not support an integrated European army (Q70). 
+- They do not think NATO is important to their country's defence (Q71).
+- They would vote to remain in the EU (Q9)
 
 ```{r}
 hist(EUI_data$comb_scale)
@@ -134,9 +144,13 @@ Respondents get 1 point if:
 
 -   They do not trust the European Union (New_Q43)
 
-Respondents get an additional 0.5 point if:
+Respondents get 0.5 points if:
 
--   **\*\*INSERT\*\***
+- Do not support an integrated European army (Q70). 
+- They do not think NATO is important to their country's defence (Q71).
+- They would vote to remain in the EU (Q9)
+- They support a return to the pre 2022 status quo in Ukraine (EUI_Ukraine_Outcome).
+- Support only compromises to end the war (New_Q78_variables)
 
 ```{r}
 hist(EUI_data$comb_scale_short)
@@ -319,3 +333,11 @@ EUI_data %>%
   mutate(Percentage = n / sum(n) * 100) %>% 
   kable(digits = 2)
 ```
+
+
+## Next steps
+
+- Decide which measure to use for the groups.
+- Decide what social medias we want to scrape to identify discourse surrounding the war in Ukraine.
+  - We need API access for Meta. 
+  - We can then use BERTopic to identify themes in this corpus.

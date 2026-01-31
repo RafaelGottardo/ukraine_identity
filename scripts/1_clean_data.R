@@ -725,7 +725,4 @@ test <- read_xlsx("Data_raw/Results for EUI, SOU and Solidarity 2022 OMGLOB 041 
 
 summer_2023 <- read_spss("Data_raw/data/survey/raw/eui-yg/2023-11/eui-yg-2023-11.sav")
 
-write_sav(EUI_data, "Data_clean/EUI_data.sav")
-
-
-
+write_sav(EUI_data, "data_raw/data//EUI_data.sav")

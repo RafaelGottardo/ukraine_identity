@@ -141,8 +141,8 @@ EUI_2020 <- EUI_2020 %>%
          q73 = case_match(q73,
                           1 ~ "European countries should invest more in defence and security to defend against Russian aggression",
                           2 ~ "European countries should invest more in trade and diplomacy with Russia to improve relations",
-                          3 ~ NA,
-                          4 ~ NA)) %>% 
+                          3 ~ "Neither/DK",
+                          4 ~ "Neither/DK")) %>% 
   rename("country" = "qcountry",
          "Q4"  =  "q4",
          "Q5"  =  "q5",
@@ -208,8 +208,8 @@ EUI_2021 <- EUI_2021 %>%
                                14 ~ "Spain"),
          Q73 = case_match(Q73, 1 ~ "European countries should invest more in defence and security to defend against Russian aggression",
                           2 ~ "European countries should invest more in trade and diplomacy with Russia to improve relations",
-                          3 ~ NA,
-                          4 ~ NA)) %>% 
+                          3 ~ "Neither/DK",
+                          4 ~ "Neither/DK")) %>% 
   rename("country" = "Qcountry") %>% 
   rename_with(~paste0("Q7_", c(1, 17, 2, 3, 4, 5, 6, 7, 8, 9, 10, 18, 11, 12, 13, 19, 14)), starts_with("q7_"))
 
@@ -254,8 +254,8 @@ EUI_2022 <- EUI_2022 %>%
                               35 ~ "Bulgaria"),
          Q73 = case_match(Q73, 1 ~ "European countries should invest more in defence and security to defend against Russian aggression",
                           2 ~ "European countries should invest more in trade and diplomacy with Russia to improve relations",
-                          3 ~ NA,
-                          4 ~ NA)) %>% 
+                          3 ~ "Neither/DK",
+                          4 ~ "Neither/DK")) %>% 
   rename("Q18" = "Q18_r",
          "Q26" = "Q26_r",
          "Q68" = "Q68_r") %>% 
@@ -268,7 +268,7 @@ EUI_2023 <- read_spss("Data_raw/Results for EUI, SOU and Solidarity 2023 - OMGLO
 
 EUI_2023 <- EUI_2023 %>% 
   select(country, Q4, Q5,  New_Q5_1, New_Q5_6, Q9, Q7_revisions_1:Q7_revisions_16, Q18_revisions, Q21, Q24, Q26_revisions, Q30, Q37, Q40,
-         New_Q43, Q44, EUI_Ukraine_Outcome, Q62, starts_with("Q47a_"),
+         New_Q43, Q44, EUI_Ukraine_Outcome, Q62, starts_with("Q47a_"), New_Q79,
          Q68_revisions, Q61, gender_all,education_merged1_101, education_merged1_102 , education_merged1_103,
          New_Q43,
          Q69, Q70, Q71, Q73, , weight, matches("New_Q78_\\d{1,2}$")) %>% 
@@ -303,8 +303,8 @@ EUI_2023 <- EUI_2023 %>%
                               35 ~ "Bulgaria"),
          Q73 = case_match(Q73, 1 ~ "European countries should invest more in defence and security to defend against Russian aggression",
                           2 ~ "European countries should invest more in trade and diplomacy with Russia to improve relations",
-                          3 ~ NA,
-                          4 ~ NA),
+                          3 ~ "Neither/DK",
+                          4 ~ "Neither/DK"),
          across(matches("New_Q78_\\d$"),\(x)as.numeric(x))) %>% 
   rename("Q18" = "Q18_revisions", 
          "Q26" = "Q26_revisions",
@@ -314,7 +314,6 @@ EUI_2023 <- EUI_2023 %>%
 #### 2024 ####
 
 EUI_2024 <- read_spss("Data_raw/Results for EUI, SOU and Solidarity 2024 - OMGLOB016 - Merged.sav")
-
 
 EUI_2024 <- EUI_2024 %>% 
   mutate(New_Q59 = replace(New_Q59, New_Q59 == 14, 414),
@@ -369,8 +368,8 @@ EUI_2024 <- EUI_2024 %>%
                               23 ~ "Belgium"),
          Q73 = case_match(Q73, 1 ~ "European countries should invest more in defence and security to defend against Russian aggression",
                           2 ~ "European countries should invest more in trade and diplomacy with Russia to improve relations",
-                          3 ~ NA,
-                          4 ~ NA),
+                          3 ~ "Neither/DK",
+                          4 ~ "Neither/DK"),
          across(matches("New_Q78_\\d$"),\(x)as.numeric(x))
          ) %>% 
   rename_with(~paste0("Q7_", 1:16), starts_with("Q7_revisions_")) 
@@ -451,8 +450,8 @@ EUI_2025 <- data_2025 %>%
          ForeignPolicyDecisions = case_match(ForeignPolicyDecisions, 1 ~ 1, 2 ~ 1, 3 ~ 0, 4 ~ 0, 5 ~ 0, 6 ~ 0),
          Q73 = case_match(Q73, 1 ~ "European countries should invest more in defence and security to defend against Russian aggression",
                           2 ~ "European countries should invest more in trade and diplomacy with Russia to improve relations",
-                          3 ~ NA,
-                          4 ~ NA),
+                          3 ~ "Neither/DK",
+                          4 ~ "Neither/DK"),
          across(matches("New_Q78_\\d$"),\(x)as.numeric(x))) %>% 
   rename_with(~paste0("Q7_", 1:16), starts_with("Q7_revisions_"))
 
@@ -589,7 +588,7 @@ EUI_ukraine_2 <- bind_rows(EUI_sept_2022) %>%
 EUI_data <- EUI_data %>% 
   mutate(Q44_base = Q44,
     across(Q21:Q44, \(x)case_match(x, 1 ~ 1, 2 ~ 0, 3 ~ 0)),
-         across(starts_with("New_Q78"), \(x)case_match(x, 1 ~ 5, 2 ~ 4, 3 ~ 2, 4 ~ 1, 5 ~ 3)))
+         across(starts_with("New_Q78"), \(x)case_match(x, 1 ~ 5, 2 ~ 4, 3 ~ 2, 4 ~ 1, 5 ~ 5)))
 
 
 

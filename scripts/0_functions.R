@@ -84,3 +84,6 @@ NEW_COUNTRIES_2024 <- c("UK", "Slovakia", "Netherlands", "Denmark", "Hungary",
                         "Poland", "Spain", "Germany", "Sweden", "Italy", "France", "Finland", "Belgium")
 
 
+
+#### Split Map Polygons ####
+

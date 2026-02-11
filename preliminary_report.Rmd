@@ -22,10 +22,10 @@ Other: don't know
 ```{r}
 
  EUI_data <- EUI_data %>% 
-  mutate(Ukraine_group_long = case_when((Q68 == 2 | Q68 == 5) & Q73 == "European countries should invest more in trade and diplomacy with Russia to improve relations" ~ "Appease",
-    Q68 != 2 & Q73 == "European countries should invest more in trade and diplomacy with Russia to improve relations" ~ "Pro-Russian",
-                                       Q73 == "European countries should invest more in defence and security to defend against Russian aggression" ~ "EU Defence",
-                                       TRUE ~ "Other"
+  mutate(Ukraine_group_long = case_when((Q68 == 2 | Q68 == 5) & Q73 == "European countries should invest more in trade and diplomacy with Russia to improve relations" ~ "Russia Appeaser",
+    Q68 != 2 & Q73 == "European countries should invest more in trade and diplomacy with Russia to improve relations" ~ "Pro-Russia",
+                                       Q73 == "European countries should invest more in defence and security to defend against Russian aggression" ~ "Pro-Ukraine",
+                                       TRUE ~ "Indifferent"
                                    ))
 
 
@@ -41,7 +41,7 @@ EUI_2023 <- EUI_2023 %>%
                                          New_Q79 %in% c(4, 5) & EUI_Ukraine_Outcome %in% c(5, 4) & 
                                            New_Q78_1 %in% c(3, 4) & New_Q78_2 %in% c(3, 4) &
                                            New_Q78_3 %in% c(3, 4) & New_Q78_4 %in% c(3, 4) &
-                                           New_Q78_5 %in% c(3, 4) & New_Q78_7 %in% c(3, 4) ~ "Pro Ukraine",
+                                           New_Q78_5 %in% c(3, 4) & New_Q78_7 %in% c(3, 4) ~ "Pro-Ukraine",
                                         
                                          TRUE ~ "Indifferenent"
                                            ))
@@ -68,6 +68,32 @@ EUI_data <- EUI_data %>%
 table(EUI_2023$Ukraine_group_2023)
 table(EUI_2023$New_Q79)
 ```
+
+### Long-term group trends
+
+```{r}
+EUI_data %>% 
+  filter(Year > 2019) %>% 
+  ggplot(aes(x = Ukraine_group_long, fill = as.factor(Year), group = as.factor(Year))) + 
+  geom_bar(position = "dodge") + 
+  labs(fill = "Year", title = "Russia Attitudinal Groups: Long-Term Measure",
+       x = "Groups", y = "Frequency") + 
+  theme_bw()
+
+```
+
+### Short-term group trends
+
+```{r}
+EUI_data %>% 
+  filter(Year > 2022) %>% 
+  ggplot(aes(x = Ukraine_group_short, fill = as.factor(Year), group = as.factor(Year))) + 
+  geom_bar(position = "dodge") + 
+  labs(fill = "Year", title = "Russia Attitudinal Groups: Short-Term Measure",
+       x = "Groups", y = "Frequency") + 
+  theme_bw()
+```
+
 ## Short Term Measure
 
 New_Q79: (2023: 5923; 14502; 3836) anti Russia 
@@ -240,7 +266,7 @@ ggpubr::ggarrange(plotlist = maps_pro_ukraine[c(1, 3, 5, 6)],
   legend = "bottom")
 ```
 
-## Ambivelent
+## Ambivalent
 
 ```{r}
 maps_other <- list()
@@ -282,6 +308,8 @@ ggpubr::ggarrange(plotlist = maps_other[c(1, 3, 5, 6)],
   common.legend = TRUE,
   legend = "bottom")
 ```
+
+
 # Method 1: Group-Based Indices
 
 ## Creating Group-Based Indices

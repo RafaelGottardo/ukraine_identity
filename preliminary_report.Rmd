@@ -156,7 +156,7 @@ maps_pro_Russia <- list()
 for(i in 1:length(years)){
   df <- EUI_data %>% 
     filter(Year == years[i]) %>% 
-    mutate(Pro_Russia = case_when(Ukraine_group_long == "Pro-Russian" ~ 1,
+    mutate(Pro_Russia = case_when(Ukraine_group_long == "Pro-Russia" ~ 1,
                                   TRUE ~ 0)) %>% 
     group_by(country) %>% 
     summarise(`Pro-Russia` = mean(Pro_Russia, na.rm = TRUE))
@@ -199,7 +199,7 @@ maps_appease <- list()
 for(i in 1:length(years)){
   df <- EUI_data %>% 
     filter(Year == years[i]) %>% 
-    mutate(Appeaser = case_when(Ukraine_group_long == "Appease" ~ 1,
+    mutate(Appeaser = case_when(Ukraine_group_long == "Russia Appeaser" ~ 1,
                                   TRUE ~ 0)) %>% 
     group_by(country) %>% 
     summarise(`Russia Appeaser` = mean(Appeaser, na.rm = TRUE))
@@ -242,7 +242,7 @@ maps_pro_ukraine <- list()
 for(i in 1:length(years)){
   df <- EUI_data %>% 
     filter(Year == years[i]) %>% 
-    mutate(Ukraine = case_when(Ukraine_group_long == "EU Defence" ~ 1,
+    mutate(Ukraine = case_when(Ukraine_group_long == "Pro-Ukraine" ~ 1,
                                   TRUE ~ 0)) %>% 
     group_by(country) %>% 
     summarise(`Pro-Ukraine` = mean(Ukraine, na.rm = TRUE))
@@ -278,7 +278,7 @@ ggpubr::ggarrange(plotlist = maps_pro_ukraine[c(1, 3, 5, 6)],
   legend = "bottom")
 ```
 
-## Ambivalent
+## Ambivalent (all "Other" individual)
 
 ```{r}
 maps_other <- list()

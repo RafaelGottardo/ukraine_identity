@@ -25,7 +25,7 @@ Other: don't know
   mutate(Ukraine_group_long = case_when((Q68 == 2 | Q68 == 5) & Q73 == "European countries should invest more in trade and diplomacy with Russia to improve relations" ~ "Russia Appeaser",
     Q68 != 2 & Q73 == "European countries should invest more in trade and diplomacy with Russia to improve relations" ~ "Pro-Russia",
                                        Q73 == "European countries should invest more in defence and security to defend against Russian aggression" ~ "Pro-Ukraine",
-                                       TRUE ~ "Indifferent"
+                                       TRUE ~ "Other"
                                    ))
 
 
@@ -43,7 +43,7 @@ EUI_2023 <- EUI_2023 %>%
                                            New_Q78_3 %in% c(3, 4) & New_Q78_4 %in% c(3, 4) &
                                            New_Q78_5 %in% c(3, 4) & New_Q78_7 %in% c(3, 4) ~ "Pro-Ukraine",
                                         
-                                         TRUE ~ "Indifferenent"
+                                         TRUE ~ "Other"
                                            ))
 
 EUI_data <- EUI_data %>% 
@@ -62,7 +62,7 @@ EUI_data <- EUI_data %>%
                                            New_Q78_5 %in% c(3, 4) |
                                              New_Q78_7 %in% c(3, 4)) ~ "Pro Ukraine",
                                          
-                                         TRUE ~ "Indifferenent"
+                                         TRUE ~ "Other"
                                            ))
 
 table(EUI_2023$Ukraine_group_2023)
@@ -70,6 +70,8 @@ table(EUI_2023$New_Q79)
 ```
 
 ### Long-term group trends
+
+
 
 ```{r}
 EUI_data %>% 
@@ -85,7 +87,17 @@ EUI_data %>%
 ### Short-term group trends
 
 ```{r}
-EUI_data %>% 
+
+EUI_2023_short <- EUI_2023 %>%
+  mutate(Ukraine_group_short = case_when(Ukraine_group_2023 %in% c("Pro-Russia", "Russia Appeaser") ~ Ukraine_group_2023)) %>%
+  select(Year, Ukraine_group_short)
+
+EUI_plot_short <- EUI_data %>%
+  select(Year, Ukraine_group_short) %>%
+  bind_rows(EUI_2023_short) %>% 
+  filter(!is.na(Ukraine_group_short))
+
+EUI_plot_short %>% 
   filter(Year > 2022) %>% 
   ggplot(aes(x = Ukraine_group_short, fill = as.factor(Year), group = as.factor(Year))) + 
   geom_bar(position = "dodge") + 

@@ -49,6 +49,22 @@ EUI_data %>%
        x = "Groups", y = "Frequency") + 
   theme_bw()
 
+# Frequencies Percentages 
+  
+  EUI_data %>% 
+  filter(Year > 2019) %>% 
+  filter(country %in% COUNTRIES_2020) %>% 
+  group_by(Year) %>% 
+  count(ukrainegroups_long) %>% 
+   # group_by(ukrainegroups_long) %>% 
+  mutate(Percentage = n / sum(n) ) %>% 
+    ggplot(aes(x = ukrainegroups_long, y = Percentage, fill = as.factor(Year))) + 
+    geom_col(position = "dodge") +
+      labs(fill = "Year", title = "Russia Attitudinal Group Proportions: \n Simplified Long-Term Measure (Percentage)",
+       x = "Groups", y = "Percentage") + 
+    scale_y_continuous(labels = scales::percent) +
+      theme_bw()
+
 #Proportions
 EUI_data %>% 
   filter(Year > 2019) %>% 
@@ -119,6 +135,19 @@ EUI_data_short %>%
        x = "Groups", y = "Frequency") + 
   theme_bw()
 
+EUI_data_short %>% 
+  filter(Year > 2022) %>% 
+  filter(country %in% COUNTRIES_2023) %>% 
+  group_by(Year) %>% 
+  count(ukrainegroups_short) %>% 
+  mutate(Percentage = n / sum(n) ) %>% 
+    ggplot(aes(x = ukrainegroups_short, y = Percentage, fill = as.factor(Year))) + 
+    geom_col(position = "dodge") +
+      labs(fill = "Year", title = "Russia Attitudinal Group Proportions: \n Simplified Short-Term Measure (Percentage)",
+       x = "Groups", y = "Percentage") + 
+    scale_y_continuous(labels = scales::percent) +
+      theme_bw()
+  
 #Proportions
 EUI_data_short %>% 
   filter(Year > 2022) %>% 

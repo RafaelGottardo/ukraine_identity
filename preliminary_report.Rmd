@@ -22,7 +22,7 @@ source("scripts/2_group_variables.R")
 Long-term measure centered on dichotomous question for trade with Russia (Pro-Russia) or defence against Russia (Pro-Ukraine); all outstanding respondents tentatively classed as "Other".
 
 ```{r}
-
+COUNTRIES_2020 <- c("Denmark", "Finland", "France", "Germany", "Greece", "Hungary", "Italy", "Lithuania",  "Netherlands", "Poland", "Romania", "Spain", "Sweden", "UK")
 EUI_data <- EUI_data %>% 
   mutate(ukrainegroups_long = case_when(Q73 == "European countries should invest more in trade and diplomacy with Russia to improve relations" ~ "Pro-Russia",
                                         Q73 == "European countries should invest more in defence and security to defend against Russian aggression" ~ "Pro-Ukraine",
@@ -66,6 +66,7 @@ table(EUI_data$ukrainegroups_short)
 #Frequencies
 EUI_data %>% 
   filter(Year > 2019) %>% 
+  filter(country %in% COUNTRIES_2020) %>% 
   ggplot(aes(x = ukrainegroups_long, fill = as.factor(Year), group = as.factor(Year))) +
   geom_bar(position = "dodge") +
   labs(fill = "Year", title = "Russia Attitudinal Groups: Simplified Long-Term Measure",
@@ -75,6 +76,7 @@ EUI_data %>%
 #Proportions
 EUI_data %>% 
   filter(Year > 2019) %>% 
+  filter(country %in% COUNTRIES_2020) %>% 
   ggplot(aes(x = Year, fill = as.factor(ukrainegroups_long))) + 
   geom_bar(position = "fill") +
   labs(fill = "Year", title = "Russia Attitudinal Group Proportions: Simplified Long-Term Measure",

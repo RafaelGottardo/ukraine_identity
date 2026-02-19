@@ -39,8 +39,8 @@ table(EUI_data$ukrainegroups_long)
 EUI_data <- EUI_data %>%
   mutate(ukrainegroups_short = case_when(
     Q73 == "European countries should invest more in defence and security to defend against Russian aggression" ~ "Pro-Ukraine",
-    replace_na(New_Q78_4 %in% c(3, 4), FALSE) ~ "Pro-Russia",
-    replace_na(New_Q78_5 %in% c(3, 4), FALSE) ~ "Pro-Russia",
+    New_Q78_4 %in% c(3, 4) ~ "Pro-Russia",
+    New_Q78_5 %in% c(3, 4) ~ "Pro-Russia",
     TRUE ~ "Other"
     ),
     Q73_dk = as.integer(Q73 == "Neither/DK"), #Neither/DK coded as 1

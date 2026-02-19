@@ -49,7 +49,7 @@ EUI_data <- EUI_data %>%
                                         "Unknowledgeable", ukrainegroups_short),
     ukrainegroups_short = ifelse(Q73_dk == 1 & New_Q78_5 == 5, 
                                         "Unknowledgeable", ukrainegroups_short),
-    ukrainegroups_short = ifelse(New_Q78_4 == 5 & New_Q78_4 == 5, 
+    ukrainegroups_short = ifelse(New_Q78_4 == 5 & New_Q78_5 == 5, 
                                         "Unknowledgeable", ukrainegroups_short))
 
 table(EUI_data$ukrainegroups_short)

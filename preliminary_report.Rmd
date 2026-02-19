@@ -22,11 +22,12 @@ source("scripts/2_group_variables.R")
 Long-term measure centered on dichotomous question for trade with Russia (Pro-Russia) or defence against Russia (Pro-Ukraine); all outstanding respondents tentatively classed as "Other".
 
 ```{r}
-COUNTRIES_2020 <- c("Denmark", "Finland", "France", "Germany", "Greece", "Hungary", "Italy", "Lithuania",  "Netherlands", "Poland", "Romania", "Spain", "Sweden", "UK")
-
 EUI_data <- EUI_data %>% 
-  mutate(ukrainegroups_long = case_when(Q73 == "European countries should invest more in trade and diplomacy with Russia to improve relations" ~ "Pro-Russia",
-                                        Q73 == "European countries should invest more in defence and security to defend against Russian aggression" ~ "Pro-Ukraine",
+  mutate(ukrainegroups_long = case_when(
+    #classed as Pro-Russia
+    Q73 == "European countries should invest more in trade and diplomacy with Russia to improve relations" ~ "Pro-Russia",
+    #classed as Pro-Ukraine
+    Q73 == "European countries should invest more in defence and security to defend against Russian aggression" ~ "Pro-Ukraine",
                                        TRUE ~ "Other"))
 
 table(EUI_data$ukrainegroups_long)
@@ -36,6 +37,7 @@ table(EUI_data$ukrainegroups_long)
 ## Trends over time: Long-term measure
 
 ```{r}
+COUNTRIES_2020 <- c("Denmark", "Finland", "France", "Germany", "Greece", "Hungary", "Italy", "Lithuania",  "Netherlands", "Poland", "Romania", "Spain", "Sweden", "UK")
 
 #Frequencies
 EUI_data %>% 
@@ -96,7 +98,7 @@ EUI_data_short <- EUI_data %>%
 
 #Every individual was classed into one of four categories
 #(we can see this because there is no "Other" category in the table)
-table(EUI_data$ukrainegroups_short)
+table(EUI_data_short$ukrainegroups_short)
 
 ```
 
@@ -146,7 +148,7 @@ europe <- europe %>%
 years <- c(2023, 2024, 2025)
 maps_pro_Russia <- list()
 for(i in 1:length(years)){
-  df <- EUI_data %>% 
+  df <- EUI_data_short %>% 
     filter(Year == years[i]) %>% 
     mutate(Pro_Russia = case_when(ukrainegroups_short == "Pro-Russia" ~ 1,
                                   TRUE ~ 0)) %>% 
@@ -185,12 +187,13 @@ ggpubr::ggarrange(plotlist = maps_pro_Russia[c(1,2, 3)],
 
 ```
 
+## Pro-Ukraine
 
 ```{r, echo = FALSE}
 
 maps_pro_ukraine <- list()
 for(i in 1:length(years)){
-  df <- EUI_data %>% 
+  df <- EUI_data_short %>% 
     filter(Year == years[i]) %>% 
     mutate(Ukraine = case_when(ukrainegroups_short == "Pro-Ukraine" ~ 1,
                                   TRUE ~ 0)) %>% 
@@ -229,11 +232,58 @@ ggpubr::ggarrange(plotlist = maps_pro_ukraine[c(1, 2, 3)],
 
 ```
 
+## Ambivalent
+
 ```{r, echo = FALSE}
 
 maps_other <- list()
 for(i in 1:length(years)){
-  df <- EUI_data %>% 
+  df <- EUI_data_short %>% 
+    filter(Year == years[i]) %>% 
+    mutate(Ambivelent = case_when(ukrainegroups_short == "Ambivalent" ~ 1,
+                                  TRUE ~ 0)) %>% 
+    group_by(country) %>% 
+    summarise(Ambivelent = mean(Ambivelent, na.rm = TRUE))
+  
+  
+  df <- left_join(europe, df, by = c("name" = "country"))
+  
+  maps_other[[as.character(years[i])]] <- df %>% 
+    ggplot() + 
+    geom_sf(aes(fill = Ambivelent)) + 
+    scale_fill_gradientn(
+    colours = c("yellow","orange"),
+    na.value = "grey90",
+    breaks = seq(0, 0.4, 0.1),
+    limits = c(0, 0.4),
+    labels = scales::percent
+  ) +
+      coord_sf(
+    xlim = c(-25, 49),   # longitude range
+    ylim = c(34, 72)     # latitude range
+  ) + 
+    theme_void() +
+      labs(fill = "% Ambivalent",
+           title = paste0(years[i])) + 
+  theme(legend.position = "bottom",
+        text = element_text(size = 8))
+}
+
+ggpubr::ggarrange(plotlist = maps_other[c(1, 2, 3)],
+  ncol = 2,
+  nrow = 2,
+  common.legend = TRUE,
+  legend = "bottom")
+
+```
+
+## Unknowledgeable
+
+```{r, echo = FALSE}
+
+maps_other <- list()
+for(i in 1:length(years)){
+  df <- EUI_data_short %>% 
     filter(Year == years[i]) %>% 
     mutate(Ambivelent = case_when(ukrainegroups_short == "Unknowledgeable" ~ 1,
                                   TRUE ~ 0)) %>% 

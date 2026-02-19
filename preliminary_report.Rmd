@@ -1,5 +1,5 @@
 ---
-title: "Groups on Russia Preliminary Report"
+title: "Groups on Russia Progress Report"
 author: "Rafael Campos-Gottardo & Alan Nemirovski"
 date: "`r Sys.Date()`"
 output: pdf_document
@@ -10,140 +10,110 @@ knitr::opts_chunk$set(echo = TRUE)
 source("scripts/2_group_variables.R")
 ```
 
-# Updated Scale based on Dietlind's Comments Feb 4, 2026
+## Comments from meeting: Feb. 12, 2026
+- Pro-Russia/Pro-Ukraine dichotomy in the long-run as opposed to doing the more granular "Russia appeaser" (only using dichotomous question around trade/security, i.e., Q73) --> appeaser group is conceptually too small over time
+- "Other" group is too big
+- Appeasers: also more broad appeasers (potentially on a more general note) --> sticking with smaller appeasers group for short
+- Additional data sources: European Social Survey, European Values Survey (same as World Values Survey), Eurobarometer survey (look at those for addidtional Russia-related Q's?)
+- Calling people that selected "Neither" or "Don't Know" as "Un-knowledgeable" (more broadly)
 
-Slimmed down indicators 
-Long Term
-Group 1: Not threat, trade and diplomacy
-Group 2: Threat, trade and diplomacy
-Group 3: Threat, Troops?, military 
-Other: don't know 
+# Long-term (simplified) measure
+
+Long-term measure centered on dichotomous question for trade with Russia (Pro-Russia) or defence against Russia (Pro-Ukraine); all outstanding respondents tentatively classed as "Other".
 
 ```{r}
-
- EUI_data <- EUI_data %>% 
-  mutate(Ukraine_group_long = case_when((Q68 == 2 | Q68 == 5) & Q73 == "European countries should invest more in trade and diplomacy with Russia to improve relations" ~ "Russia Appeaser",
-    Q68 != 2 & Q73 == "European countries should invest more in trade and diplomacy with Russia to improve relations" ~ "Pro-Russia",
-                                       Q73 == "European countries should invest more in defence and security to defend against Russian aggression" ~ "Pro-Ukraine",
-                                       TRUE ~ "Other"
-                                   ))
-
-
-EUI_2023 <- EUI_2023 %>% 
-  mutate(Ukraine_group_2023 = case_when(New_Q79 %in% c(1, 2, 3) &
-                                          EUI_Ukraine_Outcome %in% c(1, 2) ~ "Pro-Russia",
-                                        
-                                         New_Q79 %in% c(4, 5) & EUI_Ukraine_Outcome == 3 &
-                                          (New_Q78_1 %in% c(3, 4) | New_Q78_3 %in% c(3,4)) &
-                                           (New_Q78_4 %in% c(1, 2) & New_Q78_4 %in% c(1, 2) |
-                                              New_Q78_5 %in% c(1, 2)) ~ "Russia Appeaser",
-                                        
-                                         New_Q79 %in% c(4, 5) & EUI_Ukraine_Outcome %in% c(5, 4) & 
-                                           New_Q78_1 %in% c(3, 4) & New_Q78_2 %in% c(3, 4) &
-                                           New_Q78_3 %in% c(3, 4) & New_Q78_4 %in% c(3, 4) &
-                                           New_Q78_5 %in% c(3, 4) & New_Q78_7 %in% c(3, 4) ~ "Pro-Ukraine",
-                                        
-                                         TRUE ~ "Other"
-                                           ))
 
 EUI_data <- EUI_data %>% 
-  mutate(Ukraine_group_short = case_when( EUI_Ukraine_Outcome %in% c(1, 2) & 
-                                           New_Q78_11 %in% c(3, 4) ~ "Pro-Russia",
-                                          
-                                         EUI_Ukraine_Outcome == 3 &
-                                           (New_Q78_1 %in% c(3, 4) | New_Q78_3 %in% c(3,4)) &
-                                           (New_Q78_4 %in% c(1, 2) & New_Q78_4 %in% c(1, 2) |
-                                              New_Q78_5 %in% c(1, 2)) &
-                                           New_Q78_11 %in% c(3, 4) ~ "Russia Appeaser",
-                                         
-                                          EUI_Ukraine_Outcome %in% c(5, 4) & 
-                                           (New_Q78_1 %in% c(3, 4) | New_Q78_2 %in% c(3, 4) |
-                                           New_Q78_3 %in% c(3, 4) | New_Q78_4 %in% c(3, 4) |
-                                           New_Q78_5 %in% c(3, 4) |
-                                             New_Q78_7 %in% c(3, 4)) ~ "Pro Ukraine",
-                                         
-                                         TRUE ~ "Other"
-                                           ))
+  mutate(ukrainegroups_long = case_when(Q73 == "European countries should invest more in trade and diplomacy with Russia to improve relations" ~ "Pro-Russia",
+                                        Q73 == "European countries should invest more in defence and security to defend against Russian aggression" ~ "Pro-Ukraine",
+                                       TRUE ~ "Other"))
 
-table(EUI_2023$Ukraine_group_2023)
-table(EUI_2023$New_Q79)
+table(EUI_data$ukrainegroups_long)
+
 ```
 
-### Long-term group trends
-
-
+# Short-term (simplified) measure
 
 ```{r}
+
+EUI_data <- EUI_data %>%
+  mutate(ukrainegroups_short = case_when(
+    Q73 == "European countries should invest more in defence and security to defend against Russian aggression" ~ "Pro-Ukraine",
+    replace_na(New_Q78_4 %in% c(3, 4), FALSE) ~ "Pro-Russia",
+    replace_na(New_Q78_5 %in% c(3, 4), FALSE) ~ "Pro-Russia",
+    TRUE ~ "Other"
+    ),
+    Q73_dk = as.integer(Q73 == "Neither/DK"), #Neither/DK coded as 1
+    # coding people who answered 2/3 questions as "Dont Know" into "Unknowledgeable"
+    ukrainegroups_short = ifelse(Q73_dk == 1 & New_Q78_4 == 5, 
+                                        "Unknowledgeable", ukrainegroups_short),
+    ukrainegroups_short = ifelse(Q73_dk == 1 & New_Q78_5 == 5, 
+                                        "Unknowledgeable", ukrainegroups_short),
+    ukrainegroups_short = ifelse(New_Q78_4 == 5 & New_Q78_4 == 5, 
+                                        "Unknowledgeable", ukrainegroups_short))
+
+table(EUI_data$ukrainegroups_short)
+
+```
+
+
+# Proportion trends over time
+
+## New long-term measure
+
+```{r}
+
+#Frequencies
 EUI_data %>% 
   filter(Year > 2019) %>% 
-  ggplot(aes(x = Ukraine_group_long, fill = as.factor(Year), group = as.factor(Year))) + 
-  geom_bar(position = "dodge") + 
-  labs(fill = "Year", title = "Russia Attitudinal Groups: Long-Term Measure",
+  ggplot(aes(x = ukrainegroups_long, fill = as.factor(Year), group = as.factor(Year))) +
+  geom_bar(position = "dodge") +
+  labs(fill = "Year", title = "Russia Attitudinal Groups: Simplified Long-Term Measure",
+       x = "Groups", y = "Frequency") + 
+  theme_bw()
+
+#Proportions
+EUI_data %>% 
+  filter(Year > 2019) %>% 
+  ggplot(aes(x = Year, fill = as.factor(ukrainegroups_long))) + 
+  geom_bar(position = "fill") +
+  labs(fill = "Year", title = "Russia Attitudinal Group Proportions: Simplified Long-Term Measure",
        x = "Groups", y = "Frequency") + 
   theme_bw()
 
 ```
 
-### Short-term group trends
+
+## New short-term measure
 
 ```{r}
-
-EUI_2023_short <- EUI_2023 %>%
-  mutate(Ukraine_group_short = case_when(Ukraine_group_2023 %in% c("Pro-Russia", "Russia Appeaser") ~ Ukraine_group_2023)) %>%
-  select(Year, Ukraine_group_short)
-
-EUI_plot_short <- EUI_data %>%
-  select(Year, Ukraine_group_short) %>%
-  bind_rows(EUI_2023_short) %>% 
-  filter(!is.na(Ukraine_group_short))
-
-EUI_plot_short %>% 
+#Frequencies
+EUI_data %>% 
   filter(Year > 2022) %>% 
-  ggplot(aes(x = Ukraine_group_short, fill = as.factor(Year), group = as.factor(Year))) + 
-  geom_bar(position = "dodge") + 
-  labs(fill = "Year", title = "Russia Attitudinal Groups: Short-Term Measure",
+  ggplot(aes(x = ukrainegroups_short, fill = as.factor(Year), group = as.factor(Year))) +
+  geom_bar(position = "dodge") +
+  labs(fill = "Year", title = "Russia Attitudinal Groups: Simplified Short-Term Measure",
        x = "Groups", y = "Frequency") + 
   theme_bw()
+
+#Proportions
+EUI_data %>% 
+  filter(Year > 2022) %>% 
+  ggplot(aes(x = Year, fill = as.factor(ukrainegroups_short))) +
+  geom_bar(position = "fill") + #for frequency, change position to "dodge"
+  labs(fill = "Year", title = "Russia Attitudinal Group Proportions: Simplified Short-Term Measure",
+       x = "Groups", y = "Frequency") + 
+  theme_bw()
+
 ```
 
-## Short Term Measure
 
-New_Q79: (2023: 5923; 14502; 3836) anti Russia 
-<1>     	Entirely NATO (Pro Russian)
-<2>     	More NATO than Russia (Pro Russian)
-<3>     	NATO and Russia equally (Pro Russian)
-<4>     	More Russia than NATO (Anti Russian)
-<5>     	Entirely Russia (Anti Russian)
-<6 fixed>     	Don’t know (Other)
+# Country-level trends along new short-term measure
 
-Outcome of the War
-Group 1: (7764); Group 2: 17469; Group 3: 32023; 16229
-[EUI_Ukraine_Outcome] Generally speaking, what do you consider an ideal end to the war in Ukraine?
-<1>     	Russia achieves all its territorial goals in Ukraine
-<2>     	Russia manages to take more Ukrainian territory than it controlled at the start of the war
-<3>     	A return to the territorial situation of earlier this year before the war started, including Russia holding territory it took from Ukraine in 2014
-<4>     	Ukraine manages to retake some of the territory Russia occupied in 2014
-<5>     	Ukraine manages to retake all of its original territory (including Crimea)
-<99 fixed>     	Don’t know
+## Pro-Russia
 
-# Proposal to code 
+```{r, echo = FALSE}
 
-[New_Q78] Thinking about the conflict in Ukraine, to what extent would you support or oppose each of the following? (Please select the option that best applies on each row)
--[New_Q78_1]     	$Qcountry2 allowing Ukrainian refugees to enter the country (Appease or Pro_Ukraine)
--[New_Q78_3]     	$Qcountry2 sending humanitarian aid to Ukraine (Appease or Pro_Ukraine)
--[New_Q78_4]     	$Qcountry2 sending weapons and military equipment to support the Ukrainian army (Pro Ukraine)
--[New_Q78_5]     	$Qcountry2 accepting higher energy costs due to the sanctions imposed on Russia (Pro Ukraine)
--[New_Q78_7]     	Ukraine fast-tracking European Union membership (Pro Ukraine)
--[New_Q78_11]     	$Qcountry2 facilitating diplomatic relations between Russia and Ukraine (Appease or Pro Russia)
-
-Ukraine Aid Questions
-
-
-## Long Term Variable 
-
-### Breakdown by country and year pro-Russia
-
-```{r}
 europe <- ne_countries(scale = "medium", returnclass = "sf") %>%
   filter(region_un == "Europe")
 
@@ -151,12 +121,12 @@ europe <- europe %>%
  # st_transform(3035) %>% 
   mutate(name = replace(name, name == "United Kingdom", "UK"))
 
-years <- seq(2020, 2025, 1)
+years <- c(2023, 2024, 2025)
 maps_pro_Russia <- list()
 for(i in 1:length(years)){
   df <- EUI_data %>% 
     filter(Year == years[i]) %>% 
-    mutate(Pro_Russia = case_when(Ukraine_group_long == "Pro-Russia" ~ 1,
+    mutate(Pro_Russia = case_when(ukrainegroups_short == "Pro-Russia" ~ 1,
                                   TRUE ~ 0)) %>% 
     group_by(country) %>% 
     summarise(`Pro-Russia` = mean(Pro_Russia, na.rm = TRUE))
@@ -190,59 +160,15 @@ ggpubr::ggarrange(plotlist = maps_pro_Russia[c(1, 3, 5, 6)],
   nrow = 2,
   common.legend = TRUE,
   legend = "bottom")
+
 ```
+```{r, echo = FALSE}
 
-## Russia Appeaser
-
-```{r}
-maps_appease <- list()
-for(i in 1:length(years)){
-  df <- EUI_data %>% 
-    filter(Year == years[i]) %>% 
-    mutate(Appeaser = case_when(Ukraine_group_long == "Russia Appeaser" ~ 1,
-                                  TRUE ~ 0)) %>% 
-    group_by(country) %>% 
-    summarise(`Russia Appeaser` = mean(Appeaser, na.rm = TRUE))
-  
-  
-  df <- left_join(europe, df, by = c("name" = "country"))
-  
-  maps_appease[[as.character(years[i])]] <- df %>% 
-    ggplot() + 
-    geom_sf(aes(fill = `Russia Appeaser`)) + 
-    scale_fill_gradientn(
-    colours = c("white","blue"), # light pink → hot pink → purple
-    na.value = "grey90",
-    breaks = seq(0, 0.3, 0.1),
-    limits = c(0, 0.3),
-    labels = scales::percent
-  ) +
-      coord_sf(
-    xlim = c(-25, 49),   # longitude range
-    ylim = c(34, 72)     # latitude range
-  ) + 
-    theme_void() +
-      labs(fill = "% Appease Russia",
-           title = paste0(years[i])) + 
-  theme(legend.position = "bottom",
-        text = element_text(size = 8))
-}
-
-ggpubr::ggarrange(plotlist = maps_appease[c(1, 3, 5, 6)],
-  ncol = 2,
-  nrow = 2,
-  common.legend = TRUE,
-  legend = "bottom")
-```
-
-## Pro Ukraine
-
-```{r}
 maps_pro_ukraine <- list()
 for(i in 1:length(years)){
   df <- EUI_data %>% 
     filter(Year == years[i]) %>% 
-    mutate(Ukraine = case_when(Ukraine_group_long == "Pro-Ukraine" ~ 1,
+    mutate(Ukraine = case_when(ukrainegroups_short == "Pro-Ukraine" ~ 1,
                                   TRUE ~ 0)) %>% 
     group_by(country) %>% 
     summarise(`Pro-Ukraine` = mean(Ukraine, na.rm = TRUE))
@@ -254,7 +180,7 @@ for(i in 1:length(years)){
     ggplot() + 
     geom_sf(aes(fill = `Pro-Ukraine`)) + 
     scale_fill_gradientn(
-    colours = c("yellow","orange"), # light pink → hot pink → purple
+    colours = c("lightblue","blue"), # light pink → hot pink → purple
     na.value = "grey90",
     breaks = seq(0, 0.7, 0.1),
     limits = c(0, 0.7),
@@ -276,16 +202,16 @@ ggpubr::ggarrange(plotlist = maps_pro_ukraine[c(1, 3, 5, 6)],
   nrow = 2,
   common.legend = TRUE,
   legend = "bottom")
+
 ```
 
-## Ambivalent (all "Other" individual)
+```{r, echo = FALSE}
 
-```{r}
 maps_other <- list()
 for(i in 1:length(years)){
   df <- EUI_data %>% 
     filter(Year == years[i]) %>% 
-    mutate(Ambivelent = case_when(Ukraine_group_long == "Other" ~ 1,
+    mutate(Ambivelent = case_when(ukrainegroups_short == "Unknowledgeable" ~ 1,
                                   TRUE ~ 0)) %>% 
     group_by(country) %>% 
     summarise(Ambivelent = mean(Ambivelent, na.rm = TRUE))
@@ -297,7 +223,7 @@ for(i in 1:length(years)){
     ggplot() + 
     geom_sf(aes(fill = Ambivelent)) + 
     scale_fill_gradientn(
-    colours = c("lightgreen","darkgreen"), # light pink → hot pink → purple
+    colours = c("lightgreen","darkgreen"),
     na.value = "grey90",
     breaks = seq(0, 0.4, 0.1),
     limits = c(0, 0.4),
@@ -308,7 +234,7 @@ for(i in 1:length(years)){
     ylim = c(34, 72)     # latitude range
   ) + 
     theme_void() +
-      labs(fill = "% Ambivelent",
+      labs(fill = "% Unknowledgeable",
            title = paste0(years[i])) + 
   theme(legend.position = "bottom",
         text = element_text(size = 8))
@@ -319,374 +245,6 @@ ggpubr::ggarrange(plotlist = maps_other[c(1, 3, 5, 6)],
   nrow = 2,
   common.legend = TRUE,
   legend = "bottom")
-```
-
-
-# Method 1: Group-Based Indices
-
-## Creating Group-Based Indices
-
-**Pro Russian Long Term**
-
-0 - 6 scale
-
-Respondents gain 1 point if:
-- They do not think Russia is their countries greatest threat (Q68). 
-- They think that Europeans should pursue trade and diplomacy with Russia (Q73).
-- They think their country spends too much on defence (Q69) - They do not support democracy (Q5 \< 5/10) - They do not trust the European Union (New_Q43)
-
-```{r}
-hist(EUI_data$Pro_russia_scale)
-```
-
-**Pro Russian Short Term**
-
-0 - 7 scale
-
--   Respondents gain 1 point if:
-    -   They do not think Russia is their countries greatest threat (Q68).
-    -   They think that Europeans should pursue trade and diplomacy with Russia (Q73).
-    -   They think their country spends too much on defence (Q69)
-    -   They do not support democracy (Q5 < 5/10)
-    -   They do not trust the European Union (New_Q43)
-    -   They do want Russia to gain territory in Ukraine (EUI_Ukraine_Outcome)
-    -   They do not support Aid to Ukraine (New_Q78, less than 4 on a 0-9 scale)
-
-Question: Q5 only captures ideological pro Russia not situational.
-
-```{r}
-hist(EUI_data$Pro_russia_scale_short)
-```
-
-## Biggest Groups 
-
-### Do not think Russia is the biggest threat
-
-```{r}
-table(EUI_data$Q68 != 2)
-```
-
-### Do not support high levels of aid
-
-```{r}
-table(EUI_data$Aid_support < 4)
-```
-
-**Russian Appeaser Long Term**
-
-0 - 6 scale
-
--   Respondents gain 1 point if:
-    -   they think Russia is their country's greatest threat (Q68) or they think Nuclear proliferation is their greatest threat.
-    -   They want to trade with Russia (instead of invest in defence) (Q73)
-    -   They think their country spends too much on defence (Q69)
-    -   They oppose the creation of an integrated European army (Q70)
-    -   They think that NATO is not important for their country's defence (Q71)
-    -   They would vote to remain in the EU (Q9)
-
-```{r}
-hist(EUI_data$appease_russia_scale)
-```
-
-## Biggest groups 
-
-### they think Russia is their country's greatest threat (Q68) or they think Nuclear proliferation is their greatest threat.
-```{r}
-table(EUI_data$Q68 %in% c(2, 5))
-```
-
-### They would vote to remain in the EU
-
-```{r}
-table(EUI_data$Q9i == 1)
-```
-
-**Russian Appeaser Short Term**
-
-Only post 2023
-
-0 - 8 scale
-
-Respondents gain 1 point if:
-- They do they think Russia is their country's greatest threat (Q68) 
-- They want to trade with Russia (instead of invest in defence) (Q73)
-- Their country spends too much on defence (Q69)
-- They oppose the creation of an integrated European army (Q70)
-- They think that NATO is not important for their country's defence (Q71) 
-- They would vote to remain in the EU (Q9)
-- Favour a return to the territorial situation before the war (EUI_Ukraine_Outcome)
-- Support only compromises to end the war (New_Q78_variables)
-
-```{r}
-hist(EUI_data$appease_russia_scale_short)
-```
-
-## Testing Method 1 Variables
-
-### Correlations
-
-First, I check the correlation of the pro-Russia and appease Russia scales to ensure they are capturing different concepts.
-
-The long term scales
-
-```{r}
-cor(EUI_data$Pro_russia_scale, EUI_data$appease_russia_scale, use = "complete.obs")
-```
-
-The short term scales
-
-```{r}
-cor(EUI_data$Pro_russia_scale_short, EUI_data$appease_russia_scale_short,
-    use = "complete.obs")
-```
-
-Both scales are weakly correlated at $r = 0.27$ and $r = 0.35$ respectively. Indicating that the scales are not highly collinear.
-
-# Method 2: Combined index
-
-## Generating combined index
-
-*Long term appeaser-supporter scale*
-
-0 - 7 scale
-
-Respondents get 1 point if:
-
--   They do not think Russia or nuclear non-proliferation is their countries greatest threat (Q68).
-
--   They think that Europeans should pursue trade and diplomacy with Russia (Q73).
-
--   They think their country spends too much on defence (Q69)
-
--   They do not support democracy (Q5 \< 5/10)
-
--   They do not trust the European Union (New_Q43)
-
-Respondents get 0.5 points if:
-
-- Do not support an integrated European army (Q70). 
-- They do not think NATO is important to their country's defence (Q71).
-- They would vote to remain in the EU (Q9)
-
-```{r}
-hist(EUI_data$comb_scale)
-```
-
-*Short term appeaser-supporter scale* 0 - 9.5 scale
-
-Respondents get 1 point if:
-
--   They do not think Russia is their countries greatest threat (Q68).
-
--   They think that Europeans should pursue trade and diplomacy with Russia (Q73).
-
--   They think their country spends too much on defence (Q69)
-
--   They do not support democracy (Q5 \< 5/10)
-
--   They do not trust the European Union (New_Q43)
-
-Respondents get 0.5 points if:
-
-- Do not support an integrated European army (Q70). 
-- They do not think NATO is important to their country's defence (Q71).
-- They would vote to remain in the EU (Q9)
-- They support a return to the pre 2022 status quo in Ukraine (EUI_Ukraine_Outcome).
-- Support only compromises to end the war (New_Q78_variables)
-
-```{r}
-hist(EUI_data$comb_scale_short)
-```
-
-# Comparisons of measures
-
-### Over time distributions
-
-Long term pro-Russia
-
-```{r}
-EUI_data %>% 
-  filter(Year > 2019) %>% 
-  ggplot(aes(x = Pro_russia_scale, fill = as.factor(Year), group = as.factor(Year))) + 
-  geom_bar(position = "dodge") + 
-  labs(fill = "Year", x = "Long Term Pro-Russia Scale") + 
-  scale_x_continuous(breaks = 0:6) +
-  theme_bw()
 
 ```
 
-Short term pro-Russia
-
-```{r}
-EUI_data %>% 
-  filter(Year > 2022) %>% 
-  ggplot(aes(x = Pro_russia_scale, fill = as.factor(Year), group = as.factor(Year))) + 
-  geom_bar(position = "dodge") + 
-  labs(fill = "Year", x = "Short Term Pro-Russia Scale") + 
-  scale_x_continuous(breaks = 0:7) +
-  theme_bw()
-```
-
-Long term Appease Russia
-
-```{r}
-EUI_data %>% 
-  filter(Year > 2019) %>% 
-  ggplot(aes(x = appease_russia_scale, fill = as.factor(Year), group = as.factor(Year))) + 
-  geom_bar(position = "dodge") + 
-  scale_x_continuous(breaks = 0:6) +
-  labs(fill = "Year", x = "Long Term Appease Russia Scale") + 
-  theme_bw()
-```
-
-Short term Appease Russia
-
-```{r}
-
-EUI_data %>% 
-  filter(Year > 2019) %>% 
-  ggplot(aes(x = appease_russia_scale_short, fill = as.factor(Year), group = as.factor(Year))) + 
-  geom_bar(position = "dodge") + 
-  scale_x_continuous(breaks = 0:8) +
-  labs(fill = "Year", x = "Short Term Appease Russia Scale") + 
-  theme_bw()
-
-```
-
-Long term Combined Scale
-
-```{r}
-EUI_data %>% 
-  filter(Year > 2019) %>% 
-  ggplot(aes(x = comb_scale, fill = as.factor(Year), group = as.factor(Year))) + 
-  geom_bar(position = "dodge") + 
-  scale_x_continuous(breaks = 0:8) +
-  labs(fill = "Year", x = "Long Term Combined Scale") + 
-  theme_bw()
-```
-
-Short term Combined Scale
-
-```{r}
-EUI_data %>% 
-  filter(Year > 2019) %>% 
-  ggplot(aes(x = comb_scale_short, fill = as.factor(Year), group = as.factor(Year))) + 
-  geom_bar(position = "dodge") + 
-  scale_x_continuous(breaks = 0:8) +
-  labs(fill = "Year", x = "Short Term Combined Scale") + 
-  theme_bw()
-```
-
-### Average Measures (ALL) by Country
-
-Long Term
-
-```{r}
-EUI_data %>% 
-  filter(Year > 2019) %>% 
-  group_by(country) %>% 
-  summarise(`Pro-Russian Scale` = mean(Pro_russia_scale, na.rm = TRUE),
-            `Appease Russia Scale` = mean(appease_russia_scale, na.rm = TRUE),
-            `Combined Scale` = mean(comb_scale, na.rm = TRUE)) %>% 
-    arrange(-`Pro-Russian Scale`) %>% 
-  kable(digits = 2) 
-
-```
-
-Short Term
-
-```{r}
-EUI_data %>% 
-  filter(Year > 2019) %>% 
-  group_by(country) %>% 
-  summarise(`Pro-Russian Scale` = mean(Pro_russia_scale_short, na.rm = TRUE),
-            `Appease Russia Scale` = mean(appease_russia_scale_short, na.rm = TRUE),
-            `Combined Scale` = mean(comb_scale_short, na.rm = TRUE)) %>% 
-    arrange(-`Pro-Russian Scale`) %>% 
-  kable(digits = 2) 
-```
-
-## Create group variables
-
-(Using Pro-Russia + Russia Appeaser scales:) Those who score 3 or less on both scales are considered pro-Europeans, those who score 4 or above on the Russian appeaser scale are considered Russian appeasers and those that score 4 or above on the Pro Russia scale are considered Pro-Russian.
-
-```{r}
-EUI_data <- EUI_data %>% 
-  mutate(Russia_groups_long = case_when(appease_russia_scale < 4 & Pro_russia_scale < 4 ~ "Anti-Russia",
-                                        appease_russia_scale > 3 ~ "Russia Appeaser",
-                                        Pro_russia_scale > 3 ~ "Pro Russian"),
-         Russia_groups_short = case_when(appease_russia_scale_short < 4 & Pro_russia_scale_short < 4 ~ "Anti-Russia",
-                                        appease_russia_scale_short > 3 ~ "Russia Appeaser",
-                                        Pro_russia_scale_short > 3 ~ "Pro Russian")
-         )
-
-```
-
-*Note: A similar grouping measure could be reconstructed with thresholds set on the combined index.*
-
-### Groups over time
-
-Long Term Variable
-
-```{r}
-EUI_data %>% 
-  filter(Year > 2019) %>% 
-  group_by(Year, Russia_groups_long) %>% 
-  summarise(n = n(), .groups = "drop_last") %>% 
-  filter(!is.na(Russia_groups_long)) %>% 
-  mutate(Percentage = n / sum(n) * 100) %>% 
-  kable(digits = 2)
-```
-
-Short Term Variable
-
-```{r}
-EUI_data %>% 
-  filter(Year > 2022) %>% 
-  group_by(Year, Russia_groups_short) %>% 
-  summarise(n = n(), .groups = "drop_last") %>% 
-  filter(!is.na(Russia_groups_short)) %>% 
-  mutate(Percentage = n / sum(n) * 100) %>% 
-  kable(digits = 2)
-```
-
-### Groups by Country
-
-Long Term Measure
-
-```{r}
-EUI_data %>% 
-  filter(Year > 2019) %>% 
-  group_by(country, Russia_groups_long) %>% 
-  summarise(n = n(), .groups = "drop_last") %>% 
-  filter(!is.na(Russia_groups_long)) %>% 
-  mutate(Percentage = n / sum(n) * 100) %>% 
-  kable(digits = 2)
-```
-
-Short Term Measure
-
-```{r}
-EUI_data %>% 
-  filter(Year > 2022) %>% 
-  group_by(country, Russia_groups_short) %>% 
-  summarise(n = n(), .groups = "drop_last") %>% 
-  filter(!is.na(Russia_groups_short)) %>% 
-  mutate(Percentage = n / sum(n) * 100) %>% 
-  kable(digits = 2)
-```
-
-
-## Next steps
-
-- Decide which measure to use for the groups.
-- Decide what social medias we want to scrape to identify discourse surrounding the war in Ukraine.
-  - We need API access for Meta. 
-  - We can then use BERTopic to identify themes in this corpus.
-  
-## Dietlind's comments 
-
-- Too many unrelated components 
-- Left over group 
-- What are essential vars
-- 

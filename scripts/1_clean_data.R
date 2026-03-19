@@ -464,7 +464,7 @@ EUI_april_2022 <- read_xlsx("Data_raw/Results for EUI, SOU and Solidarity 2022 O
                             sheet = 3)
 
 EUI_april_2022 <- EUI_april_2022 %>% 
-  select(weight, country,  matches("New_Q78_\\d$"), Q62, Q7_revisions_2, Q68_revisions) %>% 
+  select(weight, country,  matches("New_Q78_\\d$"), Q62, Q7_revisions_2, Q68_revisions, Q73, New_Q79) %>% 
   mutate(country = dplyr::recode(country, `1` = "UK",
                                  `15` = "Australia", `32` = "Brazil", 
                                  `40` = "Canada", `46` = "China", 
@@ -483,7 +483,12 @@ EUI_april_2022 <- EUI_april_2022 %>%
                                  `204` = "Spain", `210` = "Sweden",
                                  `216` = "Thailand", `223` = "Turkey", 
                                  `230` = "United States"),
-         across(matches("New_Q78_\\d$"),\(x)as.numeric(x))) %>% 
+         across(matches("New_Q78_\\d$"),\(x)as.numeric(x)),
+         Q73 = case_match(Q73, 1 ~ "European countries should invest more in defence and security to defend against Russian aggression",
+                          2 ~ "European countries should invest more in trade and diplomacy with Russia to improve relations",
+                          3 ~ "Neither/DK",
+                          4 ~ "Neither/DK"),
+         across(starts_with("New_Q78"), \(x)case_match(x, 1 ~ 4, 2 ~ 3, 3 ~ 2, 4 ~ 1, 5 ~ 5))) %>% 
   mutate(Year = "April 2022") %>% 
   rename(Q7_2 = Q7_revisions_2,
          Q68 = Q68_revisions
@@ -520,7 +525,8 @@ EUI_sept_2022 <- EUI_sept_2022 %>%
                                                  "A return to the territorial situation of earlier this year before the war started, including Russia holding territory it" ~ 3,
                                                  "Don't know" ~ 99,
                                                  "Ukraine manages to retake some of the territory Russia has occupied this year" ~ 4,
-                                                "Ukraine manages to retake all of its original territory (including Crimea)" ~ 5)) %>% 
+                                                "Ukraine manages to retake all of its original territory (including Crimea)" ~ 5),
+         across(starts_with("New_Q78"), \(x)case_match(x, 1 ~ 4, 2 ~ 3, 3 ~ 2, 4 ~ 1, 5 ~ 5))) %>% 
   select(weight, country,  matches("New_Q78_\\d$"), EUI_Ukraine_Outcome) %>% 
   mutate(Year = "Sept. 2022") 
 
@@ -588,7 +594,7 @@ EUI_ukraine_2 <- bind_rows(EUI_sept_2022) %>%
 EUI_data <- EUI_data %>% 
   mutate(Q44_base = Q44,
     across(Q21:Q44, \(x)case_match(x, 1 ~ 1, 2 ~ 0, 3 ~ 0)),
-         across(starts_with("New_Q78"), \(x)case_match(x, 1 ~ 5, 2 ~ 4, 3 ~ 2, 4 ~ 1, 5 ~ 5)))
+         across(starts_with("New_Q78"), \(x)case_match(x, 1 ~ 4, 2 ~ 3, 3 ~ 2, 4 ~ 1, 5 ~ 5)))
 
 
 
@@ -603,11 +609,6 @@ EUI_data <- EUI_data %>%
 unique(EUI_data$New_Q78_1)
 
 
-EUI_ukraine <- EUI_ukraine %>% 
-  mutate(across(starts_with("New_Q78"), \(x)case_match(x, 1 ~ 5, 2 ~ 4, 3 ~ 2, 4 ~ 1, 5 ~ 3)),
-    ukraine_support = rowMeans(across(c(New_Q78_1, New_Q78_2, New_Q78_3, New_Q78_4, 
-                                             New_Q78_5, New_Q78_7, New_Q78_9)), na.rm = TRUE),
-         )
 
 
 cross_walk <- read.csv("Data_raw/new_crosswalk_june_9_2025.csv")

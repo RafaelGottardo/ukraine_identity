@@ -1,0 +1,377 @@
+---
+title: "Updated Preliminary Report"
+author: "Rafael Campos-Gottardo & Alan Nemirovski"
+date: "`r Sys.Date()`"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+source("scripts/2_group_variables.R")
+```
+
+
+# New Measure of groups short term
+
+```{r}
+
+EUI_data_short <- EUI_data %>%
+  filter(Year > 2022) 
+
+EUI_data_short <- EUI_data_short %>% 
+  bind_rows(EUI_april_2022 %>% mutate(Year = 2022))
+
+EUI_data_short <- EUI_data_short %>% 
+  mutate(Ukraine_groups = case_when(Q73 == "European countries should invest more in defence and security to defend against Russian aggression" &
+                                      New_Q78_4 %in% c(3, 4) &
+                                      New_Q78_5 %in% c(3, 4) ~ "Security-focused",
+                                    New_Q78_4 %in% c(3, 4) &
+                                      New_Q78_5 %in% c(1, 2) ~ "Conditional Ukraine Supporters",
+                                    Q73 == "European countries should invest more in trade and diplomacy with Russia to improve relations" & 
+                                      New_Q78_4 %in% c(1, 2) ~ "Russia collaboration",
+                                    TRUE ~ "Domestic/ Distracted"))
+```
+
+The Coding of the new measure
+
+Security Focused: Q73 - Defence and Security; New_Q78_4 - Support sending military equipment; New_Q78_5 - Willing to accept higher energy costs
+
+Conditional Supporters: New_Q78_4 - Support sending military equipment; New_Q78_5 - Not wiling to accept higher energy costs
+
+Russian collaboration: Q73 - Trade and diplomacy; New_Q78_4 - Do not support sending military equipment
+
+Domestic/Distracted: All those not previously categorized (The coding scheme says and don't know which is captured by all the remaining categories)
+
+There is the code used to create the groups with spacing to see all of it
+```
+EUI_data_short <- EUI_data_short %>% 
+  mutate(Ukraine_groups = case_when(Q73 == "European countries should invest
+  more in defence and security to defend against Russian aggression" &
+                                      New_Q78_4 %in% c(3, 4) &
+                                      New_Q78_5 %in% c(3, 4) ~ "Security-focused",
+                                    New_Q78_4 %in% c(3, 4) &
+                                      New_Q78_5 %in% c(1, 2) ~ "Conditional
+                                      Ukraine Supporters",
+                                    Q73 == "European countries should invest 
+                                    more in trade and diplomacy with Russia to
+                                    improve relations" & 
+                                      New_Q78_4 %in% c(1, 2) ~ 
+                                      "Russia collaboration",
+                                    TRUE ~ "Domestic/ Distracted"))
+```
+```{r}
+table(EUI_data_short$Ukraine_groups)
+```
+
+### Examining the Domestic/Distracted Group
+
+```{r}
+EUI_data_short %>% 
+  mutate(New_Q78_4 = case_when(New_Q78_4 %in% c(1,2) ~ "No Military Equipment",
+                               New_Q78_4 %in% c(3,4) ~ "Yes Military Equipment", 
+                               New_Q78_4 == 5 ~ "DK"),
+         New_Q78_5 = case_when(New_Q78_5 %in% c(1,2) ~ "Do not Support Sanctions",
+                               New_Q78_5 %in% c(3,4) ~ "Support Sanctions", 
+                               New_Q78_5 == 5 ~ "DK"),
+         Q73 = case_when(Q73 == "European countries should invest more in defence and security to defend against Russian aggression" ~ "Defence and Security",
+                         Q73 == "European countries should invest more in trade and diplomacy with Russia to improve relations" ~ "Trade and Diplomacy",
+                        TRUE ~ Q73)
+         ) %>% 
+  group_by(Q73, New_Q78_4, New_Q78_5) %>% 
+  count(Ukraine_groups) %>% 
+  filter(Ukraine_groups == "Domestic/ Distracted") %>% 
+  ungroup() %>% 
+  select(-Ukraine_groups) %>% 
+  mutate(percentage = round(n/sum(n)*100, 2)) %>% 
+  arrange(-percentage) %>% 
+  kable(col.names = c("Plan for Russia", "Military Aid", "Sanctions", "N", "Percentage"
+                      ))
+
+```
+
+## Trends over time: New Measure 
+
+```{r}
+
+COUNTRIES_2022 <- c("UK", "Denmark", "Greece", "Hungary", "Lithuania",
+                    "Italy", "Poland", "Netherlands", "Romania",  "Slovakia",
+                    "Croatia", "Bulgaria", "Spain", "Finland", "France",
+                    "Germany", "Sweden")
+
+#Frequencies
+EUI_data_short %>% 
+  filter(Year > 2021) %>% 
+  filter(country %in% COUNTRIES_2022) %>% 
+    mutate(Ukraine_groups = replace(Ukraine_groups, Ukraine_groups == "Conditional Ukraine Supporters", "Conditional \n Ukraine Supporters"),
+      Ukraine_groups = factor(Ukraine_groups,
+                                      levels = c("Security-focused",
+                                                 "Conditional \n Ukraine Supporters",
+                                                 "Domestic/ Distracted",
+                                                 "Russia collaboration"))) %>% 
+  ggplot(aes(x = Ukraine_groups, fill = as.factor(Year), group = as.factor(Year))) +
+  geom_bar(position = "dodge") +
+  labs(fill = "Year", title = "Russia Attitudinal Groups",
+       x = "Groups", y = "Frequency") + 
+  theme_bw()
+
+EUI_data_short %>% 
+  filter(Year > 2021) %>% 
+  filter(country %in% COUNTRIES_2022) %>% 
+  group_by(Year) %>% 
+  count(Ukraine_groups) %>% 
+  mutate(Percentage = n / sum(n) ) %>% 
+    mutate(Ukraine_groups = replace(Ukraine_groups, Ukraine_groups == "Conditional Ukraine Supporters", "Conditional \n Ukraine Supporters"),
+      Ukraine_groups = factor(Ukraine_groups,
+                                      levels = c("Security-focused",
+                                                 "Conditional \n Ukraine Supporters",
+                                                 "Domestic/ Distracted",
+                                                 "Russia collaboration"))) %>% 
+    ggplot(aes(x = Ukraine_groups, y = Percentage, fill = as.factor(Year))) + 
+    geom_col(position = "dodge") +
+      labs(fill = "Year", title = "Russia Attitudinal Group Proportions: \n Short-Term Measure (Percentage)",
+       x = "Groups", y = "Percentage") + 
+    scale_y_continuous(labels = scales::percent) +
+      theme_bw()
+  
+#Proportions
+EUI_data_short %>% 
+  filter(Year > 2021) %>% 
+  filter(country %in% COUNTRIES_2022) %>% 
+  mutate(Ukraine_groups = factor(Ukraine_groups,
+                                      levels = c("Security-focused",
+                                                 "Conditional Ukraine Supporters",
+                                                  "Domestic/ Distracted",
+                                                 "Russia collaboration"))) %>% 
+  ggplot(aes(x = Year, fill = (Ukraine_groups))) +
+  geom_bar(position = "fill") + #for frequency, change position to "dodge"
+  labs(fill = "Year", title = "Russia Attitudinal Group Proportions: Short-Term Measure",
+       x = "Groups", y = "Proportion") + 
+  scale_fill_manual(values = c("darkblue", "lightblue", "forestgreen", "darkred")) + 
+  theme_bw()
+
+```
+
+# Short Term Country Year Trends Graph 
+
+```{r  fig.width=10, fig.height=12, out.width="\\linewidth"}
+short_country_year_df <- EUI_data_short %>% 
+  filter(Year > 2021) %>% 
+  filter(!is.na(country)) %>% 
+  mutate(Ukraine_groups = factor(Ukraine_groups,
+                                      levels = c("Security-focused",
+                                                 "Conditional Ukraine Supporters",
+                                                 "Domestic/ Distracted",
+                                                 "Russia collaboration"))) %>% 
+  group_by(Year, country) %>% 
+  count(Ukraine_groups) %>% 
+  mutate(Percentage = n / sum(n))
+
+
+countries <- short_country_year_df %>% 
+  filter(Year == 2025) %>% 
+  filter(Ukraine_groups == "Security-focused") %>% 
+  arrange(-Percentage) %>% 
+  pull(country)
+
+short_country_year_df %>% 
+  mutate(country = factor(country, levels = countries)) %>% 
+    ggplot(aes(x = Year, y = Percentage, fill = as.factor(Ukraine_groups))) + 
+    geom_col(position = "fill") +
+      labs(fill = "Group", title = "Russia Attitudinal Group Proportions: \n Short Term Measure (by Country)",
+       x = "Year", y = "Percentage",
+       caption = "Ordered by Highest Percentage of Pro-Russians in 2025") + 
+  facet_wrap(~country, ncol = 4) +
+  scale_fill_manual(values = c("darkblue", "lightblue", "forestgreen", "darkred")) + 
+    scale_y_continuous(labels = scales::percent) +
+      theme_bw() + 
+  theme(legend.position = "bottom") 
+
+
+```
+
+# Robustness Checks on Other measures
+
+## Support for Aid to Ukraine
+
+```{r}
+
+EUI_data_short <- EUI_data_short %>% 
+  mutate(Support_refugees = ifelse(New_Q78_1 %in% c(3, 4), 1, 0),
+         Support_humanitarian_aid = ifelse(New_Q78_2 %in% c(3, 4), 1, 0),
+         Support_EU_memebership = ifelse(New_Q78_7 %in% c(3, 4), 1, 0)
+         )
+
+
+EUI_data_short_long <- EUI_data_short %>% 
+  pivot_longer(cols = c(Support_refugees, Support_humanitarian_aid, Support_EU_memebership),
+               values_to = "Support", names_to = "Aid_type")
+
+
+EUI_data_short_long %>% 
+  group_by(Aid_type, Ukraine_groups) %>% 
+  summarize(Mean = paste0(round(mean(Support, na.rm = TRUE) * 100, 2), "%")) %>% 
+  pivot_wider(names_from = Aid_type, values_from = Mean) %>% 
+  kable(col.names = c("Group", "EU Membership Ukraine", "Send Humanitarian Aid",
+                      "Accept Refugees"),
+        label = "Support for Ukraine Aid by Membership in Groups in Ukraine") 
+
+```
+
+## Preferred Outcome to the War
+
+```{r}
+
+EUI_data_short %>% 
+    group_by(Ukraine_groups) %>% 
+    count(EUI_Ukraine_Outcome) %>% 
+  mutate(EUI_Ukraine_Outcome = case_match(EUI_Ukraine_Outcome,
+                                          1 ~ "Russia achieves all territorial goals",
+                                          2 ~ "Russia takes more territory",
+                                          3 ~ "A return to the territorial situation beofre the war",
+                                          4 ~ "Ukraine retakes some territory",
+                                          5 ~ "Ukraine retakes all territory"),
+         Ukraine_groups = factor(Ukraine_groups,
+                                      levels = c("Security-focused",
+                                                  "Conditional Ukraine Supporters",
+                                                 "Domestic/ Distracted",
+                                                 "Russia collaboration"))) %>% 
+  filter(!is.na(EUI_Ukraine_Outcome)) %>% 
+  mutate(n = paste0(round(n/ sum(n) * 100, 2), "%")) %>% 
+  pivot_wider(names_from = Ukraine_groups, values_from = n) %>%  
+  rename("Preferred Outcome" = EUI_Ukraine_Outcome) %>% 
+  kable()
+
+```
+
+## Trust in Russia
+
+```{r}
+
+EUI_data_short %>% 
+    group_by(Ukraine_groups) %>% 
+    mutate(Trust_Russia_3 = ifelse(A5_2 >= 3, 1, 0),
+           Trust_Russia_5 = ifelse(A5_2 >= 5, 1, 0),
+           Trust_Russia_7 = ifelse(A5_2 >= 7, 1, 0),
+           Trust_Russia_9 = ifelse(A5_2 >= 9, 1, 0)
+           ) %>% 
+  mutate(Ukraine_groups = factor(Ukraine_groups,
+                                      levels = c("Security-focused",                      
+                                                 "Conditional Ukraine Supporters",
+                                                 "Domestic/ Distracted",
+                                                 "Russia collaboration"))) %>% 
+  filter(!is.na(EUI_Ukraine_Outcome)) %>% 
+  summarize(`Percentage Trust 3` = paste0(round(mean(Trust_Russia_3, na.rm = TRUE)*100,
+                                              2), "%"),
+            `Percentage Trust 5` = paste0(round(mean(Trust_Russia_5, na.rm = TRUE)*100,
+                                              2), "%"),
+            `Percentage Trust 7` = paste0(round(mean(Trust_Russia_7, na.rm = TRUE)*100,
+                                              2), "%"),
+            `Percentage Trust 9` = paste0(round(mean(Trust_Russia_9, na.rm = TRUE)*100,
+                                              2), "%"),
+            ) %>% 
+  rename(Group = Ukraine_groups) %>% 
+  kable()
+
+```
+
+## Trust in Ukraine
+
+```{r}
+EUI_data_short %>% 
+    group_by(Ukraine_groups) %>% 
+    mutate(Trust_Russia_3 = ifelse(A5_3 >= 3, 1, 0),
+           Trust_Russia_5 = ifelse(A5_3 >= 5, 1, 0),
+           Trust_Russia_7 = ifelse(A5_3 >= 7, 1, 0),
+           Trust_Russia_9 = ifelse(A5_3 >= 9, 1, 0)
+           ) %>% 
+  mutate(Ukraine_groups = factor(Ukraine_groups,
+                                      levels = c("Security-focused",
+                                                 "Conditional Ukraine Supporters",
+                                                 "Domestic/ Distracted",
+                                                 "Russia collaboration"))) %>% 
+  filter(!is.na(EUI_Ukraine_Outcome)) %>% 
+  summarize(`Percentage Trust 3` = paste0(round(mean(Trust_Russia_3, na.rm = TRUE)*100,
+                                              2), "%"),
+            `Percentage Trust 5` = paste0(round(mean(Trust_Russia_5, na.rm = TRUE)*100,
+                                              2), "%"),
+            `Percentage Trust 7` = paste0(round(mean(Trust_Russia_7, na.rm = TRUE)*100,
+                                              2), "%"),
+            `Percentage Trust 9` = paste0(round(mean(Trust_Russia_9, na.rm = TRUE)*100,
+                                              2), "%"),
+            ) %>% 
+  rename(Group = Ukraine_groups) %>% 
+  kable()
+```
+
+
+## Greatest Threat
+
+```{r}
+EUI_data_short %>% 
+    group_by(Ukraine_groups) %>% 
+    count(Q68) %>% 
+  mutate(Q68 = case_match(Q68,
+                          1 ~ "Terrorism",
+                          2 ~ "Russia",
+                          3 ~ "The US",
+                          4 ~ "China",
+                          5 ~ "Nuclear Proliferation",
+                          6 ~ "Other",
+                          7 ~ "Don't Know"
+                          ),
+         Ukraine_groups = factor(Ukraine_groups,
+                                      levels = c("Security-focused",
+                                                 "Conditional Ukraine Supporters",
+                                                "Domestic/ Distracted",
+                                                 "Russia collaboration"))) %>% 
+  mutate(n = paste0(round(n/ sum(n) * 100, 2), "%")) %>% 
+  pivot_wider(names_from = Ukraine_groups, values_from = n) %>%  
+  rename(`Biggest Threat` = Q68) %>% 
+  kable()
+
+```
+
+## Responsibility for the Conflict
+
+```{r}
+
+EUI_data_short %>% 
+    group_by(Ukraine_groups) %>% 
+    count(New_Q79) %>% 
+  mutate(New_Q79 = case_match(New_Q79,
+                          1 ~ "Entirely NATO",
+                          2 ~ "More NATO Than Russia",
+                          3 ~ "NATO and Russia Equally",
+                          4 ~ "More Russia than NATO",
+                          5 ~ "Entirely Russia",
+                          6 ~ "Don't Know"
+                          ),
+         Ukraine_groups = factor(Ukraine_groups,
+                                      levels = c("Security-focused",
+                                                 "Conditional Ukraine Supporters",
+                                                "Domestic/ Distracted",
+                                                 "Russia collaboration"))) %>% 
+  filter(!is.na(New_Q79)) %>% 
+  mutate(n = paste0(round(n/ sum(n) * 100, 2), "%")) %>% 
+  pivot_wider(names_from = Ukraine_groups, values_from = n) %>%
+  rename("Responsibilty for War" = New_Q79) %>% 
+  kable()
+
+```
+
+## Threat of Nuclear Escalation Should be considered when making aid decisions
+
+```{r}
+EUI_data_short %>% 
+    group_by(Ukraine_groups) %>% 
+  mutate(
+         Ukraine_groups = factor(Ukraine_groups,
+                                      levels = c("Security-focused", 
+                                                 "Conditional Ukraine Supporters",
+                                                "Domestic/ Distracted",
+                                                 "Russia collaboration"))) %>% 
+summarize(`Threat of Escalation` = mean(ForeignPolicyDecisions2_2, na.rm = TRUE)) %>% 
+  mutate(`Threat of Escalation` = paste0(round(`Threat of Escalation` * 100, 2), "%")) %>% 
+  kable()
+```
+

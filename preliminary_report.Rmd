@@ -2,6 +2,10 @@
 title: "Groups on Russia Progress Report"
 author: "Rafael Campos-Gottardo & Alan Nemirovski"
 date: "`r Sys.Date()`"
+header-includes:
+- \usepackage{pdflscape}
+- \newcommand{\blandscape}{\begin{landscape}}
+- \newcommand{\elandscape}{\end{landscape}}
 output: pdf_document
 ---
 
@@ -10,14 +14,7 @@ knitr::opts_chunk$set(echo = TRUE)
 source("scripts/2_group_variables.R")
 ```
 
-## Comments from meeting: Feb. 12, 2026
-- Pro-Russia/Pro-Ukraine dichotomy in the long-run as opposed to doing the more granular "Russia appeaser" (only using dichotomous question around trade/security, i.e., Q73) --> appeaser group is conceptually too small over time
-- "Other" group is too big
-- Appeasers: also more broad appeasers (potentially on a more general note) --> sticking with smaller appeasers group for short
-- Additional data sources: European Social Survey, European Values Survey (same as World Values Survey), Eurobarometer survey (look at those for addidtional Russia-related Q's?)
-- Calling people that selected "Neither" or "Don't Know" as "Un-knowledgeable" (more broadly)
-
-# Long-term (simplified) measure
+# Long-term measure
 
 Long-term measure centered on dichotomous question for trade with Russia (Pro-Russia) or defence against Russia (Pro-Ukraine); all outstanding respondents tentatively classed as "Other".
 
@@ -43,9 +40,11 @@ COUNTRIES_2020 <- c("Denmark", "Finland", "France", "Germany", "Greece", "Hungar
 EUI_data %>% 
   filter(Year > 2019) %>% 
   filter(country %in% COUNTRIES_2020) %>% 
+      mutate(ukrainegroups_long = factor(ukrainegroups_long,
+                                      levels = c("Pro-Ukraine", "Other", "Pro-Russia"))) %>% 
   ggplot(aes(x = ukrainegroups_long, fill = as.factor(Year), group = as.factor(Year))) +
   geom_bar(position = "dodge") +
-  labs(fill = "Year", title = "Russia Attitudinal Groups: Simplified Long-Term Measure",
+  labs(fill = "Year", title = "Russia Attitudinal Groups: Long-Term Measure",
        x = "Groups", y = "Frequency") + 
   theme_bw()
 
@@ -58,9 +57,11 @@ EUI_data %>%
   count(ukrainegroups_long) %>% 
    # group_by(ukrainegroups_long) %>% 
   mutate(Percentage = n / sum(n) ) %>% 
+        mutate(ukrainegroups_long = factor(ukrainegroups_long,
+                                      levels = c("Pro-Ukraine", "Other", "Pro-Russia"))) %>% 
     ggplot(aes(x = ukrainegroups_long, y = Percentage, fill = as.factor(Year))) + 
     geom_col(position = "dodge") +
-      labs(fill = "Year", title = "Russia Attitudinal Group Proportions: \n Simplified Long-Term Measure (Percentage)",
+      labs(fill = "Year", title = "Russia Attitudinal Group Proportions: \n Long-Term Measure (Percentage)",
        x = "Groups", y = "Percentage") + 
     scale_y_continuous(labels = scales::percent) +
       theme_bw()
@@ -69,31 +70,142 @@ EUI_data %>%
 EUI_data %>% 
   filter(Year > 2019) %>% 
   filter(country %in% COUNTRIES_2020) %>% 
+    mutate(ukrainegroups_long = factor(ukrainegroups_long,
+                                      levels = c("Pro-Ukraine", "Other", "Pro-Russia"))) %>% 
   ggplot(aes(x = Year, fill = as.factor(ukrainegroups_long))) + 
   geom_bar(position = "fill") +
-  labs(fill = "Year", title = "Russia Attitudinal Group Proportions: Simplified Long-Term Measure",
-       x = "Groups", y = "Frequency") + 
+  labs(fill = "Year", title = "Russia Attitudinal Group Proportions: Long-Term Measure",
+       x = "Groups", y = "Proportion") + 
+  scale_fill_manual(values = c("darkblue", "lightgreen", "purple")) + 
   theme_bw()
 
 ```
 
-# Short-term (simplified) measure
+
+# Long term Measure Country Trends
+
+```{r  fig.width=10, fig.height=12, out.width="\\linewidth"}
+
+long_term_country_year_df <- EUI_data %>% 
+  filter(Year > 2019) %>% 
+    mutate(ukrainegroups_long = factor(ukrainegroups_long,
+                                      levels = c("Pro-Ukraine", "Other", "Pro-Russia"))) %>% 
+  group_by(Year, country) %>% 
+  count(ukrainegroups_long) %>% 
+  mutate(Percentage = n / sum(n)) 
+
+long_country_order <- long_term_country_year_df %>% 
+  filter(Year == 2025) %>% 
+  filter(ukrainegroups_long == "Pro-Russia") %>% 
+  arrange(-Percentage) %>% 
+  pull(country)
+
+
+long_term_country_year_df %>% 
+  mutate(country = factor(country, levels = long_country_order)) %>% 
+    ggplot(aes(x = Year, y = Percentage, fill = as.factor(ukrainegroups_long))) + 
+    geom_col(position = "fill") +
+      labs(fill = "Group", title = "Russia Attitudinal Group Proportions: \n Long Term Measure (by Country)",
+       x = "Year", y = "Percentage", caption = "Order by Highest Percentage of Pro-Russians in 2025") + 
+  facet_wrap(~country, ncol = 6) +
+    scale_y_continuous(labels = scales::percent) +
+  scale_x_continuous(breaks = seq(2020, 2025, 1)) +
+      theme_bw() + 
+  scale_fill_manual(values = c("darkblue", "lightgreen", "purple")) + 
+  theme(legend.position = "bottom",
+        axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) 
+
+```
+
+
+# Situational Pro-Russian
+
+## Longterm measure (threat)
+
+This is a long-term to distinguish situational pro-Russians from ideological pro-Russians considering those who see Russia as their country's and want to invest in diplomacy with Russia as situationally pro-Russian. 
 
 ```{r}
+EUI_data <- EUI_data %>% 
+  mutate(Types_pro_Russia_long = case_when(
+    #classed as Pro-Russia
+    Q73 == "European countries should invest more in trade and diplomacy with Russia to improve relations" 
+    & Q68 == 2 ~ "Situationally Pro-Russian",
+    Q73 == "European countries should invest more in trade and diplomacy with Russia to improve relations" ~ "Ideologically Pro-Russian",
+    #classed as Pro-Ukraine
+    Q73 == "European countries should invest more in defence and security to defend against Russian aggression" | Q47a_8 == 1 ~ "Pro-Ukraine",
+                                       TRUE ~ "Other"))
+
+table(EUI_data$Types_pro_Russia_long)
+```
+
+## Long-term measure (greatest issue)
+
+Those who think that Europe should invest in trade and diplomacy with Russian and consider war or energy their country's biggest issue are classified as situationally pro-Russian.   
+
+```{r}
+EUI_data <- EUI_data %>% 
+  mutate(pro_Russia_long_issues = case_when(
+    #classed as Pro-Ukraine
+        Q73 == "European countries should invest more in defence and security to defend against Russian aggression" 
+        | Q47a_8 == 1 ~ "Pro-Ukraine",
+        #classed as situationally pro-Russian
+    Q73 == "European countries should invest more in trade and diplomacy with Russia to improve relations" 
+    & (Q7_6 == 1 | Q7_12 == 1) ~ "Situationally Pro-Russian",
+    # classes as Ideologically Pro-Russian
+    Q73 == "European countries should invest more in trade and diplomacy with Russia to improve relations" ~ "Ideologically Pro-Russian",
+
+
+                                       TRUE ~ "Other"))
+
+table(EUI_data$pro_Russia_long_issues)
+```
+## Long-Term measure (defence) 
+
+This measure produces the largest situationally pro-Russian group. Respondents are classified as situationally pro-Russian if they think European countries should invest in trade and diplomacy with Russia AND think Russia is their country's greatest threat OR If they think their country should send troops to support Latvia, Romania, Finland, or Greenland but not Ukraine. 
+
+```{r}
+EUI_data <- EUI_data %>% 
+  mutate(pro_Russia_long_defence = case_when(
+    #Pro-Ukraine
+      Q73 == "European countries should invest more in defence and security to defend against Russian aggression"
+      | Q47a_8 == 1 ~ "Pro-Ukraine",
+      #Situationally Pro-Russian
+    (Q73 == "European countries should invest more in trade and diplomacy with Russia to improve relations" 
+     & Q68 == 2) |
+      ((Q47a_3 == 1 | Q47a_5 == 1 | Q47a_7 == 1 | Q47a_9 == 1) & Q47a_8 == 0) ~ "Situationally Pro-Russian",
+    #Ideologically Pro-Russian
+    Q73 == "European countries should invest more in trade and diplomacy with Russia to improve relations" 
+    | (Q47a_8 == 0) ~ "Ideologically Pro-Russian",
+                                       TRUE ~ "Other"))
+
+table(EUI_data$pro_Russia_long_defence)
+```
+
+
+# Short-term measure
+
+```{r}
+
 #creating "short" dataset for separate short-term variable manipulation
 EUI_data_short <- EUI_data %>%
-  filter(Year > 2022) %>% 
+  filter(Year > 2022) 
+
+EUI_data_short <- EUI_data_short %>% 
+  bind_rows(EUI_april_2022 %>% mutate(Year = 2022))
+
+
+EUI_data_short <- EUI_data_short %>% 
   #creating counts for "proukr", "prorus", and "dk" ("don't know") camps
   mutate(Q73_proukr = as.integer(Q73 == "European countries should invest more in defence and security to defend against Russian aggression"),
          Q73_prorus = as.integer(Q73 == "European countries should invest more in trade and diplomacy with Russia to improve relations"),
          Q73_dk = as.integer(Q73 == "Neither/DK"),
          
-         Q78_4_prorus = as.integer(New_Q78_4 %in% c(3, 4)),
-         Q78_4_proukr = as.integer(New_Q78_4 %in% c(1, 2)),
+         Q78_4_prorus = as.integer(New_Q78_4 %in% c(1, 2)),
+         Q78_4_proukr = as.integer(New_Q78_4 %in% c(3, 4)),
          Q78_4_dk = as.integer(New_Q78_4 == 5),
          
-         Q78_5_prorus = as.integer(New_Q78_5 %in% c(3, 4)),
-         Q78_5_proukr = as.integer(New_Q78_5 %in% c(1, 2)),
+         Q78_5_prorus = as.integer(New_Q78_5 %in% c(1, 2)),
+         Q78_5_proukr = as.integer(New_Q78_5 %in% c(3, 4)),
          Q78_5_dk = as.integer(New_Q78_5 == 5),
          
          #summing responses in each direction per individual
@@ -103,20 +215,56 @@ EUI_data_short <- EUI_data %>%
          
          ukrainegroups_short = case_when(
            #at least 2/3 pro-Russia answers
-           prorus_count >= 2 ~ "Pro-Russia", 
+           prorus_count >= 2 & proukr_count == 0
+           ~ "Pro-Russia", 
            #at least 2/3 pro-Ukraine answers
-           proukr_count >=2 ~ "Pro-Ukraine",
+           proukr_count >=2 & prorus_count == 0 
+           ~ "Pro-Ukraine",
            #exactly 1/3 pro-Russia AND 1/3 pro-Ukraine answer
-           prorus_count == 1 & proukr_count == 1 ~ "Ambivalent",
+            (prorus_count == 1 & proukr_count == 1) |
+            (prorus_count >= 2 & proukr_count == 1) | 
+             (proukr_count >=2 & prorus_count == 1) 
+           ~ "Ambivalent",
            #at least 2/3 "Don't Know's"
            dk_count >= 2 ~ "Unknowledgeable",
-           TRUE ~ "Other")) #"Other" included as a fail-safe category
+           TRUE ~ "Other")) %>%  #"Other" included as a fail-safe category 
+  filter(ukrainegroups_short != "Other") # The one other is a row that is all NA so it is filtered out 
 
 #Every individual was classed into one of four categories
 #(we can see this because there is no "Other" category in the table)
+
 table(EUI_data_short$ukrainegroups_short)
 
 ```
+
+## Short Term - situationally pro-Russian
+
+```{r}
+EUI_data_short <- EUI_data_short %>% 
+  mutate(
+         ukrainegroups_short_situational = case_when(
+           # Situationally Pro-Russian
+           prorus_count >= 2 & proukr_count == 0 & Q68 == 2
+           ~ "Situationally Pro-Russia",
+           #at least 2/3 pro-Russia answers
+           prorus_count >= 2 & proukr_count == 0
+           ~ "Ideologically Pro-Russia", 
+           #at least 2/3 pro-Ukraine answers
+           proukr_count >=2 & prorus_count == 0 
+           ~ "Pro-Ukraine",
+           #exactly 1/3 pro-Russia AND 1/3 pro-Ukraine answer
+            (prorus_count == 1 & proukr_count == 1) |
+            (prorus_count >= 2 & proukr_count == 1) | 
+             (proukr_count >=2 & prorus_count == 1) 
+           ~ "Ambivalent",
+           #at least 2/3 "Don't Know's"
+           dk_count >= 2 ~ "Unknowledgeable",
+           TRUE ~ "Other")) %>%  #"Other" included as a fail-safe category 
+  filter(ukrainegroups_short_situational != "Other")
+
+table(EUI_data_short$ukrainegroups_short_situational)
+```
+
 
 
 ## Trends over time: Short-term measure
@@ -127,41 +275,86 @@ COUNTRIES_2023 <- c("UK", "Denmark", "Greece", "Hungary", "Lithuania", "Italy", 
 
 #Frequencies
 EUI_data_short %>% 
-  filter(Year > 2022) %>% 
+  filter(Year > 2021) %>% 
   filter(country %in% COUNTRIES_2023) %>% 
+    mutate(ukrainegroups_short = factor(ukrainegroups_short,
+                                      levels = c("Pro-Ukraine", "Ambivalent",
+                                                 "Unknowledgeable", "Pro-Russia"))) %>% 
   ggplot(aes(x = ukrainegroups_short, fill = as.factor(Year), group = as.factor(Year))) +
   geom_bar(position = "dodge") +
-  labs(fill = "Year", title = "Russia Attitudinal Groups: Simplified Short-Term Measure",
+  labs(fill = "Year", title = "Russia Attitudinal Groups: Short-Term Measure",
        x = "Groups", y = "Frequency") + 
   theme_bw()
 
 EUI_data_short %>% 
-  filter(Year > 2022) %>% 
+  filter(Year > 2021) %>% 
   filter(country %in% COUNTRIES_2023) %>% 
   group_by(Year) %>% 
   count(ukrainegroups_short) %>% 
   mutate(Percentage = n / sum(n) ) %>% 
+    mutate(ukrainegroups_short = factor(ukrainegroups_short,
+                                      levels = c("Pro-Ukraine", "Ambivalent",
+                                                 "Unknowledgeable", "Pro-Russia"))) %>% 
     ggplot(aes(x = ukrainegroups_short, y = Percentage, fill = as.factor(Year))) + 
     geom_col(position = "dodge") +
-      labs(fill = "Year", title = "Russia Attitudinal Group Proportions: \n Simplified Short-Term Measure (Percentage)",
+      labs(fill = "Year", title = "Russia Attitudinal Group Proportions: \n Short-Term Measure (Percentage)",
        x = "Groups", y = "Percentage") + 
     scale_y_continuous(labels = scales::percent) +
       theme_bw()
   
 #Proportions
 EUI_data_short %>% 
-  filter(Year > 2022) %>% 
+  filter(Year > 2021) %>% 
   filter(country %in% COUNTRIES_2023) %>% 
-  ggplot(aes(x = Year, fill = as.factor(ukrainegroups_short))) +
+  mutate(ukrainegroups_short = factor(ukrainegroups_short,
+                                      levels = c("Pro-Ukraine", "Ambivalent",
+                                                 "Unknowledgeable", "Pro-Russia"))) %>% 
+  ggplot(aes(x = Year, fill = (ukrainegroups_short))) +
   geom_bar(position = "fill") + #for frequency, change position to "dodge"
-  labs(fill = "Year", title = "Russia Attitudinal Group Proportions: Simplified Short-Term Measure",
-       x = "Groups", y = "Frequency") + 
+  labs(fill = "Year", title = "Russia Attitudinal Group Proportions: Short-Term Measure",
+       x = "Groups", y = "Proportion") + 
+  scale_fill_manual(values = c("darkblue", "lightgreen", "#01665e", "purple")) + 
   theme_bw()
 
 ```
 
+# Short Term Country Year Trends Graph 
 
-# Country-level trends along new short-term measure
+```{r  fig.width=10, fig.height=12, out.width="\\linewidth"}
+short_country_year_df <- EUI_data_short %>% 
+  filter(Year > 2021) %>% 
+  filter(!is.na(country)) %>% 
+  mutate(ukrainegroups_short = factor(ukrainegroups_short,
+                                      levels = c("Pro-Ukraine", "Ambivalent",
+                                                 "Unknowledgeable", "Pro-Russia"))) %>% 
+  group_by(Year, country) %>% 
+  count(ukrainegroups_short) %>% 
+  mutate(Percentage = n / sum(n))
+
+
+short_country_order <- short_country_year_df %>% 
+  filter(Year == 2025) %>% 
+  filter(ukrainegroups_short == "Pro-Russia") %>% 
+  arrange(-Percentage) %>% 
+  pull(country)
+
+short_country_year_df %>% 
+  mutate(country = factor(country, levels = long_country_order)) %>% 
+    ggplot(aes(x = Year, y = Percentage, fill = as.factor(ukrainegroups_short))) + 
+    geom_col(position = "fill") +
+      labs(fill = "Group", title = "Russia Attitudinal Group Proportions: \n Short Term Measure (by Country)",
+       x = "Year", y = "Percentage",
+       caption = "Order by Highest Percentage of Pro-Russians in 2025") + 
+  facet_wrap(~country, ncol = 4) +
+  scale_fill_manual(values = c("darkblue", "lightgreen", "#01665e", "purple")) + 
+    scale_y_continuous(labels = scales::percent) +
+      theme_bw() + 
+  theme(legend.position = "bottom") 
+
+
+```
+
+# Country-level trends along short-term measure
 
 ## Pro-Russia
 
@@ -174,7 +367,7 @@ europe <- europe %>%
  # st_transform(3035) %>% 
   mutate(name = replace(name, name == "United Kingdom", "UK"))
 
-years <- c(2023, 2024, 2025)
+years <- c(2022, 2023, 2024, 2025)
 maps_pro_Russia <- list()
 for(i in 1:length(years)){
   df <- EUI_data_short %>% 
@@ -191,10 +384,10 @@ for(i in 1:length(years)){
     ggplot() + 
     geom_sf(aes(fill = `Pro-Russia`)) + 
     scale_fill_gradientn(
-    colours = c("pink","darkred"), # light pink → hot pink → purple
+    colours = c("lightpink", "hotpink","purple"), # light pink → hot pink → purple
     na.value = "grey90",
-    breaks = seq(0, 0.7, 0.1),
-    limits = c(0, 0.7),
+    breaks = seq(0, 0.6, 0.1),
+    limits = c(0, 0.6),
     labels = scales::percent
   ) +
       coord_sf(
@@ -208,7 +401,7 @@ for(i in 1:length(years)){
         text = element_text(size = 8))
 }
 
-ggpubr::ggarrange(plotlist = maps_pro_Russia[c(1,2, 3)],
+ggpubr::ggarrange(plotlist = maps_pro_Russia[c(1,2, 3, 4)],
   ncol = 2,
   nrow = 2,
   common.legend = TRUE,
@@ -236,7 +429,7 @@ for(i in 1:length(years)){
     ggplot() + 
     geom_sf(aes(fill = `Pro-Ukraine`)) + 
     scale_fill_gradientn(
-    colours = c("lightblue","blue"), # light pink → hot pink → purple
+    colours = c("#e0f3f3", "#80cdc1", "#01665e"), # light pink → hot pink → purple
     na.value = "grey90",
     breaks = seq(0, 0.7, 0.1),
     limits = c(0, 0.7),
@@ -253,7 +446,7 @@ for(i in 1:length(years)){
         text = element_text(size = 8))
 }
 
-ggpubr::ggarrange(plotlist = maps_pro_ukraine[c(1, 2, 3)],
+ggpubr::ggarrange(plotlist = maps_pro_ukraine[c(1, 2, 3, 4)],
   ncol = 2,
   nrow = 2,
   common.legend = TRUE,
@@ -281,10 +474,10 @@ for(i in 1:length(years)){
     ggplot() + 
     geom_sf(aes(fill = Ambivelent)) + 
     scale_fill_gradientn(
-    colours = c("yellow","orange"),
+    colours = c("#fff7bc", "#fec44f", "#b45309"),
     na.value = "grey90",
-    breaks = seq(0, 0.4, 0.1),
-    limits = c(0, 0.4),
+    breaks = seq(0, 0.6, 0.1),
+    limits = c(0, 0.6),
     labels = scales::percent
   ) +
       coord_sf(
@@ -298,7 +491,7 @@ for(i in 1:length(years)){
         text = element_text(size = 8))
 }
 
-ggpubr::ggarrange(plotlist = maps_other[c(1, 2, 3)],
+ggpubr::ggarrange(plotlist = maps_other[c(1, 2, 3, 4)],
   ncol = 2,
   nrow = 2,
   common.legend = TRUE,
@@ -326,10 +519,10 @@ for(i in 1:length(years)){
     ggplot() + 
     geom_sf(aes(fill = Ambivelent)) + 
     scale_fill_gradientn(
-    colours = c("lightgreen","darkgreen"),
+    colours = c("#e5f5e0", "limegreen", "darkgreen"),
     na.value = "grey90",
-    breaks = seq(0, 0.4, 0.1),
-    limits = c(0, 0.4),
+    breaks = seq(0, 0.2, 0.1),
+    limits = c(0, 0.2),
     labels = scales::percent
   ) +
       coord_sf(
@@ -343,7 +536,7 @@ for(i in 1:length(years)){
         text = element_text(size = 8))
 }
 
-ggpubr::ggarrange(plotlist = maps_other[c(1, 2, 3)],
+ggpubr::ggarrange(plotlist = maps_other[c(1, 2, 3, 4)],
   ncol = 2,
   nrow = 2,
   common.legend = TRUE,
@@ -351,3 +544,201 @@ ggpubr::ggarrange(plotlist = maps_other[c(1, 2, 3)],
 
 ```
 
+# Looking at how the different groups compare the end to the war, NATO-Russia and Trust Russia
+
+## End of the War
+
+### Long Term
+
+```{r}
+EUI_data %>% 
+  group_by(EUI_Ukraine_Outcome) %>% 
+   mutate(pro_Russia_long_defence = factor(pro_Russia_long_defence, levels = c("Pro-Ukraine", "Ideologically Pro-Russian", "Situationally Pro-Russian", "Other"))) %>% 
+  count(pro_Russia_long_defence) %>% 
+  filter(!is.na(EUI_Ukraine_Outcome)) %>% 
+  pivot_wider(names_from = pro_Russia_long_defence, values_from = n) %>% 
+  ungroup() %>% 
+  mutate(across(2:4, \(x) paste0(round((x / sum(x))*100 , 2), "%")),
+         EUI_Ukraine_Outcome = case_match(EUI_Ukraine_Outcome,
+                                          1 ~ "Russia achieves all its territorial goals in Ukraine",
+                                          2 ~ "Russia manages to take more Ukrainian territory",
+                                          3 ~ "A return to the territorial situation of earlier this year before the war started",
+                                          4 ~ "Ukraine manages to retake some of the territory Russia occupied in 2014",
+                                          5 ~ "Ukraine manages to retake all of its original territory (including Crimea)",
+                                          99 ~ "Don't Know")) %>% 
+  rename(`Prefered War Outcome` = EUI_Ukraine_Outcome) %>% 
+  kable()
+```
+
+
+```{r}
+EUI_data_short %>% 
+  group_by(EUI_Ukraine_Outcome) %>% 
+  count(ukrainegroups_short) %>% 
+  filter(!is.na(EUI_Ukraine_Outcome)) %>% 
+  pivot_wider(names_from = ukrainegroups_short, values_from = n) %>% 
+  ungroup() %>% 
+  mutate(across(2:5, \(x) paste0(round((x / sum(x))*100 , 2), "%")),
+         EUI_Ukraine_Outcome = case_match(EUI_Ukraine_Outcome,
+                                          1 ~ "Russia achieves all its territorial goals in Ukraine",
+                                          2 ~ "Russia manages to take more Ukrainian territory",
+                                          3 ~ "A return to the territorial situation of earlier this year before the war started",
+                                          4 ~ "Ukraine manages to retake some of the territory Russia occupied in 2014",
+                                          5 ~ "Ukraine manages to retake all of its original territory (including Crimea)",
+                                          99 ~ "Don't Know")) %>% 
+    rename(`Prefered War Outcome` = EUI_Ukraine_Outcome) %>% 
+  kable()
+```
+
+
+## Responsibility for the War 
+
+### Long Term 
+
+```{r}
+EUI_data %>% 
+  group_by(New_Q79) %>% 
+  mutate(pro_Russia_long_defence = factor(pro_Russia_long_defence, levels = c("Pro-Ukraine", "Ideologically Pro-Russian", "Situationally Pro-Russian", "Other"))) %>% 
+  count(pro_Russia_long_defence) %>% 
+  filter(!is.na(New_Q79)) %>% 
+  pivot_wider(names_from = pro_Russia_long_defence, values_from = n) %>% 
+  ungroup() %>% 
+  mutate(across(2:4, \(x) paste0(round((x / sum(x))*100 , 2), "%")),
+         New_Q79 = case_match(New_Q79,
+                                          1 ~ "Entirely NATO",
+                                          2 ~ "More NATO than Russia",
+                                          3 ~ "NATO and Russia Equally",
+                                          4 ~ "More Russia than NATO",
+                                          5 ~ "Entirely Russia",
+                                          6 ~ "Don't Know")) %>% 
+  rename(`War Responsibility` = New_Q79) %>% 
+  kable()
+```
+
+### Short Term
+
+```{r}
+EUI_data_short %>% 
+  group_by(New_Q79) %>% 
+  count(ukrainegroups_short) %>% 
+  filter(!is.na(New_Q79)) %>% 
+  pivot_wider(names_from = ukrainegroups_short, values_from = n) %>% 
+  ungroup() %>% 
+  mutate(across(2:5, \(x) paste0(round((x / sum(x))*100 , 2), "%")),
+         New_Q79 = case_match(New_Q79,
+                                          1 ~ "Entirely NATO",
+                                          2 ~ "More NATO than Russia",
+                                          3 ~ "NATO and Russia Equally",
+                                          4 ~ "More Russia than NATO",
+                                          5 ~ "Entirely Russia",
+                                          6 ~ "Don't Know")) %>% 
+  rename(`War Responsibility` = New_Q79) %>% 
+  kable()
+```
+
+## Trust in Russia 
+
+### Long Term
+
+```{r}
+EUI_data %>% 
+  group_by(A5_2) %>% 
+  mutate(pro_Russia_long_defence = factor(pro_Russia_long_defence, levels = c("Pro-Ukraine", "Ideologically Pro-Russian", "Situationally Pro-Russian", "Other"))) %>% 
+  count(pro_Russia_long_defence) %>% 
+  filter(!is.na(A5_2)) %>% 
+  pivot_wider(names_from = pro_Russia_long_defence, values_from = n) %>% 
+  ungroup() %>% 
+  mutate(across(2:4, \(x) paste0(round((x / sum(x))*100 , 2), "%"))) %>% 
+  rename(`Trust in Russia` = A5_2) %>% 
+  kable()
+```
+
+### Short Term
+
+```{r}
+EUI_data_short %>% 
+  group_by(A5_2) %>% 
+  count(ukrainegroups_short) %>% 
+  filter(!is.na(A5_2)) %>% 
+  pivot_wider(names_from = ukrainegroups_short, values_from = n) %>% 
+  ungroup() %>% 
+  mutate(across(2:5, \(x) paste0(round((x / sum(x))*100 , 2), "%"))) %>% 
+  rename(`Trust in Russia` = A5_2) %>% 
+  kable()
+```
+
+
+\newpage
+\blandscape
+
+### Examining the Ambivalent 
+
+```{r echo=FALSE}
+
+Ambivalent <- EUI_data_short %>% 
+  filter(ukrainegroups_short == "Ambivalent")
+
+Ambivalent <- Ambivalent %>% 
+  mutate(Send_weapons = case_when(New_Q78_4 %in% c(1, 2) ~ "Do Not Support",
+                                  New_Q78_4 %in% c(3, 4) ~ "Support",
+                                  New_Q78_4 == 5 ~ "Don't Know"),
+         Higher_Energy = case_when(New_Q78_5 %in% c(1, 2) ~ "Do Not Support",
+                                   New_Q78_5 %in% c(3, 4) ~ "Support",
+                                   New_Q78_5 == 5 ~ "Don't Know")
+         )
+
+Ambivalent %>% 
+  group_by(Q73, Send_weapons, Higher_Energy) %>% 
+  count() %>% 
+  ungroup() %>% 
+  mutate(Percent = round(n/sum(n) * 100, 2)) %>% 
+  kable()
+
+``` 
+
+
+
+\elandscape
+
+# New Questions 
+
+## Dietlind and Maria
+Two more questions we worked on: 
+According to you, what do you perceive Russia’s goals to be. Click all that apply. 
+--Take all of Ukraine’s territory
+--Attempting to retake the old Soviet Republics (Latvia, Lithuania etc.)
+--Attempting to retake All of Eastern Europe, e.g. Poland, Romania, Bulgaria
+--Attacking Europea countries (e.g. France, Germany) 
+--Russia is a peaceful country and does not desire to take or retake any countries or territories. 
+--OR: Russia is a good country that is getting a bad reputation. 
+
+
+
+If another country would attack Sweden, would you support Sweden to fight in a war to defend itself. 
+Yes or No
+
+## Rafael
+
+To capture situational pro-Russians?
+
+How much do you agree with each of the following statements:
+
+Every effort should be made to prevent war.
+Environmental consequences should always be considered when making policy decisions.
+Governments should try to maintain access to existing energy sources.  
+
+OR – trade offs
+
+Which of the following are more important policy goals for the EU (could do an experiment where respondents are shown a bunch of randomized trade-offs)
+Defend European nations from foreign military attacks OR maintain environmental protections OR maintain costs of cheap energy OR support efforts to take in immigrants and refugees. 
+
+Potential country budget? What percentage of your country’s budget would you allocate to each of these policy issues:
+
+Defence and Security XX%
+Environmental protections XX%
+Housing XX%
+Healthcare XX%
+Immigration and Refugees XX%
+Energy Independence XX%
+Public Debt XX%
+Natural Disaster Preparedness XX%

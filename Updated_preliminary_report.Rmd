@@ -29,7 +29,8 @@ EUI_data_short <- EUI_data_short %>%
                                       New_Q78_5 %in% c(1, 2) ~ "Conditional Ukraine Supporters",
                                     Q73 == "European countries should invest more in trade and diplomacy with Russia to improve relations" & 
                                       New_Q78_4 %in% c(1, 2) ~ "Russia collaboration",
-                                    TRUE ~ "Domestic/ Distracted"))
+                                    TRUE ~ "Domestic/ Distracted"),
+         Ukraine_groups = factor(Ukraine_groups, levels = c("Domestic/ Distracted", "Security-focused", "Conditional Ukraine Supporters", "Russia collaboration")))
 ```
 
 The Coding of the new measure

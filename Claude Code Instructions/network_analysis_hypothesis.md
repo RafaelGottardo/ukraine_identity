@@ -1,0 +1,2 @@
+
+Take the hypothesis testing code in `examples/Analysis_code.ipynb` (chunks 43-46) based on the method described in `Readings/British J Social Psychol - 2023 - L%C3%BCders - Attitude networks as intergroup realities  Using network%E2%80%90modelling to research.pdf` and transform it into R code based on the plots in `scripts/6_network_analysis.R`. 

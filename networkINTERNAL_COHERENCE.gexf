@@ -1,0 +1,288 @@
+<?xml version='1.0' encoding='utf-8'?>
+<gexf xmlns="http://www.gexf.net/1.2draft" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.gexf.net/1.2draft http://www.gexf.net/1.2draft/gexf.xsd" version="1.2">
+  <meta lastmodifieddate="2026-06-08">
+    <creator>NetworkX 3.2.1</creator>
+  </meta>
+  <graph defaultedgetype="undirected" mode="static" name="">
+    <nodes>
+      <node id="Unnamed: 0" label="Unnamed: 0" />
+      <node id="US_trust" label="US_trust" />
+      <node id="Russia_trust" label="Russia_trust" />
+      <node id="Ukraine_trust" label="Ukraine_trust" />
+      <node id="China_trust" label="China_trust" />
+      <node id="Terrorism_threat" label="Terrorism_threat" />
+      <node id="Russia_threat" label="Russia_threat" />
+      <node id="US_threat" label="US_threat" />
+      <node id="China_threat" label="China_threat" />
+      <node id="Nuclear_threat" label="Nuclear_threat" />
+      <node id="Other_threat" label="Other_threat" />
+      <node id="DK_threat" label="DK_threat" />
+      <node id="Referendum" label="Referendum" />
+      <node id="Trust_EU" label="Trust_EU" />
+      <node id="NATO_support" label="NATO_support" />
+      <node id="SecurityFA_1" label="SecurityFA_1" />
+      <node id="SecurityFA_2" label="SecurityFA_2" />
+      <node id="SecurityFA_3" label="SecurityFA_3" />
+      <node id="SecurityFA_4" label="SecurityFA_4" />
+      <node id="SecurityFA_5" label="SecurityFA_5" />
+      <node id="SecurityFA_6" label="SecurityFA_6" />
+      <node id="SecurityFA_7" label="SecurityFA_7" />
+      <node id="SecurityFA_8" label="SecurityFA_8" />
+    </nodes>
+    <edges>
+      <edge source="Unnamed: 0" target="US_trust" id="0" weight="0.03008231413050631" />
+      <edge source="Unnamed: 0" target="Russia_trust" id="1" weight="0.04643213306714763" />
+      <edge source="Unnamed: 0" target="Ukraine_trust" id="2" weight="0" />
+      <edge source="Unnamed: 0" target="China_trust" id="3" weight="0.0434988148189216" />
+      <edge source="Unnamed: 0" target="Terrorism_threat" id="4" weight="0" />
+      <edge source="Unnamed: 0" target="Russia_threat" id="5" weight="0" />
+      <edge source="Unnamed: 0" target="US_threat" id="6" weight="0.025250783975889955" />
+      <edge source="Unnamed: 0" target="China_threat" id="7" weight="0.002657205871142509" />
+      <edge source="Unnamed: 0" target="Nuclear_threat" id="8" weight="0.0022802478516205657" />
+      <edge source="Unnamed: 0" target="Other_threat" id="9" weight="0.01691853683643834" />
+      <edge source="Unnamed: 0" target="DK_threat" id="10" weight="0.015219885201900714" />
+      <edge source="Unnamed: 0" target="Referendum" id="11" weight="0.01736779575018809" />
+      <edge source="Unnamed: 0" target="Trust_EU" id="12" weight="0.0284446576451078" />
+      <edge source="Unnamed: 0" target="NATO_support" id="13" weight="0" />
+      <edge source="Unnamed: 0" target="SecurityFA_1" id="14" weight="0" />
+      <edge source="Unnamed: 0" target="SecurityFA_2" id="15" weight="nan" />
+      <edge source="Unnamed: 0" target="SecurityFA_3" id="16" weight="nan" />
+      <edge source="Unnamed: 0" target="SecurityFA_4" id="17" weight="0" />
+      <edge source="Unnamed: 0" target="SecurityFA_5" id="18" weight="0.017025079217035364" />
+      <edge source="Unnamed: 0" target="SecurityFA_6" id="19" weight="nan" />
+      <edge source="Unnamed: 0" target="SecurityFA_7" id="20" weight="0.01674937264415817" />
+      <edge source="Unnamed: 0" target="SecurityFA_8" id="21" weight="nan" />
+      <edge source="US_trust" target="Russia_trust" id="22" weight="0.2997687383305087" />
+      <edge source="US_trust" target="Ukraine_trust" id="23" weight="0.10686622997774514" />
+      <edge source="US_trust" target="China_trust" id="24" weight="0.3256661035746754" />
+      <edge source="US_trust" target="Terrorism_threat" id="25" weight="0.08523585859622838" />
+      <edge source="US_trust" target="Russia_threat" id="26" weight="0.017190286474508824" />
+      <edge source="US_trust" target="US_threat" id="27" weight="0" />
+      <edge source="US_trust" target="China_threat" id="28" weight="0.031181149892294403" />
+      <edge source="US_trust" target="Nuclear_threat" id="29" weight="0.05446942616600539" />
+      <edge source="US_trust" target="Other_threat" id="30" weight="0.04943353057633388" />
+      <edge source="US_trust" target="DK_threat" id="31" weight="0.01860466926355168" />
+      <edge source="US_trust" target="Referendum" id="32" weight="0" />
+      <edge source="US_trust" target="Trust_EU" id="33" weight="0.04453697228211481" />
+      <edge source="US_trust" target="NATO_support" id="34" weight="0.05861137284766224" />
+      <edge source="US_trust" target="SecurityFA_1" id="35" weight="0" />
+      <edge source="US_trust" target="SecurityFA_2" id="36" weight="nan" />
+      <edge source="US_trust" target="SecurityFA_3" id="37" weight="nan" />
+      <edge source="US_trust" target="SecurityFA_4" id="38" weight="0.008343015972145044" />
+      <edge source="US_trust" target="SecurityFA_5" id="39" weight="0" />
+      <edge source="US_trust" target="SecurityFA_6" id="40" weight="nan" />
+      <edge source="US_trust" target="SecurityFA_7" id="41" weight="0" />
+      <edge source="US_trust" target="SecurityFA_8" id="42" weight="nan" />
+      <edge source="Russia_trust" target="Ukraine_trust" id="43" weight="0" />
+      <edge source="Russia_trust" target="China_trust" id="44" weight="0.45035140622494013" />
+      <edge source="Russia_trust" target="Terrorism_threat" id="45" weight="0.09152698898729142" />
+      <edge source="Russia_trust" target="Russia_threat" id="46" weight="0" />
+      <edge source="Russia_trust" target="US_threat" id="47" weight="0.0689767678754683" />
+      <edge source="Russia_trust" target="China_threat" id="48" weight="0.004357422269916534" />
+      <edge source="Russia_trust" target="Nuclear_threat" id="49" weight="0.10154471760707566" />
+      <edge source="Russia_trust" target="Other_threat" id="50" weight="0.11798582594893141" />
+      <edge source="Russia_trust" target="DK_threat" id="51" weight="0.013111531004692669" />
+      <edge source="Russia_trust" target="Referendum" id="52" weight="0" />
+      <edge source="Russia_trust" target="Trust_EU" id="53" weight="0" />
+      <edge source="Russia_trust" target="NATO_support" id="54" weight="0" />
+      <edge source="Russia_trust" target="SecurityFA_1" id="55" weight="0" />
+      <edge source="Russia_trust" target="SecurityFA_2" id="56" weight="nan" />
+      <edge source="Russia_trust" target="SecurityFA_3" id="57" weight="nan" />
+      <edge source="Russia_trust" target="SecurityFA_4" id="58" weight="0" />
+      <edge source="Russia_trust" target="SecurityFA_5" id="59" weight="0" />
+      <edge source="Russia_trust" target="SecurityFA_6" id="60" weight="nan" />
+      <edge source="Russia_trust" target="SecurityFA_7" id="61" weight="0" />
+      <edge source="Russia_trust" target="SecurityFA_8" id="62" weight="nan" />
+      <edge source="Ukraine_trust" target="China_trust" id="63" weight="0.059355546253978674" />
+      <edge source="Ukraine_trust" target="Terrorism_threat" id="64" weight="0" />
+      <edge source="Ukraine_trust" target="Russia_threat" id="65" weight="0.24456623103741443" />
+      <edge source="Ukraine_trust" target="US_threat" id="66" weight="0" />
+      <edge source="Ukraine_trust" target="China_threat" id="67" weight="0.002177283408253404" />
+      <edge source="Ukraine_trust" target="Nuclear_threat" id="68" weight="0" />
+      <edge source="Ukraine_trust" target="Other_threat" id="69" weight="0" />
+      <edge source="Ukraine_trust" target="DK_threat" id="70" weight="0" />
+      <edge source="Ukraine_trust" target="Referendum" id="71" weight="0.29442000133846113" />
+      <edge source="Ukraine_trust" target="Trust_EU" id="72" weight="0.3489631899964809" />
+      <edge source="Ukraine_trust" target="NATO_support" id="73" weight="0.24339720638236267" />
+      <edge source="Ukraine_trust" target="SecurityFA_1" id="74" weight="0.3165326165035329" />
+      <edge source="Ukraine_trust" target="SecurityFA_2" id="75" weight="nan" />
+      <edge source="Ukraine_trust" target="SecurityFA_3" id="76" weight="nan" />
+      <edge source="Ukraine_trust" target="SecurityFA_4" id="77" weight="0.07097451579238016" />
+      <edge source="Ukraine_trust" target="SecurityFA_5" id="78" weight="0.0017783255310106852" />
+      <edge source="Ukraine_trust" target="SecurityFA_6" id="79" weight="nan" />
+      <edge source="Ukraine_trust" target="SecurityFA_7" id="80" weight="0" />
+      <edge source="Ukraine_trust" target="SecurityFA_8" id="81" weight="nan" />
+      <edge source="China_trust" target="Terrorism_threat" id="82" weight="0.033033934465035227" />
+      <edge source="China_trust" target="Russia_threat" id="83" weight="0" />
+      <edge source="China_trust" target="US_threat" id="84" weight="0.046747857228283944" />
+      <edge source="China_trust" target="China_threat" id="85" weight="0" />
+      <edge source="China_trust" target="Nuclear_threat" id="86" weight="0.07223044403697672" />
+      <edge source="China_trust" target="Other_threat" id="87" weight="0.045940335412924936" />
+      <edge source="China_trust" target="DK_threat" id="88" weight="0.0334007376154011" />
+      <edge source="China_trust" target="Referendum" id="89" weight="0" />
+      <edge source="China_trust" target="Trust_EU" id="90" weight="0" />
+      <edge source="China_trust" target="NATO_support" id="91" weight="0" />
+      <edge source="China_trust" target="SecurityFA_1" id="92" weight="0" />
+      <edge source="China_trust" target="SecurityFA_2" id="93" weight="nan" />
+      <edge source="China_trust" target="SecurityFA_3" id="94" weight="nan" />
+      <edge source="China_trust" target="SecurityFA_4" id="95" weight="0.013062849762291554" />
+      <edge source="China_trust" target="SecurityFA_5" id="96" weight="0" />
+      <edge source="China_trust" target="SecurityFA_6" id="97" weight="nan" />
+      <edge source="China_trust" target="SecurityFA_7" id="98" weight="0" />
+      <edge source="China_trust" target="SecurityFA_8" id="99" weight="nan" />
+      <edge source="Terrorism_threat" target="Russia_threat" id="100" weight="0" />
+      <edge source="Terrorism_threat" target="US_threat" id="101" weight="0" />
+      <edge source="Terrorism_threat" target="China_threat" id="102" weight="0" />
+      <edge source="Terrorism_threat" target="Nuclear_threat" id="103" weight="0" />
+      <edge source="Terrorism_threat" target="Other_threat" id="104" weight="0" />
+      <edge source="Terrorism_threat" target="DK_threat" id="105" weight="0" />
+      <edge source="Terrorism_threat" target="Referendum" id="106" weight="0" />
+      <edge source="Terrorism_threat" target="Trust_EU" id="107" weight="0" />
+      <edge source="Terrorism_threat" target="NATO_support" id="108" weight="0" />
+      <edge source="Terrorism_threat" target="SecurityFA_1" id="109" weight="0" />
+      <edge source="Terrorism_threat" target="SecurityFA_2" id="110" weight="nan" />
+      <edge source="Terrorism_threat" target="SecurityFA_3" id="111" weight="nan" />
+      <edge source="Terrorism_threat" target="SecurityFA_4" id="112" weight="0.004995991750927522" />
+      <edge source="Terrorism_threat" target="SecurityFA_5" id="113" weight="0.005965512832870724" />
+      <edge source="Terrorism_threat" target="SecurityFA_6" id="114" weight="nan" />
+      <edge source="Terrorism_threat" target="SecurityFA_7" id="115" weight="0.0167332686215651" />
+      <edge source="Terrorism_threat" target="SecurityFA_8" id="116" weight="nan" />
+      <edge source="Russia_threat" target="US_threat" id="117" weight="0" />
+      <edge source="Russia_threat" target="China_threat" id="118" weight="0" />
+      <edge source="Russia_threat" target="Nuclear_threat" id="119" weight="0" />
+      <edge source="Russia_threat" target="Other_threat" id="120" weight="0" />
+      <edge source="Russia_threat" target="DK_threat" id="121" weight="0" />
+      <edge source="Russia_threat" target="Referendum" id="122" weight="0.24106778906750892" />
+      <edge source="Russia_threat" target="Trust_EU" id="123" weight="0.26597383776470984" />
+      <edge source="Russia_threat" target="NATO_support" id="124" weight="0.26541579894013456" />
+      <edge source="Russia_threat" target="SecurityFA_1" id="125" weight="0.31225054103698785" />
+      <edge source="Russia_threat" target="SecurityFA_2" id="126" weight="nan" />
+      <edge source="Russia_threat" target="SecurityFA_3" id="127" weight="nan" />
+      <edge source="Russia_threat" target="SecurityFA_4" id="128" weight="0" />
+      <edge source="Russia_threat" target="SecurityFA_5" id="129" weight="0.023344547302630324" />
+      <edge source="Russia_threat" target="SecurityFA_6" id="130" weight="nan" />
+      <edge source="Russia_threat" target="SecurityFA_7" id="131" weight="0.019461633071486333" />
+      <edge source="Russia_threat" target="SecurityFA_8" id="132" weight="nan" />
+      <edge source="US_threat" target="China_threat" id="133" weight="0" />
+      <edge source="US_threat" target="Nuclear_threat" id="134" weight="0" />
+      <edge source="US_threat" target="Other_threat" id="135" weight="0" />
+      <edge source="US_threat" target="DK_threat" id="136" weight="0" />
+      <edge source="US_threat" target="Referendum" id="137" weight="0" />
+      <edge source="US_threat" target="Trust_EU" id="138" weight="0" />
+      <edge source="US_threat" target="NATO_support" id="139" weight="0" />
+      <edge source="US_threat" target="SecurityFA_1" id="140" weight="0" />
+      <edge source="US_threat" target="SecurityFA_2" id="141" weight="nan" />
+      <edge source="US_threat" target="SecurityFA_3" id="142" weight="nan" />
+      <edge source="US_threat" target="SecurityFA_4" id="143" weight="0.01877581148959704" />
+      <edge source="US_threat" target="SecurityFA_5" id="144" weight="0" />
+      <edge source="US_threat" target="SecurityFA_6" id="145" weight="nan" />
+      <edge source="US_threat" target="SecurityFA_7" id="146" weight="0" />
+      <edge source="US_threat" target="SecurityFA_8" id="147" weight="nan" />
+      <edge source="China_threat" target="Nuclear_threat" id="148" weight="0" />
+      <edge source="China_threat" target="Other_threat" id="149" weight="0" />
+      <edge source="China_threat" target="DK_threat" id="150" weight="0" />
+      <edge source="China_threat" target="Referendum" id="151" weight="0" />
+      <edge source="China_threat" target="Trust_EU" id="152" weight="0" />
+      <edge source="China_threat" target="NATO_support" id="153" weight="0.013688585352830665" />
+      <edge source="China_threat" target="SecurityFA_1" id="154" weight="0.0007682242300127058" />
+      <edge source="China_threat" target="SecurityFA_2" id="155" weight="nan" />
+      <edge source="China_threat" target="SecurityFA_3" id="156" weight="nan" />
+      <edge source="China_threat" target="SecurityFA_4" id="157" weight="0.014528642133754106" />
+      <edge source="China_threat" target="SecurityFA_5" id="158" weight="0.011256946912430512" />
+      <edge source="China_threat" target="SecurityFA_6" id="159" weight="nan" />
+      <edge source="China_threat" target="SecurityFA_7" id="160" weight="0.002101692849183679" />
+      <edge source="China_threat" target="SecurityFA_8" id="161" weight="nan" />
+      <edge source="Nuclear_threat" target="Other_threat" id="162" weight="0" />
+      <edge source="Nuclear_threat" target="DK_threat" id="163" weight="0" />
+      <edge source="Nuclear_threat" target="Referendum" id="164" weight="0" />
+      <edge source="Nuclear_threat" target="Trust_EU" id="165" weight="0" />
+      <edge source="Nuclear_threat" target="NATO_support" id="166" weight="0" />
+      <edge source="Nuclear_threat" target="SecurityFA_1" id="167" weight="0" />
+      <edge source="Nuclear_threat" target="SecurityFA_2" id="168" weight="nan" />
+      <edge source="Nuclear_threat" target="SecurityFA_3" id="169" weight="nan" />
+      <edge source="Nuclear_threat" target="SecurityFA_4" id="170" weight="0" />
+      <edge source="Nuclear_threat" target="SecurityFA_5" id="171" weight="0" />
+      <edge source="Nuclear_threat" target="SecurityFA_6" id="172" weight="nan" />
+      <edge source="Nuclear_threat" target="SecurityFA_7" id="173" weight="0.02712873317561024" />
+      <edge source="Nuclear_threat" target="SecurityFA_8" id="174" weight="nan" />
+      <edge source="Other_threat" target="DK_threat" id="175" weight="0" />
+      <edge source="Other_threat" target="Referendum" id="176" weight="0" />
+      <edge source="Other_threat" target="Trust_EU" id="177" weight="0" />
+      <edge source="Other_threat" target="NATO_support" id="178" weight="0" />
+      <edge source="Other_threat" target="SecurityFA_1" id="179" weight="0" />
+      <edge source="Other_threat" target="SecurityFA_2" id="180" weight="nan" />
+      <edge source="Other_threat" target="SecurityFA_3" id="181" weight="nan" />
+      <edge source="Other_threat" target="SecurityFA_4" id="182" weight="0.014705593420973483" />
+      <edge source="Other_threat" target="SecurityFA_5" id="183" weight="0" />
+      <edge source="Other_threat" target="SecurityFA_6" id="184" weight="nan" />
+      <edge source="Other_threat" target="SecurityFA_7" id="185" weight="0" />
+      <edge source="Other_threat" target="SecurityFA_8" id="186" weight="nan" />
+      <edge source="DK_threat" target="Referendum" id="187" weight="0" />
+      <edge source="DK_threat" target="Trust_EU" id="188" weight="0" />
+      <edge source="DK_threat" target="NATO_support" id="189" weight="0" />
+      <edge source="DK_threat" target="SecurityFA_1" id="190" weight="0" />
+      <edge source="DK_threat" target="SecurityFA_2" id="191" weight="nan" />
+      <edge source="DK_threat" target="SecurityFA_3" id="192" weight="nan" />
+      <edge source="DK_threat" target="SecurityFA_4" id="193" weight="0.029777817239001643" />
+      <edge source="DK_threat" target="SecurityFA_5" id="194" weight="0" />
+      <edge source="DK_threat" target="SecurityFA_6" id="195" weight="nan" />
+      <edge source="DK_threat" target="SecurityFA_7" id="196" weight="0" />
+      <edge source="DK_threat" target="SecurityFA_8" id="197" weight="nan" />
+      <edge source="Referendum" target="Trust_EU" id="198" weight="0.4850103582657312" />
+      <edge source="Referendum" target="NATO_support" id="199" weight="0.3594423063997414" />
+      <edge source="Referendum" target="SecurityFA_1" id="200" weight="0.27642168530368905" />
+      <edge source="Referendum" target="SecurityFA_2" id="201" weight="nan" />
+      <edge source="Referendum" target="SecurityFA_3" id="202" weight="nan" />
+      <edge source="Referendum" target="SecurityFA_4" id="203" weight="0.012706644529705807" />
+      <edge source="Referendum" target="SecurityFA_5" id="204" weight="0.03811355691547116" />
+      <edge source="Referendum" target="SecurityFA_6" id="205" weight="nan" />
+      <edge source="Referendum" target="SecurityFA_7" id="206" weight="0" />
+      <edge source="Referendum" target="SecurityFA_8" id="207" weight="nan" />
+      <edge source="Trust_EU" target="NATO_support" id="208" weight="0.3316068409611441" />
+      <edge source="Trust_EU" target="SecurityFA_1" id="209" weight="0.3114690449349111" />
+      <edge source="Trust_EU" target="SecurityFA_2" id="210" weight="nan" />
+      <edge source="Trust_EU" target="SecurityFA_3" id="211" weight="nan" />
+      <edge source="Trust_EU" target="SecurityFA_4" id="212" weight="0" />
+      <edge source="Trust_EU" target="SecurityFA_5" id="213" weight="0.03323684695825273" />
+      <edge source="Trust_EU" target="SecurityFA_6" id="214" weight="nan" />
+      <edge source="Trust_EU" target="SecurityFA_7" id="215" weight="0" />
+      <edge source="Trust_EU" target="SecurityFA_8" id="216" weight="nan" />
+      <edge source="NATO_support" target="SecurityFA_1" id="217" weight="0.2606119921875048" />
+      <edge source="NATO_support" target="SecurityFA_2" id="218" weight="nan" />
+      <edge source="NATO_support" target="SecurityFA_3" id="219" weight="nan" />
+      <edge source="NATO_support" target="SecurityFA_4" id="220" weight="0.023373151839638215" />
+      <edge source="NATO_support" target="SecurityFA_5" id="221" weight="0.019612586261592093" />
+      <edge source="NATO_support" target="SecurityFA_6" id="222" weight="nan" />
+      <edge source="NATO_support" target="SecurityFA_7" id="223" weight="0.02116444210542512" />
+      <edge source="NATO_support" target="SecurityFA_8" id="224" weight="nan" />
+      <edge source="SecurityFA_1" target="SecurityFA_2" id="225" weight="nan" />
+      <edge source="SecurityFA_1" target="SecurityFA_3" id="226" weight="nan" />
+      <edge source="SecurityFA_1" target="SecurityFA_4" id="227" weight="0" />
+      <edge source="SecurityFA_1" target="SecurityFA_5" id="228" weight="0" />
+      <edge source="SecurityFA_1" target="SecurityFA_6" id="229" weight="nan" />
+      <edge source="SecurityFA_1" target="SecurityFA_7" id="230" weight="0" />
+      <edge source="SecurityFA_1" target="SecurityFA_8" id="231" weight="nan" />
+      <edge source="SecurityFA_2" target="SecurityFA_3" id="232" weight="nan" />
+      <edge source="SecurityFA_2" target="SecurityFA_4" id="233" weight="nan" />
+      <edge source="SecurityFA_2" target="SecurityFA_5" id="234" weight="nan" />
+      <edge source="SecurityFA_2" target="SecurityFA_6" id="235" weight="nan" />
+      <edge source="SecurityFA_2" target="SecurityFA_7" id="236" weight="nan" />
+      <edge source="SecurityFA_2" target="SecurityFA_8" id="237" weight="nan" />
+      <edge source="SecurityFA_3" target="SecurityFA_4" id="238" weight="nan" />
+      <edge source="SecurityFA_3" target="SecurityFA_5" id="239" weight="nan" />
+      <edge source="SecurityFA_3" target="SecurityFA_6" id="240" weight="nan" />
+      <edge source="SecurityFA_3" target="SecurityFA_7" id="241" weight="nan" />
+      <edge source="SecurityFA_3" target="SecurityFA_8" id="242" weight="nan" />
+      <edge source="SecurityFA_4" target="SecurityFA_5" id="243" weight="0" />
+      <edge source="SecurityFA_4" target="SecurityFA_6" id="244" weight="nan" />
+      <edge source="SecurityFA_4" target="SecurityFA_7" id="245" weight="0" />
+      <edge source="SecurityFA_4" target="SecurityFA_8" id="246" weight="nan" />
+      <edge source="SecurityFA_5" target="SecurityFA_6" id="247" weight="nan" />
+      <edge source="SecurityFA_5" target="SecurityFA_7" id="248" weight="0" />
+      <edge source="SecurityFA_5" target="SecurityFA_8" id="249" weight="nan" />
+      <edge source="SecurityFA_6" target="SecurityFA_7" id="250" weight="nan" />
+      <edge source="SecurityFA_6" target="SecurityFA_8" id="251" weight="nan" />
+      <edge source="SecurityFA_7" target="SecurityFA_8" id="252" weight="nan" />
+    </edges>
+  </graph>
+</gexf>

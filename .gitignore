@@ -1,6 +1,7 @@
 # History files
 .Rhistory
 .Rapp.history
+/.RDataTmp*
 
 # Session Data files
 .RData
@@ -43,3 +44,4 @@ vignettes/*.pdf
 
 data_clean/*
 data_raw/*
+.positai

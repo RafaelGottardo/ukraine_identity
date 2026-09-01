@@ -9,7 +9,7 @@ Group_composition_overtime <- EUI_data_long %>%
          Ukraine_groups_long = factor(Ukraine_groups_long,
                                                 levels = rev(c("Defence and Security",
                                                                "Trade and Diplomacy",
-                                                               "Domestic-Distracted",
+                                                               "Neither/Don't Know",
                                                                "Normalization Focused")))) %>% 
   ungroup() %>% 
   ggplot(aes(x = Year, y = prop, col = Ukraine_groups_long)) + 
@@ -24,7 +24,7 @@ Group_composition_overtime <- EUI_data_long %>%
   labs(x = NULL, y = NULL, col = "Group") + 
   guides(colour = guide_legend(ncol = 2,
                                reverse = TRUE)) +
-  scale_colour_manual(values = rev(c("darkblue", "forestgreen", "darkred"))) + 
+  scale_colour_manual(values = rev(c("darkblue", "darkred", "forestgreen"))) + 
   theme_custom + 
   theme(panel.grid.major.x = element_blank(),
       panel.grid.minor.x = element_blank(),

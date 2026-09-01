@@ -16,7 +16,7 @@ COUNTRIES <- unique(EUI_data_short$country)[-c(16, 23)]
 group_vars <- EUI_data_short %>% 
   select(Q73, New_Q78_4, New_Q78_5)
 
-group_vars <- grouQ73group_vars <- group_vars %>% 
+group_vars <- group_vars %>% 
   mutate(
          Q73_security = ifelse(Q73 == "European countries should invest more in defence and security to defend against Russian aggression", 1, 0),
          New_Q78_4_security = ifelse(New_Q78_4 %in% c(3, 4), 1, 0),
@@ -51,18 +51,42 @@ cor(group_cors, use = "pairwise.complete.obs")
 
 ##### Graph Factor Loadings ####
 
+Factor_graph_data <- EUI_data_short %>% 
+  filter(country %in% COUNTRIES_2022) %>% 
+  select(Security_FA, Year) %>% 
+  rbind(EUI_data_short %>%
+          select(Security_FA) %>% 
+          mutate(Year = "Pooled"))
+
+graph_by_year <- Factor_graph_data %>% 
+  mutate(Year = factor(Year, levels = c("Pooled", "2025", "2024", "2023", "2022"))) %>% 
+  ggplot(aes(x = Security_FA, y = Year, group = Year
+             )) +
+  #geom_density_ridges2() + 
+  geom_boxplot(fill = "lightgrey") +
+  labs(y = "Year",
+       x = NULL) + 
+  scale_x_continuous( breaks = seq(-1.5, 1.5, length.out = 9),
+                      limits = c(-1.5, 1.5), 
+                      labels = c("", "",  "", "", "", "", "", "", ""))+ 
+  theme_custom 
+
+
 
 factor_graph <- EUI_data_short %>% 
+  filter(country %in% COUNTRIES_2022) %>% 
   ggplot(aes(x = Security_FA)) +
-  geom_density(fill = "seagreen", alpha = 0.4) +
-  labs(x = "Factor Scores for the Security-Collaboration Dimension \n (Higher scores indicate more security oriented)",
+  geom_density(fill = "lightgrey", alpha = 0.4) +
+  labs(x = "Defence-Normalization Dimension\n(Higher valued indicate more normalization-focused)",
        y = "Density") + 
   scale_x_continuous( breaks = seq(-1.5, 1.5, length.out = 9),
                       limits = c(-1.5, 1.5), 
-                      labels = c("", "Highest Security Focus",  "", "", "- Relations with Russia -", "", "", "Highest Collaboration Focus", "")) +
+                      labels = c("", "(-1.3) Defence-Focused",  "", "", "- 0.0 -", "", "", "Normalization-Focused (1.3)", "")) +
   theme_custom
 
-ggsave("plots/factor_scores_density.png", factor_graph, width = 7, height = 4)
+ggarrange(graph_by_year, factor_graph, ncol = 1, align = "v") %>% 
+ggsave("plots/factor_scores_density.png", ., width = 8, height = 6)
+
 ##### Factor Score Left- Right ####
 security_mid <- mean(c(max(EUI_data_short$Security_FA, na.rm = TRUE), min(EUI_data_short$Security_FA, na.rm = TRUE)))
 ideology_mid <- mean(c(max(EUI_data_short$Q62, na.rm = TRUE), min(EUI_data_short$Q62, na.rm = TRUE)))
@@ -184,35 +208,45 @@ ideology_regression_plot <- ideology_groups_df %>%
 ggsave("plots/ideology_regression.png", ideology_regression_plot, width = 6, height = 3)
 #### Test Factor Score ####
 
-testm1 <- lm(reformulate(c("Q62_01", CONTROLS, "as.factor(Year)", "country"), response = "Security_FA"),
-             data = EUI_data_short %>% drop_na(all_of(c("Q62_01", "GAL_TAN_index", CONTROLS, "Year", "country"))))
- testm2 <- lm(reformulate(c("Q9", CONTROLS, "as.factor(Year)", "country"), response = "Security_FA"),
-             data = EUI_data_short %>% drop_na(all_of(c("Q62_01", "Urban", "GAL_TAN", CONTROLS, "Year", "country"))))
-testm3 <- lm(reformulate(c("GAL_TAN", CONTROLS, "as.factor(Year)", "country"), response = "Security_FA"),
-             data = EUI_data_short %>% drop_na(all_of(c("Q62_01", "GAL_TAN_index", CONTROLS, "Year", "country"))))
+testm1 <- lmer(reformulate(c("scale(Q62)", CONTROLS, "as.factor(Year)", "(1 | country)"), response = "Security_FA"),
+             data =   drop_na(EUI_data_short, any_of(c("Q62_01", "GAL_TAN", CONTROLS, "Year", "country"))) %>%
+               filter(country %in% COUNTRIES_2022),
+             weights = balanced_weights)
+ testm2 <- lmer(reformulate(c("Q9", CONTROLS, "as.factor(Year)", "(1 | country)"), response = "Security_FA"),
+             data = EUI_data_short %>% drop_na(all_of(c("Q62_01", "Urban", "GAL_TAN", CONTROLS, "Year", "country"))) %>%
+               filter(country %in% COUNTRIES_2022),
+             weights = balanced_weights)
+testm3 <- lmer(reformulate(c("scale(GAL_TAN)", CONTROLS, "as.factor(Year)", "(1 | country)"), response = "Security_FA"),
+             data = EUI_data_short %>% drop_na(all_of(c("Q62_01", "GAL_TAN", CONTROLS, "Year", "country"))) %>%
+               filter(country %in% COUNTRIES_2022),
+             weights = balanced_weights)
+testm4 <- lmer(reformulate(c("scale(GAL_TAN)", "scale(Q62)", CONTROLS, "as.factor(Year)", "(1 | country)"), response = "Security_FA"),
+               data = EUI_data_short %>% drop_na(all_of(c("Q62_01", "GAL_TAN", CONTROLS, "Year", "country"))) %>%
+                 filter(country %in% COUNTRIES_2022),
+               weights = balanced_weights)
 
-FA_test_df <- rbind(broom::tidy(testm1, conf.int = TRUE) %>% mutate(Model = paste0("Ideology (R Squared = ", round(summary(testm1)$adj.r.squared, 3), ")")),
-                    broom::tidy(testm2, conf.int = TRUE) %>% mutate(Model = paste0("EU Referendum (R Squared = ", round(summary(testm2)$adj.r.squared, 3), ")")),
-                    broom::tidy(testm3, conf.int = TRUE) %>% mutate(Model = paste0("GAL-TAN (R Squared = ", round(summary(testm3)$adj.r.squared, 3), ")")))
+FA_test_df <- rbind(broom::tidy(testm1, conf.int = TRUE) %>% mutate(Model = paste0("Variable Only")),
+                    broom::tidy(testm2, conf.int = TRUE) %>% mutate(Model = paste0("Variable Only")),
+                    broom::tidy(testm3, conf.int = TRUE) %>% mutate(Model = paste0("Variable Only")),
+                    broom::tidy(testm4, conf.int = TRUE) %>% mutate(Model = "Controlling for Other Cleavages"))
 
 
 factor_test_plot <- FA_test_df %>% 
-  filter(term %in% c("Q62_01", "GAL_TAN", "Q9")) %>% 
-  mutate(term = case_match(term, "Q62_01" ~ "Left-Right Placement",
-                           "Q9" ~ "Support for EU Membership",
-                           "GAL_TAN" ~ "GAL-TAN"),
+  filter(term %in% c("scale(Q62)", "scale(GAL_TAN)", "Q9")) %>% 
+  mutate(term = case_match(term, "scale(Q62)" ~ "Left-Right Placement",
+                           #"Q9" ~ "Support for EU Membership",
+                           "scale(GAL_TAN)" ~ "GAL-TAN"),
          term = factor(term, rev(c("Left-Right Placement", "Support for EU Membership", "GAL-TAN"))),
-         Model = factor(Model, levels = rev(c(paste0("Ideology (R Squared = ", round(summary(testm1)$adj.r.squared, 3), ")"),
-                                            paste0("EU Referendum (R Squared = ", round(summary(testm2)$adj.r.squared, 3), ")"),
-                                            paste0("GAL-TAN (R Squared = ", round(summary(testm3)$adj.r.squared, 3), ")"))))) %>% 
-  ggplot(aes(x = estimate, y = term, xmin = conf.low, xmax = conf.high, fill = Model)) +
-  geom_linerange(linewidth = 1) + 
-  geom_col() + 
+         Model = factor(Model, levels = rev(c("Variable Only", "Controlling for Other Cleavages")))) %>% 
+  filter(!is.na(term)) %>% 
+  ggplot(aes(x = estimate, y = term, xmin = conf.low, xmax = conf.high, col = Model)) +
+  geom_linerange(linewidth = 1, position = position_dodge(width = 0.6)) + 
+  geom_point(position = position_dodge(width = 0.6)) + 
   geom_vline(xintercept = 0, lty = 4, col = "grey40") + 
-  scale_fill_manual(values = c("pink1", "purple3", "orange")) + 
-  guides(fill = guide_legend(reverse = TRUE,
+  scale_colour_manual(values = c("grey", "black")) + 
+  guides(colour = guide_legend(reverse = TRUE,
                                ncol = 1)) +
-  labs(x = "OLS Regression Coefficients and 95% Confidence Intervals \n for the Relationship Between Other Cleavages and the \n Security-Collaboration Dimension",
+  labs(x = "MLM Coefficients and 95% Confidence Intervals \n for the Relationship Between Other Cleavages and the \n Defence-Normalization Dimension",
       y = NULL) + 
   theme_custom
   
@@ -1126,7 +1160,7 @@ EUI_data_short <- EUI_data_short %>%
 EUI_data_short <- EUI_data_short %>% 
   mutate(Pro_EU = ifelse(eu_position > 4, 1, 0))
 EUI_data_short <- EUI_data_short %>% 
-  mutate(Pro_Russian_party = ifelse(Kremlin_ties <= 5, 1, 0),
+  mutate(Pro_Russian_party = ifelse(Securtiy_FA_party > 0, 1, 0),
          Very_Pro_Russian_party = ifelse(Kremlin_ties < 3, 1, 0),
          Very_anti_Russian_party = ifelse(Kremlin_ties > 8, 1, 0))
 EUI_data_short <- EUI_data_short %>% 
@@ -1139,6 +1173,7 @@ EUI_data_short <- EUI_data_short %>%
 
 mod_families_cleavage <- multinom(reformulate(c("Q62", "GAL_TAN", "Q9", "country", CONTROLS),
                                               response = "family"),
+                                  weights = balanced_weights,
                                   data = EUI_data_short %>% filter(Year == 2025),
                                   maxit = 1000)
 
@@ -1149,8 +1184,7 @@ families_cleavage_ideology <- avg_slopes(mod_families_cleavage, variables = "Q62
 
 families_cleavage_df <- bind_rows(families_cleavage_GALTAN,
                                   families_cleavage_EU,
-                                  families_cleavage_ideology,
-                                  families_normalization_df) %>% 
+                                  families_cleavage_ideology) %>% 
   as.data.frame()
 
 families_cleavage_plot <- families_cleavage_df %>% 
@@ -1198,6 +1232,7 @@ ggsave("plots/families_cleavage_plot.png", families_cleavage_plot, width = 8, he
 
 mod_families_normalization <- multinom(reformulate(c("Security_FA", "country", CONTROLS),
                                                    response = "family"),
+                                       weights = balanced_weights,
                                        data = EUI_data_short %>% filter(Year == 2025),
                                        maxit = 1000)
 
@@ -1205,19 +1240,22 @@ families_normalization_df <- avg_slopes(mod_families_normalization, variables = 
 
 mod_Russia_normalization <- lmer(reformulate(c("Security_FA", "(1 | country)", "as.factor(Year)", CONTROLS),
                                                    response = "Pro_Russian_party"),
+                                 weights = balanced_weights,
                                        data = EUI_data_short) 
 
 mod_very_Russia_normalization <- lmer(reformulate(c("Security_FA", "(1 | country)", "as.factor(Year)", CONTROLS),
                                              response = "Very_Pro_Russian_party"),
+                                      weights = balanced_weights,
                                  data = EUI_data_short) 
 
 mod_anti_Russia_normalization <- lmer(reformulate(c("Security_FA", "(1 | country)", "as.factor(Year)", CONTROLS),
                                                   response = "Very_anti_Russian_party"),
+                                      weights = balanced_weights,
                                       data = EUI_data_short) 
 
 mod_Russia_normalization_df <- tidy(mod_Russia_normalization, conf.int = TRUE) %>% 
   mutate(Mod = "Defence-Normalization Dimension Only",
-         Outcome = "Pro-Russian Parties")
+         Outcome = "Pro-Normalization Parties")
 
 mod_very_Russia_normalization_df <- tidy(mod_very_Russia_normalization, conf.int = TRUE) %>% 
   mutate(Mod = "Defence-Normalization Dimension Only",
@@ -1229,6 +1267,7 @@ mod_anti_Russia_normalization_df <- tidy(mod_anti_Russia_normalization, conf.int
 
 mod_EU_normalization <- lmer(reformulate(c("Security_FA", "(1 | country)", CONTROLS),
                                              response = "Pro_EU"),
+                             weights = balanced_weights,
                                  data = EUI_data_short %>% filter(Year == 2025)) 
 
 mod_EU_normalization_df <- tidy(mod_EU_normalization, conf.int = TRUE) %>% 
@@ -1237,6 +1276,7 @@ mod_EU_normalization_df <- tidy(mod_EU_normalization, conf.int = TRUE) %>%
 
 mod_Ukraine_normalization <- lmer(reformulate(c("Security_FA", "(1 | country)", CONTROLS),
                                          response = "Pro_Ukraine"),
+                                  weights = balanced_weights,
                              data = EUI_data_short %>% filter(Year == 2025)) 
 
 mod_Ukraine_normalization_df <- tidy(mod_Ukraine_normalization, conf.int = TRUE) %>% 
@@ -1245,6 +1285,7 @@ mod_Ukraine_normalization_df <- tidy(mod_Ukraine_normalization, conf.int = TRUE)
 
 mod_gal_normalization <- lmer(reformulate(c("Security_FA", "(1 | country)", CONTROLS),
                                               response = "gal"),
+                              weights = balanced_weights,
                                   data = EUI_data_short %>% filter(Year == 2025)) 
 
 mod_gal_normalization_df <- tidy(mod_gal_normalization, conf.int = TRUE) %>% 
@@ -1253,6 +1294,7 @@ mod_gal_normalization_df <- tidy(mod_gal_normalization, conf.int = TRUE) %>%
 
 mod_trade_normalization <- lmer(reformulate(c("Security_FA", "(1 | country)", CONTROLS),
                                           response = "Trade_diplomacy"),
+                                weights = balanced_weights,
                               data = EUI_data_short %>% filter(Year == 2025)) 
 
 mod_trade_normalization_df <- tidy(mod_trade_normalization, conf.int = TRUE) %>% 
@@ -1289,11 +1331,12 @@ families_normalization_plot <- parties_normalization_df %>%
                                "9" ~ "No Family",
                                "10" ~ "Confessional", 
                                "11" ~ "Agrarian/Centre",
-                               "Pro-Russian Parties"  ~ "Pro-Russian Parties",
+                               "Pro-Russian Parties"  ~ "Pro-Normalization Parties",
                                "Pro-EU Parties" ~ "Pro-EU Parties",
-                               "Pro-Ukraine Parties" ~ "Pro-Ukraine Parties",
-                               "GAL Parties" ~ "GAL Parties",
-                               "Supports Trade and Diplomacy w/ Russia" ~ "Supports Trade and Diplomacy w/ Russia"),
+                              # "Pro-Ukraine Parties" ~ "Pro-Ukraine Parties",
+                               "GAL Parties" ~ "GAL Parties"#,
+                             #  "Supports Trade and Diplomacy w/ Russia" ~ "Supports Trade and Diplomacy w/ Russia"
+                             ),
          group = factor(group, levels = rev(c("Radical Right/TAN",
                                               "Conservative",
                                               "Liberal",
@@ -1305,7 +1348,7 @@ families_normalization_plot <- parties_normalization_df %>%
                                               "Confessional", 
                                               "Agrarian/Centre",
                                               "No Family",
-                                              "Pro-Russian Parties",
+                                              "Pro-Normalization Parties",
                                               "Pro-EU Parties",
                                               "Pro-Ukraine Parties",
                                               "GAL Parties",
@@ -1316,13 +1359,16 @@ families_normalization_plot <- parties_normalization_df %>%
                               "Q62" ~ "Left-Right Self-Placement (A)",
                               "Security_FA" ~ "Defence-Normalization Dimension (B)"
          )) %>% 
+  filter(!is.na(group)) %>% 
   ggplot(aes(x = estimate, y = group, xmin = conf.low, xmax = conf.high)) + 
   geom_point() +
   facet_wrap(~Model, ncol = 1, scale = "free_y") + 
   geom_linerange() + 
-  scale_x_continuous(breaks = c(-0.10, -0.05, 0.00, 0.05, 0.09)) +
+  scale_x_continuous(breaks = c(-0.15, -0.10, -0.05, 0.00, 0.05, 0.1, 0.15),
+                     limits = c(-0.15, 0.15),
+                     labels =  c("", "-0.15 (Defence Focused)", "", "0.0", "","(Normalization Foucsed) 0.15", "")) +
   geom_vline(xintercept = 0, lty = 4, col = "grey40") +
-  labs(x = "Difference in % Support for Each Party Type by \n the Defence-Normalization Dimension", y = NULL) +
+  labs(x = "Difference in the Predicted Probability of Supporting Each Party Type \nby the Defence-Normalization Dimension", y = NULL) +
   theme_custom
 
 ggsave("plots/families_normalization_plot.png", families_normalization_plot, width = 8, height = 4)
@@ -1341,7 +1387,7 @@ families_marginal_effect <- parties_normalization_df %>%
                                "9" ~ "No Family",
                                "10" ~ "Confessional", 
                                "11" ~ "Agrarian/Centre",
-                               "Pro-Russian Parties"  ~ "Pro-Russian Parties",
+                               "Pro-Russian Parties"  ~ "Pro-Normalization Parties",
                                "Pro-EU Parties" ~ "Pro-EU Parties",
                                "Pro-Ukraine Parties" ~ "Pro-Ukraine Parties",
                                "GAL Parties" ~ "GAL Parties",
@@ -1357,7 +1403,7 @@ families_marginal_effect <- parties_normalization_df %>%
                                               "Confessional", 
                                               "Agrarian/Centre",
                                               "No Family",
-                                              "Pro-Russian Parties",
+                                              "Pro-Normalization Parties",
                                               "Pro-EU Parties",
                                               "Pro-Ukraine Parties",
                                               "GAL Parties",
@@ -1381,22 +1427,25 @@ families_marginal_effect <- parties_normalization_df %>%
 
 ggsave("plots/families_marginal_effect.png", families_marginal_effect, width = 8, height = 4)
 
-mod_Russia_normalization_cleavage <- lmer(reformulate(c("Security_FA", "Q62", "GAL_TAN", "Radical", "US_threat", "Q5", "Support_Aggrandizement", "Q9", "(1 | country)", "as.factor(Year)", CONTROLS),
+mod_Russia_normalization_cleavage <- lmer(reformulate(c("Security_FA", "Q62", "GAL_TAN", "Q9", "(1 | country)", "as.factor(Year)", CONTROLS),
                                              response = "Pro_Russian_party"),
+                                          weights = balanced_weights,
                                  data = EUI_data_short)
 
-mod_very_Russia_normalization_cleavage <- lmer(reformulate(c("Security_FA", "(1 | country)", "Radical", "GAL_TAN", "Q9", "US_threat", "Q5", "Support_Aggrandizement", "as.factor(Year)", CONTROLS),
+mod_very_Russia_normalization_cleavage <- lmer(reformulate(c("Security_FA", "(1 | country)", "Q62", "GAL_TAN", "Q9", "as.factor(Year)", CONTROLS),
                                                   response = "Very_Pro_Russian_party"),
+                                               weights = balanced_weights,
                                       data = EUI_data_short) 
 
-mod_anti_Russia_normalization_cleavage <- lmer(reformulate(c("Security_FA", "(1 | country)", "Radical", "GAL_TAN", "Q9",  "US_threat", "Q5", "Support_Aggrandizement", "as.factor(Year)", CONTROLS),
+mod_anti_Russia_normalization_cleavage <- lmer(reformulate(c("Security_FA", "(1 | country)", "Q62", "GAL_TAN", "Q9", "as.factor(Year)", CONTROLS),
                                                   response = "Very_anti_Russian_party"),
+                                               weights = balanced_weights,
                                       data = EUI_data_short) 
 
 
 mod_Russia_normalization_cleavage_df <- tidy(mod_Russia_normalization_cleavage, conf.int = TRUE) %>% 
   mutate(Mod = "Controling for Other Cleavages",
-         Outcome = "Pro-Russian Parties")
+         Outcome = "Pro-Normalization Parties")
 
 
 mod_very_Russia_normalization_cleavage_df <- tidy(mod_very_Russia_normalization_cleavage, conf.int = TRUE) %>% 
@@ -1407,16 +1456,18 @@ mod_anti_Russia_normalization_cleavage_df <- tidy(mod_anti_Russia_normalization_
   mutate(Mod = "Controling for Other Cleavages",
          Outcome = "Very Anti-Russian Parties")
 
-mod_EU_normalization_cleavage <- lmer(reformulate(c("Security_FA", "Radical", "GAL_TAN", "Q9", "US_threat", "Q5", "Support_Aggrandizement", "(1 | country)", CONTROLS),
+mod_EU_normalization_cleavage <- lmer(reformulate(c("Security_FA", "Q62", "GAL_TAN", "Q9", "(1 | country)", CONTROLS),
                                          response = "Pro_EU"),
+                                      weights = balanced_weights,
                              data = EUI_data_short %>% filter(Year == 2025))
 
 mod_EU_normalization_cleavage_df <- tidy(mod_EU_normalization_cleavage, conf.int = TRUE) %>% 
   mutate(Mod = "Controling for Other Cleavages",
          Outcome = "Pro-EU Parties")
 
-mod_Ukraine_normalization_cleavage <- lmer(reformulate(c("Security_FA", "Radical", "GAL_TAN", "Q9", "US_threat", "Q5", "Support_Aggrandizement", "(1 | country)", CONTROLS),
+mod_Ukraine_normalization_cleavage <- lmer(reformulate(c("Security_FA", "Q62", "GAL_TAN", "Q9", "(1 | country)", CONTROLS),
                                               response = "Pro_Ukraine"),
+                                           weights = balanced_weights,
                                   data = EUI_data_short %>% filter(Year == 2025)) 
 
 mod_Ukraine_normalization_cleavage_df <- tidy(mod_Ukraine_normalization_cleavage, conf.int = TRUE) %>% 
@@ -1424,8 +1475,9 @@ mod_Ukraine_normalization_cleavage_df <- tidy(mod_Ukraine_normalization_cleavage
          Outcome = "Pro-Ukraine Parties")
 
 
-mod_gal_normalization_cleavage <- lmer(reformulate(c("Security_FA", "Radical", "GAL_TAN", "Q9", "US_threat", "Q5", "Support_Aggrandizement", "(1 | country)", CONTROLS),
+mod_gal_normalization_cleavage <- lmer(reformulate(c("Security_FA", "Q62", "GAL_TAN", "Q9", "(1 | country)", CONTROLS),
                                           response = "gal"),
+                                       weights = balanced_weights,
                               data = EUI_data_short %>% filter(Year == 2025))
 
 mod_gal_normalization_cleavage_df <- tidy(mod_gal_normalization_cleavage, conf.int = TRUE) %>% 
@@ -1434,6 +1486,7 @@ mod_gal_normalization_cleavage_df <- tidy(mod_gal_normalization_cleavage, conf.i
 
 mod_lr_normalization <- lmer(reformulate(c("Security_FA", "(1 | country)", CONTROLS),
                                                   response = "Right_wing_party"),
+                             weights = balanced_weights,
                                       data = EUI_data_short %>% filter(Year == 2025))
 
 mod_lr_normalization_df <- tidy(mod_lr_normalization,
@@ -1443,6 +1496,7 @@ mod_lr_normalization_df <- tidy(mod_lr_normalization,
 
 mod_fr_normalization <- lmer(reformulate(c("Security_FA", "(1 | country)", CONTROLS),
                                          response = "Far_Right_party"),
+                             weights = balanced_weights,
                              data = EUI_data_short %>% filter(Year == 2025))
 
 mod_fr_normalization_df <- tidy(mod_fr_normalization,
@@ -1452,6 +1506,7 @@ mod_fr_normalization_df <- tidy(mod_fr_normalization,
 
 mod_fl_normalization <- lmer(reformulate(c("Security_FA", "(1 | country)", CONTROLS),
                                          response = "Far_Left_party"),
+                             weights = balanced_weights,
                              data = EUI_data_short %>% filter(Year == 2025))
 
 mod_fl_normalization_df <- tidy(mod_fl_normalization,
@@ -1459,8 +1514,9 @@ mod_fl_normalization_df <- tidy(mod_fl_normalization,
   mutate(Mod = "Defence-Normalization Dimension Only",
          Outcome = "Far-Left Parties (Econ)")
 
-mod_lr_normalization_cleavage <- lmer(reformulate(c("Security_FA", "Radical", "GAL_TAN", "Q9", "US_threat", "Q5", "Support_Aggrandizement", "(1 | country)", CONTROLS),
+mod_lr_normalization_cleavage <- lmer(reformulate(c("Security_FA", "Q62", "GAL_TAN", "Q9", "(1 | country)", CONTROLS),
                                                    response = "Right_wing_party"),
+                                      weights = balanced_weights,
                                        data = EUI_data_short %>% filter(Year == 2025))
 
 mod_lr_normalization_cleavage_df <- tidy(mod_lr_normalization_cleavage, conf.int = TRUE) %>% 
@@ -1468,24 +1524,27 @@ mod_lr_normalization_cleavage_df <- tidy(mod_lr_normalization_cleavage, conf.int
          Outcome = "Right-Wing Parties (Econ)")
 
 
-mod_fr_normalization_cleavage <- lmer(reformulate(c("Security_FA", "Radical", "GAL_TAN", "Q9", "US_threat", "Q5", "Support_Aggrandizement", "(1 | country)", CONTROLS),
+mod_fr_normalization_cleavage <- lmer(reformulate(c("Security_FA", "Q62", "GAL_TAN", "Q9", "(1 | country)", CONTROLS),
                                                   response = "Far_Right_party"),
+                                      weights = balanced_weights,
                                       data = EUI_data_short %>% filter(Year == 2025))
 
 mod_fr_normalization_cleavage_df <- tidy(mod_fr_normalization_cleavage, conf.int = TRUE) %>% 
   mutate(Mod = "Controling for Other Cleavages",
          Outcome = "Far-Right Parties (Econ)")
 
-mod_fl_normalization_cleavage <- lmer(reformulate(c("Security_FA", "Radical", "GAL_TAN", "Q9",  "US_threat", "Q5", "Support_Aggrandizement", "(1 | country)", CONTROLS),
+mod_fl_normalization_cleavage <- lmer(reformulate(c("Security_FA", "Q62", "GAL_TAN", "Q9", "(1 | country)", CONTROLS),
                                                   response = "Far_Left_party"),
+                                      weights = balanced_weights,
                                       data = EUI_data_short %>% filter(Year == 2025))
 
 mod_fl_normalization_cleavage_df <- tidy(mod_fl_normalization_cleavage, conf.int = TRUE) %>% 
   mutate(Mod = "Controling for Other Cleavages",
          Outcome = "Far-Left Parties (Econ)")
 
-mod_trade_normalization_cleavage <- lmer(reformulate(c("Security_FA", "Radical", "GAL_TAN", "Q9", "US_threat", "Q5", "Support_Aggrandizement", "(1 | country)", CONTROLS),
+mod_trade_normalization_cleavage <- lmer(reformulate(c("Security_FA", "Q62", "GAL_TAN", "Q9", "(1 | country)", CONTROLS),
                                             response = "Trade_diplomacy"),
+                                         weights = balanced_weights,
                                 data = EUI_data_short %>% filter(Year == 2025))
 
 mod_trade_normalization_cleavage_df <- tidy(mod_trade_normalization_cleavage, conf.int = TRUE) %>% 
@@ -1513,27 +1572,28 @@ Parties_df <- bind_rows(mod_Russia_normalization_df,
 
 support_for_different_parties_plot <- Parties_df %>% 
   filter(term == "Security_FA") %>% 
-  mutate(Outcome = factor(Outcome, levels = rev(c("Far-Right Parties (Econ)",
-                                                  "Right-Wing Parties (Econ)",
-                                                  "Far-Left Parties (Econ)",
-                                              "Pro-Russian Parties",
-                                              "Trade and Diplomacy w/ Russia",
-                                              "Pro-EU Parties",
-                                              "Pro-Ukraine Parties",
+  mutate(Outcome = factor(Outcome, levels = rev(c(#"Far-Right Parties (Econ)",
+                                                  #"Right-Wing Parties (Econ)",
+                                                  #"Far-Left Parties (Econ)",
+                                              "Pro-Normalization Parties",
+                                              #"Trade and Diplomacy w/ Russia",
+                                             # "Pro-EU Parties",
+                                              #"Pro-Ukraine Parties",
                                               "GAL Parties"
                                               )))) %>% 
+  filter(!is.na(Outcome)) %>% 
   mutate(Mod = factor(Mod, levels = rev(c("Defence-Normalization Dimension Only", "Controling for Other Cleavages")))) %>% 
   ggplot(aes(x = estimate, y = Outcome, xmin = conf.low, xmax = conf.high, col = Mod)) + 
   geom_point(position = position_dodge(width = 0.6)) +
   geom_linerange(position = position_dodge(width = 0.6)) + 
   geom_vline(xintercept = 0, lty = 4, col = "grey40") +
-  scale_colour_manual(values = c("purple4", "darkgreen")) +
+  scale_colour_manual(values = c("black", "grey70")) +
   guides(colour =  guide_legend(reverse = TRUE,
                                 ncol = 1)) + 
   labs(x = "Multilevel Model Coefficents \n Difference in Support for Each Party Type", y = NULL, col = NULL) +
-  scale_x_continuous(breaks = c(-0.10, -0.05, 0.00, 0.05, 0.10),
-                     limits = c(-0.12, 0.12),
-                     labels = c("-0.10", "-0.05 (Defence Focused)", "0.0", "0.05 (Nomralization Foucsed)", "0.10")) + 
+  scale_x_continuous(breaks = c(-0.15, -0.1, -0.05, 0.00, 0.05, 0.1, 0.15),
+                     limits = c(-0.15, 0.15),
+                     labels = c("", "-0.15 (Defence Focused)", "", "0.0", "","(Normalization Foucsed) 0.15", "")) + 
   theme_custom
   
 
@@ -1547,6 +1607,7 @@ Pro_Russian_parties_df <- bind_rows(mod_Russia_normalization_df,
                                     mod_very_Russia_normalization_cleavage_df,
                                     mod_anti_Russia_normalization_cleavage_df
                                     )
+
 most_pro_russia_plot <- Pro_Russian_parties_df %>% 
 filter(term == "Security_FA") %>% 
   mutate(Outcome = factor(Outcome, levels = rev(c("Very Pro-Russian Parties",
@@ -2258,7 +2319,7 @@ lm(formula = Russia_party ~ Pro_Russia_individual, data = test)
 security_party_position <- EUI_data_short %>% 
   group_by(country, Past_vote) %>% 
   summarise(Pro_Russia_individual = mean(Security_FA),
-            Russia_party = 10 - mean(Kremlin_ties),
+            Russia_party = mean(Securtiy_FA_party, na.rm = TRUE),
             Past_vote = mean(Past_vote)) %>% 
   ungroup() %>% 
   filter(!is.na(Russia_party)) %>% 
@@ -2288,9 +2349,9 @@ security_party_position <- EUI_data_short %>%
          )) %>% 
   ggplot(aes(x = Pro_Russia_individual, y = Russia_party, col = country, text = Past_vote)) + 
   geom_point(size = 2) + 
-  geom_hline(yintercept = 5, col = "grey40") + 
+ # geom_hline(yintercept = 5, col = "grey40") + 
   scale_colour_manual(values = c(
-    "#FAE042",  # Belgium
+   # "#FAE042",  # Belgium
     "#00966E",  # Bulgaria
     "#FF0000",  # Croatia
     "#C60C30",  # Denmark
@@ -2314,16 +2375,16 @@ security_party_position <- EUI_data_short %>%
                    fontface = "bold",
                    nudge_x = .1,
                    min.segment.length = unit(0, 'lines')) + 
-  scale_x_continuous( breaks = seq(-1, 1.2, length.out = 9),
-                      limits = c(-1, 1.2), 
+  scale_x_continuous( breaks = seq(-1, 1.3, length.out = 9),
+                      limits = c(-1, 1.3), 
                       labels = c("", "Highest Defence Focus",  "", "", "- Relations with Russia -", "", "", "Highest Normalization Focus", ""))  + 
   labs(x = "Average Defence-Normalization Index Score of Supporters", 
-       y = "Party's Pro-Russian Position",
+       y = "Party's Position on the Defence Normalization Index",
        col = NULL) + 
   theme_custom + 
   theme(legend.position = "none")
 
-ggsave("plots/security_party_position.png", security_party_position, width = 8, height = 4)
+ggsave("plots/security_party_position.png", security_party_position, width = 8, height = 5)
 test <- EUI_data_short %>% 
   group_by(country, Past_vote) %>% 
   summarise(Pro_Russia_individual = mean(Security_FA),
@@ -2506,7 +2567,7 @@ Social_group_year <- lmer(reformulate(c("( Econ_comparison + Radicalized + Emplo
                                   Generalized_trust = relevel(factor(Generalized_trust), "Untrusting"))
 )
 
-Social_group <- lmer(reformulate(c("( Econ_comparison + Radicalized + Employed + Woman + Education + Age + Urban + median_income + Former_soviet)", "(1 | country)", "as.factor(Year)"),
+Social_group <- lmer(reformulate(c("( Econ_comparison + Employed + Woman + Education + Age + median_income + Employed)", "as.factor(Year)", "(1 | country)"),
                                       response = "Security_FA"),
                           data = EUI_data_short %>%
                             filter(country %in% COUNTRIES_2022) %>% 
@@ -2519,15 +2580,17 @@ Social_group <- lmer(reformulate(c("( Econ_comparison + Radicalized + Employed +
                                    religion = relevel(factor(religion), "Christian"),
                                    Employed = relevel(factor(Employed), "Employed"),
                                    Generalized_trust = relevel(factor(Generalized_trust), "Untrusting"),
-                                   Age = recode_values(Age, "18-24" ~ "Born after the Cold War",
-                                                       "25-34" ~ "Born after the Cold War",
-                                                       "35-44" ~ "Born at the end of the Cold War (1978-1990)",
-                                                       "45-54" ~ "Socialized during the Cold War",
-                                                       "55+" ~ "Socialized during the Cold War"),
+                                   Age = recode_values(Age, "18-24" ~ "Gen Z",
+                                                       "25-34" ~ "Young Millennials",
+                                                       "35-44" ~ "Transition Generation",
+                                                       "45-54" ~ "Cold War Children",
+                                                       "55+" ~ " Cold War Adults"),
                                    Former_soviet = ifelse(country %in% c("Bulgaria","Czech Republic", "Slovakia", 
                                                                          "Hungary", "Poland", "Romania", "Estonia",
-                                                                         "Latvia", "Lithuania"), 1, 0))
+                                                                         "Latvia", "Lithuania"), 1, 0)),
+                   weights = balanced_weights
 )
+vif(Social_group)
 
 social_group_vars <- c( "Econ_comparison", "Radicalized", "Employed", "Woman", "Education", "Age", "Urban")
 Social_group_year_df <- data.frame()
@@ -2629,11 +2692,11 @@ Social_group_df <- Social_group %>%
   filter(!term %in% c("(Intercept)", "as.factor(Year)2023", "as.factor(Year)2024", "as.factor(Year)2025", "IndustryUnemployed")) %>% 
   filter(str_starts(term, "country", negate = TRUE)) %>% 
   mutate(term = case_match(term,
-                           "AgeBorn at the end of the Cold War (1978-1990)" ~ "Age: Born at the end of the Cold War (1978-1990) \n (Ref. Born after Cold War)",
+                           "AgeGen Z" ~ "Age: Gen Z (Ref. Cold War+)",
                            "AgeSocialized during the Cold War" ~ "Age: Socialized during the Cold War",
-                           "Age35-44" ~ "Age: 35-44",
-                           "Age45-54" ~ "Age: 45-54",
-                           "Age55+" ~ "Age: 55+",
+                           "AgeYoung Milenials" ~ "Age: Young Milenials",
+                           "AgeTransition Generation" ~ "Age: Transition Generation",
+                           "AgeCold War Generation" ~ "Age: Cold War Generation",
                            "Former_soviet" ~ "Location: Former Eastern Bloc Countries",
                            "WomanWoman" ~ "Gender: Woman",
                            "UrbanUrban/Suburban" ~ "Urban: Urban (Ref. Suburban)",
@@ -2658,8 +2721,10 @@ Social_group_df <- Social_group %>%
 
 Social_group_plot <- Social_group_df %>% 
   mutate(
-         term = factor(term, levels = rev(c("Age: Born at the end of the Cold War (1978-1990) \n (Ref. Born after Cold War)",
-                                            "Age: Socialized during the Cold War",
+         term = factor(term, levels = rev(c("Age: Gen Z (Ref. Cold War Adults)",
+                                            "Age: Young Milenials",
+                                            "Age: Transition Generation",
+                                            "Age: Cold War Children",
                                             "Location: Former Eastern Bloc Countries",
                                             "Gender: Woman",
                                             "Urban: Urban (Ref. Suburban)",
@@ -2669,26 +2734,29 @@ Social_group_plot <- Social_group_df %>%
                                             "Comparision: Better off (Ref. The Same)",
                                             "Comparision: Don't Know",
                                             "Comparision: Worse off",
+                                            "Income: Above Median Income",
                                             "Employment: Unemployed (Ref. Employed)",
                                             "Employment: Student",
                                             "Employment: Retired",
                                             "Employment: Other",
                                             "Education: Less than Primary (Ref. Secondary Education)",
                                             "Education: Tertiary",
-                                            "Income: Above Median Income",
                                             "Trust: Trusting (Ref. Untrusting)",
                                             "Trust: Don't Know"))),
-         group = str_extract(term, "^[^:]+")) %>%
-  filter(!effect %in% c("ran_pars")) %>% 
+         group = str_extract(term, "^[^:]+"),
+         term = str_remove(term, "^[^:]*:\\s*")
+         ) %>%
+ # filter(!effect %in% c("ran_pars")) %>% 
   filter(!is.na(term)) %>% 
   ggplot(aes(x = estimate, y = term, xmin = conf.low, xmax = conf.high, col = group)) + 
   geom_point(size = 2) +
   geom_linerange() + 
   scale_colour_manual(values = group_colors) + 
   geom_vline(xintercept = 0, lty = 4, col = "grey29") + 
-  geom_hline(yintercept = c(2.5, 5.5, 7.5, 10.5, 11.5, 12.5), col = "grey80", lty = "dotted") +
+  geom_hline(yintercept = c(2.5, 5.5, 6.5, 8.5, 9.5), col = "grey80", lty = "dotted") +
   scale_x_continuous( breaks = seq(-0.3, 0.4, length.out = 8),
-                      labels = c("-0.3", "-0.2 (Defence Focused)",  "", "0.0", "0.1", "", "0.3 (Normalization Focused)" , "")) +
+                      limits = c(-0.25, 0.25),
+                      labels = c("-0.3", "-0.2 (Defence Focused)",  "", "0.0", "", "(Normalization Focused) 0.2" , "", "")) +
   labs(x = "MLM Estimates and 95% Confidence Intervals \n Higher Values Represent the more Normalization Position",
        y = NULL) + 
   theme_custom + 
@@ -2696,7 +2764,9 @@ Social_group_plot <- Social_group_df %>%
         panel.grid.minor.x = element_blank(),
         panel.grid.major.y = element_blank(),
         panel.grid.minor.y = element_blank()) +
-  theme(legend.position = "none")
+  theme(legend.position = "none",
+        plot.margin = margin(1,1,1,1, "cm")) 
+  
 
 
 ggsave("plots/Social_group_plot.png", Social_group_plot, width = 12, height = 6)
@@ -2728,7 +2798,16 @@ country_order <- EUI_data_short %>%
   pull(country)
 
 Age_by_country <- Age_country_df %>% 
-  mutate(Age = factor(Age, levels = rev(c("18-24", "25-34", "35-44", "45-54", "55+"))),
+  mutate(Age = recode_values(Age, "18-24" ~ "Gen Z",
+                             "25-34" ~ "Young Milenials",
+                             "35-44" ~ "Transition Generation",
+                             "45-54" ~ "Cold War Children",
+                             "55+" ~ "Cold War Adults"),
+         Age = factor(Age, levels = rev(c("Gen Z",
+                                      "Young Milenials",
+                                      "Transition Generation",
+                                      "Cold War Children",
+                                      "Cold War Adults"))), 
          country = factor(country, levels = country_order)) %>% 
   ggplot(aes(x = estimate, y = Age, xmin = conf.low, xmax = conf.high)) + 
   geom_point() + 
@@ -2740,7 +2819,7 @@ Age_by_country <- Age_country_df %>%
                       labels = c("", "Defence",  "", "", "", "", "", "Normalization", "")) + 
   theme_custom
 
-ggsave("plots/Age_by_country.png", Age_by_country, width = 8, height = 6)
+ggsave("plots/Age_by_country.png", Age_by_country, width = 10, height = 6)
 
 for (i in seq_along(SODEMS)) {
   social_base_list[[i]] <- Social_base_countries %>%
@@ -2805,6 +2884,45 @@ ideology_country <- Ideology_model_df %>%
   theme_custom
 
 ggsave("plots/ideology_country.png", ideology_country, width = 8, height = 8)
+
+data_social_base <- EUI_data_short %>% 
+  filter(country %in% COUNTRIES_2022) %>% 
+  mutate(
+         Radicalized = relevel(factor(Radicalized), "Moderate"),
+         Education = relevel(factor(Education), "Higher Secondary"),
+         Econ_comparison = relevel(factor(Econ_comparison), "The same"),
+         Industry = relevel(factor(Industry), "White Collar"),
+         religion = relevel(factor(religion), "Christian"),
+         Employed = relevel(factor(Employed), "Employed"),
+         Generalized_trust = relevel(factor(Generalized_trust), "Untrusting"),
+         Former_soviet = ifelse(country %in% c("Bulgaria","Czech Republic", "Slovakia", 
+                                               "Hungary", "Poland", "Romania", "Estonia",
+                                               "Latvia", "Lithuania"), 1, 0))
+#### Subjective Economic Position by Country #####
+econ_position_mod <- lm(reformulate(c("Econ_comparison * country", "( Employed + Woman + Education + Age + median_income)", "as.factor(Year)"),
+                                 response = "Security_FA"),
+                     data = data_social_base 
+                       ,
+                     weights = balanced_weights
+)
+econ_position_df <- avg_predictions(econ_position_mod, variables = c("Econ_comparison", "country"))
+
+
+econ_position_country <- econ_position_df %>% 
+  filter(Econ_comparison != "Don't Know") %>% 
+  mutate(country = factor(country, levels = country_order),
+         Econ_comparison = factor(Econ_comparison, levels = rev(c("Worse off", "The same", "Better off")))) %>% 
+  ggplot(aes(x = estimate, y = Econ_comparison, xmin = conf.low, xmax = conf.high)) + 
+  geom_point() + 
+  geom_linerange() +
+  facet_wrap(~country) + 
+  labs(x = "Predicted Value on the Defence-Normalization Dimension \n (Higher values indicate more defence focused)",
+       caption = "Countries ordered by average defence-normalization index score",
+       y = NULL) + 
+  theme_custom +
+  theme(plot.margin = margin(1,1,1,1, "cm"))
+
+ggsave("plots/econ_position_country.png", econ_position_country, width = 8, height = 8)
 #### Affective Polarization ####
 
 affective_polarization_model <- lm_robust(reformulate(c("as.factor(Affective_Polarization)",

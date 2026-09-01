@@ -26,7 +26,7 @@ EUI_data_short <- EUI_data_short %>%
          Generalized_trust = recode_values(Q59, 1 ~ "Trusting",
                                            2 ~ "Untrusting",
                                            3 ~ "Don't Know"),
-         New_Q43i = case_match(New_Q43i, 1 ~ 4, 2 ~ 3, 5 ~ 2.5, 3 ~ 2, 4 ~ 1),
+         #New_Q43i = case_match(New_Q43i, 1 ~ 4, 2 ~ 3, 5 ~ 2.5, 3 ~ 2, 4 ~ 1),
          ideology = recode_values(Q62, 1 ~ "Left-wing",
                                   2 ~ "Left-wing",
                                   3 ~ "Centre",
@@ -61,7 +61,7 @@ EUI_data_long <- EUI_data %>%
   bind_rows(EUI_2018, EUI_2020, EUI_2021) %>% 
   mutate(Ukraine_groups_long = case_when(Q73 == "European countries should invest more in defence and security to defend against Russian aggression" ~ "Defence and Security",
                                          Q73 == "European countries should invest more in trade and diplomacy with Russia to improve relations" ~ "Trade and Diplomacy",
-                                         TRUE ~ "Domestic-Distracted"))
+                                         TRUE ~ "Neither/Don't Know"))
 
 table(EUI_data_short$Ukraine_groups)
 #### Create Factor Version of Group Variables ####
@@ -82,12 +82,88 @@ group_vars <- group_vars %>%
   select(-c(Q73, New_Q78_4, New_Q78_5
             ))
 
+item_distribution_plot <- group_vars %>% 
+  pivot_longer(cols = c(Q73_security, New_Q78_4_security, New_Q78_5_security),
+               names_to = "Variable", values_to = "val") %>% 
+  mutate(Variable = replace_values(Variable,
+                                   "Q73_security" ~ "Defence and Security",
+                                   "New_Q78_4_security" ~ "Send Weapons",
+                                   "New_Q78_5_security" ~ "Accept Higher Energy Costs"
+                                    ),
+         Variable = factor(Variable, levels = rev(c("Defence and Security",
+                                                "Send Weapons",
+                                                "Accept Higher Energy Costs"))),
+         val = replace_values(as.character(val),
+                              "0" ~ "Do Not Support",
+                              "1" ~ "Support"),
+         val = factor(val, levels = rev(c("Do Not Support", "Support"))),
+         ) %>% 
+  ggplot(aes(y = Variable, fill = val, group = val)) +
+  geom_bar(position = "fill") +
+  scale_fill_manual(values = c("darkblue", "darkred")) + 
+  guides(fill = guide_legend(reverse = TRUE,
+                             ncol = 1)) + 
+  labs(fill = NULL,
+       x = "Percentage of Respondents",
+       y = NULL) + 
+  scale_x_continuous(labels = scales::percent) +
+  theme_custom
+
+ggsave("plots/item_distribution_plot.png", item_distribution_plot, width = 8, height = 4)
 
 CORS <- tetrachoric(group_vars)
 EIGNS <- eigen(CORS$rho); EIGNS$values # 2 factors with 1 as a cutoff 
 
 Factor_loadings <- fa(group_vars, 1, cor = "tet"); Factor_loadings$loadings
 
+EUI_data_short$Security_FA <- Factor_loadings$scores
+EUI_data_short$Security_FA <- as.numeric(EUI_data_short$Security_FA) * -1
+
+group_vars <- EUI_data_short %>% 
+  select(Q73, New_Q78_4, New_Q78_5
+  )
+
+
+group_vars  <- group_vars %>% 
+  mutate(
+    Q73_security = recode_values(Q73,
+                                 "European countries should invest more in defence and security to defend against Russian aggression" ~ 3,
+                                 "Neither"  ~ 2,
+                                 "DK" ~ 2,
+                                 "European countries should invest more in trade and diplomacy with Russia to improve relations" ~ 1                                 ),
+    New_Q78_4 = recode_values(New_Q78_4,
+                              1 ~ 1,
+                              2 ~ 2,
+                              5 ~ 3,
+                              3 ~ 4,
+                              4 ~ 5),
+    New_Q78_5 = recode_values(New_Q78_5,
+                                1 ~ 1,
+                                2 ~ 2,
+                                5 ~ 3,
+                                3 ~ 4,
+                                4 ~ 5)
+  )
+
+
+group_vars <- group_vars %>% 
+  select(-c(Q73
+  ))
+
+
+CORS <- cor(group_vars)
+EIGNS <- eigen(CORS); EIGNS$values # 1 factor with 1 as a cutoff 
+
+Factor_loadings <- fa(group_vars, 1); Factor_loadings$loadings
+
+#### Create weights #### 
+
+EUI_data_short <- EUI_data_short %>% 
+  group_by(Year, country) %>% 
+  mutate(weight_sum = sum(weight),
+         balanced_weights = weight * (1000 / weight_sum)
+         )  %>% 
+  ungroup()
 
 # data.frame(Variable = c("D.S.", "S.W.", "H.E."),
 #   Loadings = Factor_loadings$loadings) %>% 
@@ -116,8 +192,7 @@ Factor_loadings <- fa(group_vars, 1, cor = "tet"); Factor_loadings$loadings
 
 alpha(group_vars)
 
-EUI_data_short$Security_FA <- Factor_loadings$scores
-EUI_data_short$Security_FA <- as.numeric(EUI_data_short$Security_FA) * -1
+#EUI_data_short$Security_FA <- Factor_loadings$scores
 
 #### Robust Factor #####
 
@@ -267,8 +342,27 @@ EUI_data_short <- left_join(EUI_data_short, ches_data %>% filter(!is.na(new_q59)
 # URBAN_RURAL
 # EU_RUSSIA
 
-#### Export Data for Predictions in Python ####
 
+#### Create Party index ####
+
+index_vars <- EUI_data_short %>% 
+  select(EU_Russia, weapons, energy_costs) 
+
+index_vars <- index_vars %>% 
+  mutate(EU_Russia = 10 - EU_Russia)
+
+COR <- cor(index_vars, use = "complete.obs")
+
+eigen(COR)$values
+
+alpha(index_vars)
+
+index_loadings <- fa(index_vars, cor = "cor", nfactors = 1); index_loadings$loadings
+
+
+EUI_data_short$Securtiy_FA_party <- as.numeric(index_loadings$scores) * -1
+#### Export Data for Predictions in Python ####
+table(EUI_data_short$Past_vote)
 EUI_data_predict <- EUI_data_short %>% 
   filter(Year %in% c(2023, 2025)) %>% 
   select(Past_vote, Year, country, Urban, Q62, Ukraine_groups, all_of(CONTROLS), Security_FA) %>% 

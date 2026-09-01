@@ -144,7 +144,8 @@ party_type_models_df <- data.frame()
 PARTY_OUTCOME_VARS <- c("Q71", "Q5", "Immigration_support", "Nationalist")
 for(i in 1:length(PARTY_OUTCOME_VARS)){
   mod <- lmer(reformulate(c("Party_position", CONTROLS, "as.factor(Year)", "(1 | country)"), response = PARTY_OUTCOME_VARS[i]),
-            data = EUI_data_short %>% filter(country %in% COUNTRIES_2022))
+            data = EUI_data_short %>% filter(country %in% COUNTRIES_2022),
+            weights = balanced_weights)
   
   df <- tidy(mod, conf.int = TRUE) %>% 
     mutate(Variable = PARTY_OUTCOME_VARS[i])
@@ -183,21 +184,35 @@ party_type_correlates <- party_type_models_df %>%
                      breaks = c(-0.75, -0.5, -0.25, 0, 0.25)) + 
   theme_custom
 
-
+ggsave("plots/party_type_correlates.png", party_type_correlates, width = 8, height = 4)
 #### By individual level attitudes 
 
+EUI_data_short <- EUI_data_short %>% 
+  mutate(individual_LW_PR = case_when(ideology == "Left-wing" & Security_FA > 0 ~ "Left-Wing Normalization-focused",
+                                      ideology == "Right-wing" & Security_FA > 0 ~ "Right-Wing Normalization-focused",
+                                      ideology == "Left-wing" & Security_FA <= 0 ~ "Left-Wing Security-focused",
+                                      ideology == "Right-wing" & Security_FA <= 0 ~ "Right-Wing Security-focused",
+                                      TRUE ~ "Centrist"
+                                    
+                                      ))
+  
 LW_proRussia_attitudes_df <- data.frame()
 PARTY_OUTCOME_VARS <- c("Q71", "Q5", "Immigration_support", "Nationalist")
 for(i in 1:length(PARTY_OUTCOME_VARS)){
-  mod <- lmer(reformulate(c("ideology*Security_FA", CONTROLS, "as.factor(Year)", "(1 | country)"), response = PARTY_OUTCOME_VARS[i]),
-              data = EUI_data_short %>% filter(country %in% COUNTRIES_2022))
+  mod <- lmer(reformulate(c("individual_LW_PR", CONTROLS, "as.factor(Year)", "(1 | country)"), response = PARTY_OUTCOME_VARS[i]),
+              data = EUI_data_short %>% filter(country %in% COUNTRIES_2022),
+              weights = balanced_weights)
   
-  df <- avg_slopes(mod, variables = "Security_FA", by = "ideology") %>% 
+  df <- tidy(mod, conf.int = TRUE) %>% 
     mutate(Variable = PARTY_OUTCOME_VARS[i])
   
   LW_proRussia_attitudes_df <- bind_rows(LW_proRussia_attitudes_df, df)
 }
 LW_correlates_correlates <- LW_proRussia_attitudes_df %>% 
+  filter(term %in% c("individual_LW_PRLeft-Wing Normalization-focused",
+                     "individual_LW_PRLeft-Wing Security-focused",
+                     "individual_LW_PRRight-Wing Normalization-focused",
+                     "individual_LW_PRRight-Wing Security-focused")) %>% 
   mutate(Variable = recode_values(Variable, "Q71" ~ "Importance of NATO",
                                   "Q5" ~ "Support for Democracy",
                                   "Immigration_support" ~ "Support for Immigration",
@@ -205,14 +220,21 @@ LW_correlates_correlates <- LW_proRussia_attitudes_df %>%
   ),
   Variable = factor(Variable, levels = rev(c("Importance of NATO", "Support for Democracy",
                                              "Support for Immigration", "Nationalism"))),
-  ideology = factor(ideology, levels = c("Don't Know", "Left-wing", "Centre", "Right-wing"))) %>% 
-  ggplot(aes(x = estimate, y = Variable, xmin = conf.low, xmax = conf.high, col = ideology)) + 
+  term = recode_values(term, "individual_LW_PRLeft-Wing Normalization-focused" ~ "Left-wing Normalization-Focused",
+                       "individual_LW_PRLeft-Wing Security-focused" ~ "Left-wing Security-Focused",
+                       "individual_LW_PRRight-Wing Normalization-focused" ~ "Right-wing Normalizaation-Focused",
+                       "individual_LW_PRRight-Wing Security-focused" ~ "Right-wing Security Focused"),
+  term = factor(term, levels = c("Left-wing Normalization-Focused", 
+                                 "Left-wing Security-Focused",
+                                 "Right-wing Normalizaation-Focused",
+                                 "Right-wing Security Focused"))) %>% 
+  ggplot(aes(x = estimate, y = Variable, xmin = conf.low, xmax = conf.high, col = term)) + 
   geom_point(position = position_dodge(width = 0.6)) + 
   geom_linerange(position = position_dodge(width = 0.6)) + 
   geom_vline(xintercept = 0, lty = 4, col = "grey40") + 
   scale_colour_manual(values = c("black", "darkred", "purple4", "darkblue")) + 
-  labs(colour = "Ideological Self-placement",
-       x = "Marginal effect of the defence-normalization dimension", 
+  labs(colour = "Ideology and Placement on the Defence-Normalization Dimension",
+       x = "Marginal effect of the defence-normalization dimension\nRef. Centrist", 
        y = "Outcome Variable",
        caption = "Model includes only countries surveyed since 2022 and country and year fixed effects."
   ) +
@@ -234,11 +256,11 @@ EUI_data_short <- EUI_data_short %>%
                                       TRUE ~ "Left and Right-wing Pro-Russia Party"))
 
 
-RW_pro_Russia_mod <- lm_robust(reformulate(c("(Security_FA * ideology * LW_RW_pro_russia)", CONTROLS, "as.factor(Year)"), 
+LW_RW_country_pro_Russia_mod <- lm_robust(reformulate(c("(Security_FA * ideology * LW_RW_pro_russia)", CONTROLS, "as.factor(Year)"), 
                                            response = "Right_wing_pro_russia"), data = EUI_data_short)
 
 
-RW_pro_Russia_df <- avg_slopes(RW_pro_Russia_mod, variables = "Security_FA", by = c("ideology", "LW_RW_pro_russia"))
+No_LW_party_df <- avg_slopes(LW_RW_country_pro_Russia_mod, variables = "Security_FA", by = c("ideology", "LW_RW_pro_russia"))
 
 
 No_LW_party_plot <- RW_pro_Russia_df %>% 
@@ -255,14 +277,14 @@ No_LW_party_plot <- RW_pro_Russia_df %>%
 
 ggsave("plots/No_LW_party_plot.png", No_LW_party_plot, width = 8, height = 5)
 
-LW_pro_Russia_mod <- lm_robust(reformulate(c("(Security_FA * ideology * country)", CONTROLS, "as.factor(Year)"), 
-                                           response = "Left_wing_pro_russia"), data = EUI_data_short)
+RW_pro_Russia_mod <- lm_robust(reformulate(c("(Security_FA * ideology * country)", CONTROLS, "as.factor(Year)"), 
+                                           response = "Right_wing_pro_russia"), data = EUI_data_short)
 
 
-LW_pro_Russia_df <- avg_slopes(LW_pro_Russia_mod, variables = "Security_FA", by = c("ideology", "country"))
+RW_pro_Russia_df <- avg_slopes(RW_pro_Russia_mod, variables = "Security_FA", by = c("ideology", "country"))
 
 
-LW_pro_Russia_df %>% 
+Voting_RW_PR_country <- RW_pro_Russia_df %>% 
   mutate(country = replace_values(country,
                                   "Croatia" ~ "Croatia (No PR)",
                                   "Denmark" ~ "Denmark (No PR)",
@@ -281,7 +303,11 @@ LW_pro_Russia_df %>%
   geom_linerange() + 
   geom_hline(yintercept = 0) + 
   facet_wrap(~country) + 
-  theme_custom
+  theme_custom + 
+  labs(x = NULL, y = "Marginal effect of being more normalization focused \n on the probability of supporting a right-wing \n pro-normalization party") +
+  theme(axis.text.x = element_text(angle = -90, hjust = 0))
+
+  ggsave("plots/Voting_RW_PR_country.png", Voting_RW_PR_country, width = 8, height = 6)
 
 ##### Average Threat and Cleavage Strength #####
 
@@ -342,3 +368,194 @@ EUI_data_short %>%
   )   + 
      geom_point() +
      theme_custom
+
+
+### Party Supply Table ####
+
+cleavage_strength <- EUI_data_short %>% 
+  group_by(country) %>% 
+  summarise(DS_pos = mean(Security_FA, na.rm = TRUE)) %>% 
+  arrange(-DS_pos)
+
+
+number_of_parties <- ches_data %>% 
+  mutate(Pro_Normalization = ifelse(Kremlin_ties <= 5, 1, 0)) %>% 
+  group_by(country_name) %>% 
+  count(Pro_Normalization) %>% 
+  filter(Pro_Normalization == 1)
+
+RW_LW_num_parties <- ches_data %>% 
+  mutate(Pro_Normalization = ifelse(Kremlin_ties <= 5, 1, 0),
+         RW = ifelse(galtan > 5, "RW", "LW")) %>% 
+  group_by(country_name, RW) %>% 
+  count(Pro_Normalization) %>% 
+  filter(Pro_Normalization == 1) %>% 
+  pivot_wider(names_from = "RW", values_from = n) %>% 
+  mutate(Ideology_parties = paste0("RW:", RW, "; LW:", ifelse(is.na(LW), "0", LW))) %>% 
+  ungroup() %>% 
+  select(-c(Pro_Normalization, RW, LW))
+  
+
+
+poll_pro_norm <- polls_df %>% 
+  mutate(Pro_Normalization = ifelse(eu_russia > 5, 1, 0)) %>% 
+  group_by(Pro_Normalization, country) %>% 
+  summarise(Total_poll = sum(poll_2025_04, na.rm = TRUE)) %>% 
+  filter(Pro_Normalization == 1)
+
+Sd_kremlim_ties <- ches_data %>% 
+  group_by(country_name) %>% 
+  summarise(SD_krelim_ties = sd(Kremlin_ties, na.rm = TRUE))
+
+Party_supply <-  left_join(cleavage_strength,
+                           number_of_parties, by = c("country" = "country_name")) %>% 
+  mutate(n = ifelse(is.na(n), 0, n)) %>% 
+  rename(`num_parties` = n) %>% 
+  select(-Pro_Normalization)
+
+
+Party_supply <- Party_supply %>% 
+  left_join(
+            RW_LW_num_parties, by = c("country" = "country_name")) %>% 
+  mutate(Ideology_parties = ifelse(is.na(Ideology_parties), "No Parties", Ideology_parties))
+
+Party_supply <- Party_supply %>% 
+  left_join(poll_pro_norm, by = "country") %>% 
+  mutate(Total_poll = ifelse(is.na(Total_poll), "No Parties", paste0(round(Total_poll, 2), "%"))) %>% 
+  select(-Pro_Normalization)
+
+Party_supply <- Party_supply %>% 
+  left_join(Sd_kremlim_ties, by = c("country" = "country_name"))  
+  
+
+Party_supply %>% 
+  kable(digits = 2, col.names = c("Country", "Average Position", "\\# Normalization Parties",
+                                  "Ideology", "Polling \\% 2025",
+                                  "Spread of Pro-Russia Party Scores"), format = "latex", booktabs = TRUE, linesep = "", align = "lcc",
+        caption = "Party Supply by Country for Pro-Normalization Parties. Average position indicates the average score on the defence normalization index of respondents in that country. The number of pro-normalization parties indicates that number of parties that score above a 5 from favouring close ties with Russia in the 2023 CHES dataset. Right-wing parties are those that are more TAN from the CHES dataset. Polling data is drawn from Politico's Poll of Polls in 2025.\\label{tab:party_supply}") %>% 
+  save_kable("tables/party_supply.tex")
+  
+
+##### Voted and DK ####
+
+EUI_data_short <- EUI_data_short %>% 
+  mutate(Voted = ifelse(is.na(Past_vote), "No", "Yes"),
+         SW = case_when(New_Q78_4 %in% c(1, 2) ~ "Oppose",
+                        New_Q78_4 %in% c(3, 4) ~ "Support",
+                        New_Q78_4 == 5 ~ "Don't Know"),
+         HE = case_when(New_Q78_5 %in% c(1, 2) ~ "Oppose",
+                        New_Q78_5 %in% c(3, 4) ~ "Support",
+                        New_Q78_5 == 5 ~ "Don't Know"))
+
+SW_df <- EUI_data_short %>% 
+  group_by(Voted) %>% 
+  count(SW) %>% 
+  ungroup() %>% 
+  group_by(SW) %>% 
+  mutate(prop = n/sum(n) * 100) %>% 
+  filter(Voted == "No") %>% 
+  bind_cols(data.frame(Variable = c("Send Weapons", "", "")), .) %>% 
+  select(-c(Voted, n)) %>% 
+  rename(Value = SW)
+
+HE_df <- EUI_data_short %>% 
+  group_by(Voted) %>% 
+  count(HE) %>% 
+  ungroup() %>%  
+  group_by(HE) %>% 
+  mutate(prop = n/sum(n) * 100) %>% 
+  filter(Voted == "No") %>% 
+  bind_cols(data.frame(Variable = c("Accept Higher Energy Costs", "", "")), .) %>% 
+  select(-c(Voted, n)) %>% 
+  rename(Value = HE)
+
+Q73_df <- EUI_data_short %>% 
+  group_by(Voted) %>% 
+  count(Q73) %>% 
+  ungroup() %>% 
+  group_by(Q73) %>% 
+  mutate(prop = n/sum(n) * 100) %>% 
+  filter(Voted == "No") %>% 
+  mutate(Q73 = replace(Q73, Q73 == "DK", "Don't Know"),
+         Q73 = replace_values(Q73,
+                              "European countries should invest more in defence and security to defend against Russian aggression" ~ "Defence and security",
+                              "European countries should invest more in trade and diplomacy with Russia to improve relations" ~ "Trade and Diplomacy")) %>% 
+  bind_cols(data.frame(Variable = c("Defence and Security", "", "", "")), .)   %>% 
+  select(-c(Voted, n)) %>% 
+  rename(Value = Q73) %>% 
+  arrange(-prop) 
+
+
+Dont_know_df <- bind_rows(SW_df, HE_df, Q73_df) 
+
+
+Dont_know_df %>% 
+  mutate(prop = paste0(round(prop, 2), "%")) %>% 
+  kable(col.names = c("Variables", "Value", "% respondents who did not vote"), format = "latex", booktabs = TRUE, linesep = "", align = "lll",
+        caption = "Proportion of Europeans in each response category who reported low political interest (by not voting).\\label{tab:dont_know}") %>% 
+  save_kable("tables/dont_know.tex")
+
+#### Dispersion and Strength ####
+
+slopes_df
+
+Dispersion_df <- EUI_data_short %>% 
+  group_by(country) %>% 
+  summarise(Dispersion = max(Securtiy_FA_party, na.rm = TRUE) - min(Securtiy_FA_party, na.rm = TRUE)) %>% 
+  left_join(slopes_df %>% select(country, `Average Absolute Slope`), by = "country")
+
+lm(Average_slope ~ Dispersion, Dispersion_df %>% rename(Average_slope = `Average Absolute Slope`)) %>% 
+  summary()
+
+Dispersion_plot <- Dispersion_df  %>% 
+  ggplot(aes(x = Dispersion, y = `Average Absolute Slope`)) + 
+  geom_smooth(method = "lm", col = "grey50") + 
+  geom_point() + 
+  geom_text_repel(  # only label the last point
+    aes(label = country),
+    hjust = 0,
+    direction = "x",           # only nudge vertically, keeps labels aligned to their point
+    nudge_x = 0.05,             # push labels to the right of the last point
+    xlim = c(-Inf, Inf),
+    segment.size = 0.3,
+    segment.color = "grey50",
+    size = 3.5,
+    col = "black"
+  ) + 
+  scale_x_continuous(limits = c(0, 4)) +
+  labs(x = "Difference in the Defence-Normalization Scores of Parties") + 
+  theme_custom
+
+ggsave("plots/Dispersion_plot.png", Dispersion_plot, width = 8, height = 4)
+
+
+#### Country Average Plot ####
+
+average_DN_df <- EUI_data_short %>% 
+  group_by(country) %>% 
+  summarise(Average = mean(Security_FA, na.rm = TRUE)) %>% 
+  left_join(slopes_df %>% select(country, `Average Absolute Slope`), by = "country")
+
+lm(Average_slope ~ Average, average_DN_df %>% rename(Average_slope = `Average Absolute Slope`)) %>% 
+  summary()
+
+Average_DN_plot <- average_DN_df  %>% 
+  ggplot(aes(x = Average, y = `Average Absolute Slope`)) + 
+  geom_smooth(method = "lm", col = "grey50") + 
+  geom_point() + 
+  geom_text_repel(  # only label the last point
+    aes(label = country),
+    hjust = 0,
+   # direction = "x",           # only nudge vertically, keeps labels aligned to their point
+    nudge_x = 0.03,             # push labels to the right of the last point
+    xlim = c(-Inf, Inf),
+    segment.size = 0.3,
+    segment.color = "grey50",
+    size = 3.5,
+    col = "black"
+  ) + 
+  scale_x_continuous(limits = c(-0.75, 1)) +
+  labs(x = "Average Country Level Defence-Normalization Position") + 
+  theme_custom
+
+ggsave("plots/Average_DN_plot.png", Average_DN_plot, width = 8, height = 4)

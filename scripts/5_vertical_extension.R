@@ -95,6 +95,7 @@ RIVAL_EXPLANATIONS <- c("Support_Aggrandizement", "Immigration_support", "Nation
 rival_explanations_df <- data.frame()
 for(i in 1:length(RIVAL_EXPLANATIONS)){
   mod <- lmer(reformulate(c(RIVAL_EXPLANATIONS[i], CONTROLS, "(1 | country)"), response = "Security_FA"), 
+              weights = balanced_weights,
               data = EUI_data_short)
   
   df <- tidy(mod, conf.int = TRUE) %>% 
@@ -142,7 +143,7 @@ rival_explanations_plot <- rival_explanations_df %>%
   scale_x_continuous(limits = c(-1, 1), 
                      breaks = c(-1, -0.6, -0.3, 0, 0.3, 0.6, 0.8),
                      labels = c("-1 (Defence focused)", "", "-0.3", "0.0", "", "0.6 (Normalization focused)", "")) + 
-  labs(x = "MLM Coefficents and 95% Confidence Intervals\n(Higher Numbers Indicate a more Normalization-Focused Position)", 
+  labs(x = "MLM Coefficents and 95% Confidence Intervals", 
        y = NULL) + 
   theme_custom
 

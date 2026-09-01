@@ -184,7 +184,8 @@ EUI_2021 <- EUI_2021 %>%
                                12 ~ "Poland",
                                13 ~ "Romania",
                                14 ~ "Spain"),
-         Q73 = case_match(Q73, 1 ~ "European countries should invest more in defence and security to defend against Russian aggression",
+         Q73 = case_match(Q73,
+                          1 ~ "European countries should invest more in defence and security to defend against Russian aggression",
                           2 ~ "European countries should invest more in trade and diplomacy with Russia to improve relations",
                           3 ~ "Other",
                           4 ~ "Other")) %>% 

@@ -45,10 +45,10 @@ label_map <- c(
   Refugee_DK        = "Ukrainian Refugees:Don't Know",
   Russia_distrust   = "Distrust Russia",
   Russia_trust      = "Trust Russia",
-  Ter_pre_war       = "Return to 2022 Stalemate",
-  Ter_Russia_goals  = "Russia full Victory",
-  Ter_Russia_more   = "Russia Partial Victory",
-  Ter_Ukr_gain      = "Ukraine Partial Victory",
+  Ter_pre_war       = "Return to 2022 Situtation",
+  Ter_Russia_goals  = "Russia Takes Territory",
+  Ter_Russia_more   = "Russia Retakes Victory",
+  Ter_Ukr_gain      = "Ukraine Gains Territory",
   Ter_ukr_retake    = "Ukraine Full Victory",
   Ukr_EU_A          = "Ukrainian EU Membership:Agree",
   Ukr_EU_D          = "Ukrainian EU Membership:Disagree",
@@ -86,7 +86,7 @@ coords_pca <- pca$x[, 1:2]
 
 
 horizontial_coherence_network_plot <- ggraph(g, layout = coords_pca) +
-  geom_edge_link(aes(width = weight), color = "gray60", alpha = 0.4) +
+  geom_edge_link(aes(width = weight), color = "gray60", alpha = 0.6) +
   scale_edge_width(range = c(0.2, 2), guide = "none") +
   geom_node_point(aes(color = ifelse(Defence_Focused >= 0,
                                      "Defence-Focused",
@@ -102,7 +102,7 @@ horizontial_coherence_network_plot <- ggraph(g, layout = coords_pca) +
                                 "Normalization-Focused" = "firebrick2"),
                      name = NULL) +
   theme_void() +
-  labs(title = "Network by Defence-Focused vs Normalization-Focused") +
+  labs() +
   theme(legend.position = "bottom")
 
 ggsave("plots/horizontial_coherence_network_plot.png", horizontial_coherence_network_plot, width = 8, height = 4)
@@ -144,10 +144,10 @@ label_map <- c(
   Refugee_DK        = "Ukrainian Refugees:Don't Know",
   Russia_distrust   = "Distrust Russia",
   Russia_trust      = "Trust Russia",
-  Ter_pre_war       = "Return to 2022 Stalemate",
-  Ter_Russia_goals  = "Russia full Victory",
+  Ter_pre_war       = "Return to 2022 Situtations",
+  Ter_Russia_goals  = "Russia Takes Territory",
   Ter_Russia_more   = "Russia Partial Victory",
-  Ter_Ukr_gain      = "Ukraine Partial Victory",
+  Ter_Ukr_gain      = "Ukraine Re-gains Territory",
   Ter_ukr_retake    = "Ukraine Full Victory",
   Ukr_EU_A          = "Ukrainian EU Membership:Agree",
   Ukr_EU_D          = "Ukrainian EU Membership:Disagree",
@@ -158,7 +158,7 @@ label_map <- c(
   US_trust          = "Trust US"
 )
 
-stopifnot(all(V(g)$name %in% names(label_map)))
+#stopifnot(all(V(g)$name %in% names(label_map)))
 V(g)$label <- label_map[V(g)$name]
 
 # ---- Pull attribute, keyed by node id -------------------------------------
@@ -185,7 +185,7 @@ coords_pca[,1] <- -coords_pca[,1]
 
 
 horizontial_coherence_network_plot_2023 <- ggraph(g, layout = coords_pca) +
-  geom_edge_link(aes(width = weight), color = "gray60", alpha = 0.4) +
+  geom_edge_link(aes(width = weight), color = "gray60", alpha = 0.6) +
   scale_edge_width(range = c(0.2, 2), guide = "none") +
   geom_node_point(aes(color = ifelse(Defence_Focused >= 0,
                                      "Defence-Focused",
@@ -243,10 +243,10 @@ label_map <- c(
   Refugee_DK        = "Ukrainian Refugees:Don't Know",
   Russia_distrust   = "Distrust Russia",
   Russia_trust      = "Trust Russia",
-  Ter_pre_war       = "Return to 2022 Stalemate",
-  Ter_Russia_goals  = "Russia full Victory",
+  Ter_pre_war       = "Return to 2022 Situation",
+  Ter_Russia_goals  = "Russia Takes Territory",
   Ter_Russia_more   = "Russia Partial Victory",
-  Ter_Ukr_gain      = "Ukraine Partial Victory",
+  Ter_Ukr_gain      = "Ukraine Re-takes Territory",
   Ter_ukr_retake    = "Ukraine Full Victory",
   Ukr_EU_A          = "Ukrainian EU Membership:Agree",
   Ukr_EU_D          = "Ukrainian EU Membership:Disagree",
@@ -284,7 +284,7 @@ coords_pca[,1] <- -coords_pca[,1]
 
 
 horizontial_coherence_network_plot_2024 <- ggraph(g, layout = coords_pca) +
-  geom_edge_link(aes(width = weight), color = "gray60", alpha = 0.4) +
+  geom_edge_link(aes(width = weight), color = "gray60", alpha = 0.6) +
   scale_edge_width(range = c(0.2, 2), guide = "none") +
   geom_node_point(aes(color = ifelse(Defence_Focused >= 0,
                                      "Defence-Focused",
@@ -343,10 +343,10 @@ label_map <- c(
   Refugee_DK        = "Ukrainian Refugees:Don't Know",
   Russia_distrust   = "Distrust Russia",
   Russia_trust      = "Trust Russia",
-  Ter_pre_war       = "Return to 2022 Stalemate",
-  Ter_Russia_goals  = "Russia full Victory",
+  Ter_pre_war       = "Return to 2022 Situation",
+  Ter_Russia_goals  = "Russia Takes Territory",
   Ter_Russia_more   = "Russia Partial Victory",
-  Ter_Ukr_gain      = "Ukraine Partial Victory",
+  Ter_Ukr_gain      = "Ukraine Re-gains Territory",
   Ter_ukr_retake    = "Ukraine Full Victory",
   Ukr_EU_A          = "Ukrainian EU Membership:Agree",
   Ukr_EU_D          = "Ukrainian EU Membership:Disagree",
@@ -385,7 +385,7 @@ coords_pca <- pca$x[, 1:2]
 
 
 horizontial_coherence_network_plot_2025 <- ggraph(g, layout = coords_pca) +
-  geom_edge_link(aes(width = weight), color = "gray60", alpha = 0.4) +
+  geom_edge_link(aes(width = weight), color = "gray60", alpha = 0.6) +
   scale_edge_width(range = c(0.2, 2), guide = "none") +
   geom_node_point(aes(color = ifelse(Defence_Focused >= 0,
                                      "Defence-Focused",
@@ -461,12 +461,12 @@ label_map <- c(
   Econ_the_same = "Economically The Same",
   Econ_worse_off = "Economically Worse Off",
   Energy = "Worried about Energy Prices",
-  EU_punish_financial = "EU Punishes Violation of Law: Financial Sanctions",
+  EU_punish_financial = "EU Punishes Violation of Law: Sanctions",
   EU_punish_nointerference  = "EU Punishes Violation of Law: No punishment",
   EU_punish_other   = "EU Punishes Violation of Law: Other",
   EU_punish_voting = "EU Punishes Violation of Law: Remove Voting Rights",
-  # General_trust_notrust      = "Generalized Trust: Low Trust",
-  # General_trust_trust = "Generalized Trust: High Trust",
+   General_trust_notrust      = "Generalized Trust: Low Trust",
+   General_trust_trust = "Generalized Trust: High Trust",
   High_democracy       = "High Support Democracy",
   Low_democracy  = "Low Support Democracy",
   Middle_democracy   = "Middle Support Democracy",
@@ -485,7 +485,11 @@ label_map <- c(
   China_threat = "Threated by China",
   Nuclear_threat = "Threated by Nuclear War",
   Other_threat = "Another Threat",
-  DK_threat = "Don't Know Biggest Threat"
+  DK_threat = "Don't Know Biggest Threat",
+  Trust_EU = "Trust the EU",
+  Do_not_trust_EU = "Do not Trust the EU",
+  Trust_Gov = "Trust National Government",
+  Do_not_trust_Gov = "Do not Trust National Government"
 )
 
 stopifnot(all(V(g)$name %in% names(label_map)))
@@ -516,7 +520,7 @@ coords_pca[, 1] <- -coords_pca[, 1]
 # Reuse the same FR layout coordinates for consistency
 
 vertical_extension_network_plot_2022 <- ggraph(g, layout = coords_pca) +
-  geom_edge_link(aes(width = weight, alpha = weight), color = "gray60", alpha = 0.4) +
+  geom_edge_link(aes(width = weight, alpha = weight), color = "gray60", alpha = 0.6) +
   scale_edge_width(range = c(0.2, 2), guide = "none") +
   geom_node_point(aes(color = ifelse(Defence_Focused >= 0,
                                      "Defence-Focused",
@@ -574,12 +578,12 @@ label_map <- c(
   Econ_the_same = "Economically The Same",
   Econ_worse_off = "Economically Worse Off",
   Energy = "Worried about Energy Prices",
-  EU_punish_financial = "EU Punishes Violation of Law: Financial Sanctions",
+  EU_punish_financial = "EU Punishes Violation of Law: Sanctions",
   EU_punish_nointerference  = "EU Punishes Violation of Law: No punishment",
   EU_punish_other   = "EU Punishes Violation of Law: Other",
   EU_punish_voting = "EU Punishes Violation of Law: Remove Voting Rights",
-  # General_trust_notrust      = "Generalized Trust: Low Trust",
-  # General_trust_trust = "Generalized Trust: High Trust",
+   General_trust_notrust      = "Generalized Trust: Low Trust",
+   General_trust_trust = "Generalized Trust: High Trust",
   High_democracy       = "High Support Democracy",
   Low_democracy  = "Low Support Democracy",
   Middle_democracy   = "Middle Support Democracy",
@@ -598,7 +602,11 @@ label_map <- c(
   China_threat = "Threated by China",
   Nuclear_threat = "Threated by Nuclear War",
   Other_threat = "Another Threat",
-  DK_threat = "Don't Know Biggest Threat"
+  DK_threat = "Don't Know Biggest Threat",
+  Trust_EU = "Trust the EU",
+  Do_not_trust_EU = "Do not Trust the EU",
+  Trust_Gov = "Trust National Government",
+  Do_not_trust_Gov = "Do not Trust National Government"
 )
 
 stopifnot(all(V(g)$name %in% names(label_map)))
@@ -629,7 +637,7 @@ coords_pca[, 1] <- -coords_pca[, 1]
 # Reuse the same FR layout coordinates for consistency
 
 vertical_extension_network_plot_2023 <- ggraph(g, layout = coords_pca) +
-  geom_edge_link(aes(width = weight, alpha = weight), color = "gray60", alpha = 0.4) +
+  geom_edge_link(aes(width = weight, alpha = weight), color = "gray60", alpha = 0.6) +
   scale_edge_width(range = c(0.2, 2), guide = "none") +
   geom_node_point(aes(color = ifelse(Defence_Focused >= 0,
                                      "Defence-Focused",
@@ -686,12 +694,12 @@ label_map <- c(
   Econ_the_same = "Economically The Same",
   Econ_worse_off = "Economically Worse Off",
   Energy = "Worried about Energy Prices",
-  EU_punish_financial = "EU Punishes Violation of Law: Financial Sanctions",
+  EU_punish_financial = "EU Punishes Violation of Law: Sanctions",
   EU_punish_nointerference  = "EU Punishes Violation of Law: No punishment",
   EU_punish_other   = "EU Punishes Violation of Law: Other",
   EU_punish_voting = "EU Punishes Violation of Law: Remove Voting Rights",
-  # General_trust_notrust      = "Generalized Trust: Low Trust",
-  # General_trust_trust = "Generalized Trust: High Trust",
+  General_trust_notrust      = "Generalized Trust: Low Trust",
+  General_trust_trust = "Generalized Trust: High Trust",
   High_democracy       = "High Support Democracy",
   Low_democracy  = "Low Support Democracy",
   Middle_democracy   = "Middle Support Democracy",
@@ -710,7 +718,11 @@ label_map <- c(
   China_threat = "Threated by China",
   Nuclear_threat = "Threated by Nuclear War",
   Other_threat = "Another Threat",
-  DK_threat = "Don't Know Biggest Threat"
+  DK_threat = "Don't Know Biggest Threat",
+  Trust_EU = "Trust the EU",
+  Do_not_trust_EU = "Do not Trust the EU",
+  Trust_Gov = "Trust National Government",
+  Do_not_trust_Gov = "Do not Trust National Government"
 )
 
 stopifnot(all(V(g)$name %in% names(label_map)))
@@ -735,13 +747,13 @@ layout_g <- layout_with_fr(g, weights = E(g)$weight,  niter = 2000)
 pca  <- prcomp(layout_g, center = TRUE, scale. = FALSE)
 coords_pca <- pca$x[, 1:2]
 
-#coords_pca[, 1] <- -coords_pca[, 1]
+coords_pca[, 1] <- -coords_pca[, 1]
 
 
 # Reuse the same FR layout coordinates for consistency
 
 vertical_extension_network_plot_2024 <- ggraph(g, layout = coords_pca) +
-  geom_edge_link(aes(width = weight, alpha = weight), color = "gray60", alpha = 0.4) +
+  geom_edge_link(aes(width = weight, alpha = weight), color = "gray60", alpha = 0.6) +
   scale_edge_width(range = c(0.2, 2), guide = "none") +
   geom_node_point(aes(color = ifelse(Defence_Focused >= 0,
                                      "Defence-Focused",
@@ -799,12 +811,12 @@ label_map <- c(
   Econ_the_same = "Economically The Same",
   Econ_worse_off = "Economically Worse Off",
   Energy = "Worried about Energy Prices",
-  EU_punish_financial = "EU Punishes Violation of Law: Financial Sanctions",
+  EU_punish_financial = "EU Punishes Violation of Law: Sanctions",
   EU_punish_nointerference  = "EU Punishes Violation of Law: No punishment",
   EU_punish_other   = "EU Punishes Violation of Law: Other",
   EU_punish_voting = "EU Punishes Violation of Law: Remove Voting Rights",
-  # General_trust_notrust      = "Generalized Trust: Low Trust",
-  # General_trust_trust = "Generalized Trust: High Trust",
+  General_trust_notrust      = "Generalized Trust: Low Trust",
+  General_trust_trust = "Generalized Trust: High Trust",
   High_democracy       = "High Support Democracy",
   Low_democracy  = "Low Support Democracy",
   Middle_democracy   = "Middle Support Democracy",
@@ -823,7 +835,11 @@ label_map <- c(
   China_threat = "Threated by China",
   Nuclear_threat = "Threated by Nuclear War",
   Other_threat = "Another Threat",
-  DK_threat = "Don't Know Biggest Threat"
+  DK_threat = "Don't Know Biggest Threat",
+  Trust_EU = "Trust the EU",
+  Do_not_trust_EU = "Do not Trust the EU",
+  Trust_Gov = "Trust National Government",
+  Do_not_trust_Gov = "Do not Trust National Government"
 )
 
 
@@ -855,7 +871,7 @@ coords_pca[, 1] <- -coords_pca[, 1]
 # Reuse the same FR layout coordinates for consistency
 
 vertical_extension_network_plot_2025 <- ggraph(g, layout = coords_pca) +
-  geom_edge_link(aes(width = weight, alpha = weight), color = "gray60", alpha = 0.4) +
+  geom_edge_link(aes(width = weight, alpha = weight), color = "gray60", alpha = 0.6) +
   scale_edge_width(range = c(0.2, 2), guide = "none") +
   geom_node_point(aes(color = ifelse(Defence_Focused >= 0,
                                      "Defence-Focused",
@@ -876,7 +892,28 @@ vertical_extension_network_plot_2025 <- ggraph(g, layout = coords_pca) +
   labs() +
   theme(legend.position = "bottom")
 
-ggsave("plots/vertical_extension_network_plot_2025.png", vertical_extension_network_plot_2025, width = 8, height = 4)
+vertical_extension_network_plot_2025_article <- ggraph(g, layout = coords_pca) +
+  geom_edge_link(aes(width = weight, alpha = weight), color = "gray60", alpha = 0.6) +
+  scale_edge_width(range = c(0.2, 2), guide = "none") +
+  geom_node_point(aes(color = ifelse(Defence_Focused >= 0,
+                                     "Defence-Focused",
+                                     "Normalization-Focused")),
+                  size = 5) +
+  geom_text_repel(aes(x = x, y = y, label = label),
+                  size = 4,
+                  max.overlaps = Inf,
+                  box.padding = 0.4,
+                  segment.color = "gray40",
+                  segment.size = 0.3) +
+  scale_color_manual(values = c("Defence-Focused" = "steelblue2",
+                                "Normalization-Focused" = "firebrick2"),
+                     name = NULL) +
+  theme_void() +
+  theme(strip.background = element_rect(fill = "#e6f8d1", colour = NA)) + 
+  labs() +
+  theme(legend.position = "bottom")
+
+ggsave("plots/vertical_extension_network_plot_2025.png", vertical_extension_network_plot_2025_article, width = 8, height = 4)
 
 #### Node and respondent x-coordinates + H1 (vertical extension) ####
 
@@ -905,6 +942,115 @@ ggpubr::ggarrange(vertical_extension_network_plot_2022, vertical_extension_netwo
   ggsave( "plots/network_over_time.png", ., width = 12, height = 9)
    
 
+##### Main Vertical Extension Graph ####
+
+gexf_path <- "data_clean/vertical_extension_network.gexf"
+
+gexf_obj <- rgexf::read.gexf(gexf_path)
+g        <- rgexf::gexf.to.igraph(gexf_obj)
+
+# ---- Explicit id -> human-readable label mapping -------------------------
+label_map <- c(
+  Econ_better_off = "Economically Better Off",
+  Econ_DK = "Economically Don't Know",
+  Econ_the_same = "Economically The Same",
+  Econ_worse_off = "Economically Worse Off",
+  Energy = "Worried about Energy Prices",
+  EU_punish_financial = "EU Punishes Violation of Law: Sanctions",
+  EU_punish_nointerference  = "EU Punishes Violation of Law: No punishment",
+  EU_punish_other   = "EU Punishes Violation of Law: Other",
+  EU_punish_voting = "EU Punishes Violation of Law: Remove Voting Rights",
+  General_trust_notrust      = "Generalized Trust: Low Trust",
+  General_trust_trust = "Generalized Trust: High Trust",
+  High_democracy       = "High Support Democracy",
+  Low_democracy  = "Low Support Democracy",
+  Middle_democracy   = "Middle Support Democracy",
+  Inflation      = "Worried about Inflation",
+  Neutral_aggrandizement = "E. Aggrandizement: Neutral",
+  Oppose_aggrandizement = "E. Aggrandizement: Oppose",
+  Support_aggrandizement  = "E. Aggrandizement: Support",
+  Support_EU  = "Pro EU Membership",
+  Support_NATO     = "NATO is Important",
+  China_distrust    = "Distrust China",
+  China_trust       = "Trust China",
+  US_distrust       = "Distrust US",
+  US_trust          = "Trust US",
+  Russia_threat = "Threatened by Russia",
+  US_threat = "Threatened by the US",
+  China_threat = "Threated by China",
+  Nuclear_threat = "Threated by Nuclear War",
+  Other_threat = "Another Threat",
+  DK_threat = "Don't Know Biggest Threat",
+  Trust_EU = "Trust the EU",
+  Do_not_trust_EU = "Do not Trust the EU",
+  Trust_Gov = "Trust National Government",
+  Do_not_trust_Gov = "Do not Trust National Government"
+)
+
+
+stopifnot(all(V(g)$name %in% names(label_map)))
+V(g)$label <- label_map[V(g)$name]
+
+# ---- Pull attribute, keyed by node id -------------------------------------
+defence_map <- parse_attribute(gexf_path, "Defence_Focused")
+V(g)$Defence_Focused <- defence_map[V(g)$name]
+
+# ---- Two discrete colors based on sign ------------------------------------
+col_defence <- "steelblue3"
+col_norm    <- "firebrick3"
+
+V(g)$color <- ifelse(V(g)$Defence_Focused >= 0, col_defence, col_norm)
+
+# ---- Plot -------------------------------------------------------------
+set.seed(1998)
+E(g)$weight <- as.numeric(E(g)$weight)
+g <- delete_edges(g, E(g)[E(g)$weight <= 0])
+
+layout_g <- layout_with_fr(g, weights = E(g)$weight,  niter = 2000)
+pca  <- prcomp(layout_g, center = TRUE, scale. = FALSE)
+coords_pca <- pca$x[, 1:2]
+
+coords_pca[, 1] <- -coords_pca[, 1]
+
+
+# Reuse the same FR layout coordinates for consistency
+
+
+
+vertical_extension_network_plot <- ggraph(g, layout = coords_pca) +
+  geom_edge_link(aes(width = weight, alpha = weight), color = "gray60", alpha = 0.6) +
+  scale_edge_width(range = c(0.2, 2), guide = "none") +
+  geom_node_point(aes(color = ifelse(Defence_Focused >= 0,
+                                     "Defence-Focused",
+                                     "Normalization-Focused")),
+                  size = 5) +
+  geom_text_repel(aes(x = x, y = y, label = label),
+                  size = 4,
+                  max.overlaps = Inf,
+                  box.padding = 0.4,
+                  segment.color = "gray40",
+                  segment.size = 0.3) +
+  scale_color_manual(values = c("Defence-Focused" = "steelblue2",
+                                "Normalization-Focused" = "firebrick2"),
+                     name = NULL) +
+  theme_void() +
+  theme(strip.background = element_rect(fill = "#e6f8d1", colour = NA)) + 
+  labs() +
+  theme(legend.position = "bottom")
+
+ggsave("plots/vertical_extension_network_plot.png", vertical_extension_network_plot, width = 9, height = 5)
+
+
+# ---- H1: respondents' network position correlates with their Defence-Focused identity ----
+h1_vertical_extension_2025 <- cor.test(vertical_extension_df$x_cor, vertical_extension_df$Defence_Focused)
+h1_vertical_extension_2025
+
+ggpubr::ggarrange(vertical_extension_network_plot_2022, vertical_extension_network_plot_2023,
+                  vertical_extension_network_plot_2024, vertical_extension_network_plot_2025, common.legend = TRUE,
+                  legend = "bottom") %>% 
+  ggsave( "plots/network_over_time.png", ., width = 12, height = 9)
+
+
 network_hypothesis <- data.frame(Year = c("2022", "2023", "2024", "2025"),
                                  Correlation = c(abs(h1_vertical_extension_2022$estimate), 
                                                  abs(h1_vertical_extension_2023$estimate),
@@ -932,10 +1078,10 @@ network_hypothesis_plot <- network_hypothesis %>%
   mutate(Year = factor(Year, levels = rev(c("2022", "2023", "2024", "2025"))),
          Model = factor(Model, levels = rev(c("Horizontial Coherence", "Vertical Coherence")))) %>% 
   ggplot(aes(x = Correlation, y = Year, xmin = xmin, xmax = xmax, col = Model)) + 
-  geom_point(position = position_dodge(width = 0.6)) + 
-  geom_linerange(position = position_dodge(width = 0.6)) + 
+  geom_point(position = position_dodge(width = 0.6), size = 3) + 
+  geom_linerange(position = position_dodge(width = 0.6), linewidth = 1) + 
  # geom_vline(xintercept = 0, lty = 4, col = "grey40") +
-  scale_colour_manual(values = c("darkgreen", "magenta4")) + 
+  scale_colour_manual(values = c("black", "grey70")) + 
   guides(colour = guide_legend(reverse = FALSE)) +
   labs(x = "Correlation between being defence-focused and location within the network", 
        y = NULL,

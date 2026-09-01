@@ -9,6 +9,7 @@ pacman::p_load(tidyverse,
                estimatr,
                labelled,
                readxl, 
+               car,
                sf, 
                srvyr,
                rnaturalearth,
@@ -36,7 +37,9 @@ pacman::p_load(tidyverse,
                igraph,
                ggraph,
                xml2,
-               tidygraph
+               tidygraph,
+               ggridges,
+               ggpubr
 )
 
 #### ggplot Custom Theme ####
@@ -119,7 +122,8 @@ ggplot(aes(x = Security_FA, y = estimate, color = group)) +
     min.segment.length = unit(0, 'lines')
   ) +
   scale_colour_manual(values = COLOURS) +
-  scale_y_continuous(labels = scales::percent) +
+  scale_y_continuous(labels = scales::percent,
+                     limits = c(0, 0.7)) +
     scale_x_continuous( breaks = seq(-1.5, 1.5, length.out = 9),
                         limits = c(-1.5, 1.5), 
                         labels = c("", "Highest Defence Focus",  "", "", "- Relations with Russia -", "", "", "Highest Nomaralization Focus", "")) +

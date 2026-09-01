@@ -203,7 +203,7 @@ data_2025 = read_spss("Data_raw/2025_country_data-sav/P_EUI_EuropeanSolidarity_2
                                        1 ~ 74,
                                        2 ~ 75,
                                        3 ~ 76,
-                                       4 ~ 78,
+                                       4 ~ 77,
                                        6 ~ 79,
                                        7 ~ 80,
                                        10 ~ 81)))%>%

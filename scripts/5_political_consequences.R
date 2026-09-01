@@ -47,3 +47,53 @@ Chi_squared_test_df %>%
   kable(format = "latex", digits = 3, col.names = c("Country", "Df", "P Value"),  booktabs = TRUE, linesep = "", align = "lcc",
         caption = "Chi-Squared test for signficance of the defence-normalization index on vote choice for each country\\label{tab:chi_square}") %>% 
   save_kable("tables/vote_choice_chi_sq.tex")
+
+
+###### D-N GAL-TAN #####
+
+EUI_data_short <- EUI_data_short %>% 
+  mutate(GAL_TAN_values = case_when(GAL_TAN < 1.6 ~ "TAN",
+                                    GAL_TAN > 1.6 & GAL_TAN < 2.5 ~ "Centre",
+                                    GAL_TAN >= 2.5 ~ "GAL"))
+  
+gal_tan_countries <- lm(reformulate(c("country * GAL_TAN_values", "as.factor(Year)", CONTROLS),
+                                      response = "Security_FA"),
+                          data = EUI_data_short %>% filter(country %in% COUNTRIES_2022),
+                          weights = balanced_weights)
+
+gal_tan_countries_df <- avg_predictions(gal_tan_countries, variables = c("GAL_TAN_values", "country"))
+
+gal_tan_countries_plot <- gal_tan_countries_df %>% 
+  mutate(GAL_TAN_values = factor(GAL_TAN_values, levels = c("GAL", "Centre", "TAN")),
+         country = factor(country, levels = country_order)) %>% 
+  ggplot(aes(x = GAL_TAN_values, y = estimate, ymin = conf.low, ymax = conf.high)) + 
+  geom_point() + 
+  geom_linerange() + 
+  facet_wrap(~country) + 
+  labs(x = "GAL-TAN Position", y = "Predicted position on the defence normalization dimension\n(Higher numbers indicate more defence focused)") +
+  theme_custom
+
+ggsave("plots/gal_tan_countries_plot.png", gal_tan_countries_plot, width = 8, height = 8)
+
+
+
+EU_countries <- lm(reformulate(c("country * as.factor(Q9)", "as.factor(Year)", CONTROLS),
+                                    response = "Security_FA"),
+                        data = EUI_data_short %>% filter(country %in% COUNTRIES_2022),
+                        weights = balanced_weights)
+
+EU_countries_df <- avg_predictions(EU_countries, variables = c("Q9", "country"))
+
+
+EU_countries_plot <- EU_countries_df %>% 
+  mutate(Q9 = recode_values(Q9, "0" ~ "Leave",
+                            "1" ~ "Remain")) %>% 
+  ggplot(aes(x = Q9, y = estimate, ymin = conf.low, ymax = conf.high)) + 
+  geom_point() +
+  geom_linerange() +
+  facet_wrap(~country) +
+  labs(x = "Voting intention in an EU Exit Referendum",
+       y = "Predicted position on the defence normalization dimension\n(Higher numbers indicate more defence focused)") + 
+  theme_custom
+  
+ggsave("plots/EU_countries_plot.png", EU_countries_plot, width = 8, height = 8)

@@ -14,11 +14,11 @@ crosswalk = read_csv("data_raw/new_crosswalk_june_9_2025.csv")
 EUI_2023 <- read_dta("data_raw/EUI YouGov 2023/SiE dataset_2023_merged_all countries.dta")
 
 EUI_2023 <- EUI_2023 %>% 
-  filter(attentioncheck1_23_1 == 4 & attentioncheck1_23_1 == 4) %>% 
+  filter(attentioncheck1_23_1 == 4 & attentioncheck2_23 == 4) %>% 
   select(country, q2, q4, q5,  q67_revisions, new_q5_1, new_q5_6, q9, q7_revisions_1:q7_revisions_16, q18_revisions, q21, q24, q26_revisions, q30, q37, q40,
          new_q43, q44, eui_ukraine_outcome, q62, starts_with("q47a_"), new_q79, new_q62a,  q59, age_grp_all,
          work_industry_shortlist, profile_work_stat, 
-         q61, q63,  q4, 
+         q61, q63,  q4, new_q41, new_q5_1, new_q5_6, 
          q68_revisions, gender_all, education_merged1_101, education_merged1_102, education_merged1_103,
           q62, country_birth, new_q60a, glob_areatype,immigration_types_23_1, immigration_types_23_2, immigration_types_23_3, immigration_types_23_4,
          q69, q70, q71, q73, pastvote, weight, matches("new_q78_\\d{1,2}$")) %>% 
@@ -202,6 +202,8 @@ EUI_2023 <- EUI_2023 %>%
          "Q59" = "q59", 
          "Q61" = "q61",
          "Q5" = "q5",
+         "New_Q5_1" = "new_q5_1",
+         "New_Q5_6" = "new_q5_6",
          "Q67_revisions" = "q67_revisions",
          "EUI_Ukraine_Outcome" = "eui_ukraine_outcome",
          "New_Q78_4" = "new_q78_4",
@@ -209,6 +211,7 @@ EUI_2023 <- EUI_2023 %>%
          "New_Q78_1" = "new_q78_1",
          "New_Q78_7" = "new_q78_7",
          "Q2" = "q2",
+         "New_Q41" = "new_q41",
          "New_Q60a" = "new_q60a",
          "New_Q62a" = "new_q62a",
          "Glob_areatype" = "glob_areatype",
@@ -246,7 +249,7 @@ EUI_2024 <- EUI_2024 %>%
          age_grp_gen_edu_1, age_grp_gen_edu_2, age_grp_gen_edu_3, age_grp_gen_edu_4, age_grp_gen_edu_5,
          New_Q6a, Q5, Q7_revisions_1:Q7_revisions_16, Q9, Q18_revisions, Q21, Q24, Q26_revisions, Q30, Q37, Q40, Q44, 
          Q47a_3, Q47a_7, Q47a_8, Q62, country_birth, New_Q60a, New_Q62a, Q59,
-         Q61, Q63,  Q4, profile_work_stat, starts_with("income"), 
+         Q61, Q63,  Q4, profile_work_stat, starts_with("income"), New_Q41,
          EUI_Ukraine_Outcome, Israel_Palestine_2024, Q68_revisions, US_Elections_2024, Q62, age_grp_gen_edu_6, age_grp_gen_edu_7, Q61, age_grp_gen_edu_18, 
          age_grp_gen_edu_19, age_grp_gen_edu_20, Q62, Glob_areatype, Q67_revisions,
          New_Q43, starts_with("Q47a_"), Immigration_types_23_1, Immigration_types_23_2, Immigration_types_23_3, Immigration_types_23_4,
@@ -272,7 +275,7 @@ EUI_2024 <- EUI_2024 %>%
          Q71 = case_match(Q71, 1 ~ 1, 2 ~ 1, 3 ~ 0, 4 ~ 0, 5 ~ 0),
         New_Q43i = New_Q43,
         New_Q43 = ifelse(New_Q43 %in% c(1, 2), 1, 0),
-         country = case_match(country,
+         country = recode_values(country,
                               180 ~ "Romania",
                               153 ~ "Netherlands",
                               125 ~ "Lithuania",
@@ -344,7 +347,7 @@ EUI_2025 <- data_2025 %>%
          Q62, gender_all, edu_group, Q61, Q62, A5_1, A5_2, A5_3, A5_4, ForeignPolicyDecisions2_1, completed2024survey,
          ForeignPolicyDecisions2_2, ForeignPolicyDecisions, New_Q59, Q70_2, Q62, country_birth, Q67_revisions,
          work_industry_shortlist, starts_with("income"), 
-         Q61, Q63,  Q4, profile_work_stat,
+         Q61, Q63,  Q4, profile_work_stat, New_Q41,
          New_Q43, Tariff_EU_US, Tariff_EU_China, Tariff_EU_US_UK, Tariff_EU_China_UK, New_Q60a, Q59, age_grp_all,
          Vote2024_combo, q_BTW25_Quote, FT23, Glob_areatype, Immigration_types_23_1,   Immigration_types_23_2, Immigration_types_23_3, Immigration_types_23_4,
          pastvote2024IE, pastvote2024LT, ES_pastvote_July2023_recoded, fr_pastvote_legislative24_round1, IT_pastvote_2022, AT_2024vote_recode,
@@ -464,66 +467,36 @@ EUI_2025 <- data_2025 %>%
   rename_with(~paste0("Q7_", 1:16), starts_with("Q7_revisions_"))
 
 
-#### Fall Datasets ####
-
-yg_sept_2023 <- read.spss("Data_raw/euiyg_oct.sav", to.data.frame = TRUE)
-
-yg_sept_2023 <- yg_sept_2023 %>% 
-  mutate(country = recode(country_cb, `1` = "UK",
-                          `15` = "Australia", `32` = "Brazil", 
-                          `40` = "Canada", `46` = "China", 
-                          `35` = "Bulgaria", `56` = "Croatia",
-                          `60` = "Denmark", `65` = "Egypt", `74` = "Finland",
-                          `75` = "France", `82` = "Germany",
-                          `85` = "Greece", `99` = "Hungary", 
-                          `101` = "India", `102` = "Indonesia", 
-                          `108` = "Italy", `110` = "Japan", 
-                          `114` = "Kenya", `125` = "Lithuania",
-                          `140` = "Mexico", `159` = "Nigeria", 
-                          `153` = "Netherlands", `175` = "Poland",
-                          `180` = "Romania", `181` = "Russia", 
-                          `191` = "Saudi Arabia", `197` = "Slovakia",  
-                          `201` = "South Africa", 
-                          `204` = "Spain", `210` = "Sweden",
-                          `216` = "Thailand", `223` = "Turkey", 
-                          `230` = "United States"),
-         across(matches("New_Q78_\\d$"),\(x)as.numeric(x)),
-         EUI_Ukraine_Outcome = case_match(EUI_Ukraine_Outcome,
-                                          "Russia achieves all its territorial goals in Ukraine" ~ 1,
-                                          "Russia manages to take more Ukrainian territory than it controlled at the start of the war" ~ 2,
-                                          "A return to the territorial situation of earlier this year before the war started, including Russia holding territory it" ~ 3,
-                                          "Don't know" ~ 99,
-                                          "Ukraine manages to retake some of the territory Russia has occupied this year" ~ 4,
-                                          "Ukraine manages to retake all of its original territory (including Crimea)" ~ 5))
 
 #### April 2022 ####
 
 EUI_april_2022 <- read_sav("Data_raw/eui-yg-2022-04.sav")
-EUI_april_2022$immi
+
 EUI_2022 <- EUI_april_2022 %>% 
   select(weight, country,  matches("New_Q78_\\d$"), Q2, Q62, Q7_revisions_2, Q7_revisions_12, New_Q60a, Q9, Q5, New_Q43, Glob_areatype, age_grp_all, work_industry_shortlist, 
          Q61, Q63,  Q4, profile_work_stat, Q67_revisions, contains("pastvote"), FT19_dk, FT18, FT19,
          PDL_Vote_18_Quote_IT, Presidential_vote17,
-         q_BTW21_Quote,
+         q_BTW21_Quote, New_Q41, New_Q43, New_Q5_1, New_Q5_6,
          New_Q62a, country_birth, Q68_revisions, Q71, Q73, New_Q79, Q59, gender_all, starts_with("education_UK_All"), starts_with("Immigration_types")) %>% 
-  mutate(country = dplyr::recode(country, `1` = "UK", 
-                                 `15` = "Australia", `32` = "Brazil", 
-                                 `40` = "Canada", `46` = "China", 
-                                 `35` = "Bulgaria", `56` = "Croatia",
-                                 `60` = "Denmark", `65` = "Egypt", `74` = "Finland",
-                                 `75` = "France", `82` = "Germany",
-                                 `85` = "Greece", `99` = "Hungary", 
-                                 `101` = "India", `102` = "Indonesia", 
-                                 `108` = "Italy", `110` = "Japan", 
-                                 `114` = "Kenya", `125` = "Lithuania",
-                                 `140` = "Mexico", `159` = "Nigeria", 
-                                 `153` = "Netherlands", `175` = "Poland",
-                                 `180` = "Romania", `181` = "Russia", 
-                                 `191` = "Saudi Arabia", `197` = "Slovakia", 
-                                 `201` = "South Africa", 
-                                 `204` = "Spain", `210` = "Sweden",
-                                 `216` = "Thailand", `223` = "Turkey", 
-                                 `230` = "United States"),
+  mutate( country = case_match(country,
+                               180 ~ "Romania",
+                               153 ~ "Netherlands",
+                               125 ~ "Lithuania",
+                               108 ~ "Italy",
+                               60 ~ "Denmark",
+                               175 ~ "Poland",
+                               74 ~ "Finland",
+                               75 ~ "France",
+                               210 ~ "Sweden",
+                               82 ~ "Germany",
+                               1 ~ "UK",
+                               85 ~ "Greece",
+                               99 ~ "Hungary",
+                               204 ~ "Spain",
+                               56 ~ "Croatia",
+                               197 ~ "Slovakia",
+                               35 ~ "Bulgaria",
+                               23 ~ "Belgium"),
          vote_values_2022 = case_when(
            country == "UK" ~ pastvote_ge_2019,
            country == "France" ~ Presidential_vote17,

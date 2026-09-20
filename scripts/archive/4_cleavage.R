@@ -1,4 +1,16 @@
 ############################################################
+###### ARCHIVED - not part of the analysis pipeline  #######
+## Nothing sources this script. Its live parts were moved out:
+##  - country vote-choice plots + UK model -> scripts/3_country_vote_plots.R
+##  - Models_Vote_choice (country loop)     -> scripts/2_main_analysis.R (no Q9 control)
+##  - rescaled *_01 columns                 -> scripts/2_group_variables.R
+## The rest (older cleavage tests, AIC comparisons, social-base plots) is kept for reference
+## only and is known not to run cleanly (e.g. undefined mod_families / m1_Russia objects,
+## a 22-vs-21 country loop bound, a 17-colour palette for 18 countries, ggplotly()
+## without plotly loaded).
+############################################################
+
+############################################################
 ###### Code to Test the Strength of the new cleavage #######
 ######     Written by Rafael Campos-Gottardo         #######
 ############################################################
@@ -56,7 +68,8 @@ Factor_graph_data <- EUI_data_short %>%
   select(Security_FA, Year) %>% 
   rbind(EUI_data_short %>%
           select(Security_FA) %>% 
-          mutate(Year = "Pooled"))
+          mutate(Year = "Pooled")) %>% 
+  mutate(Mode = "Tetrachoric")
 
 graph_by_year <- Factor_graph_data %>% 
   mutate(Year = factor(Year, levels = c("Pooled", "2025", "2024", "2023", "2022"))) %>% 
@@ -86,6 +99,46 @@ factor_graph <- EUI_data_short %>%
 
 ggarrange(graph_by_year, factor_graph, ncol = 1, align = "v") %>% 
 ggsave("plots/factor_scores_density.png", ., width = 8, height = 6)
+
+#### Continous Factor Loadings ####
+
+Factor_graph_data_cont <- EUI_data_short %>% 
+  filter(country %in% COUNTRIES_2022) %>% 
+  select(Security_FA_cont, Year) %>% 
+  rbind(EUI_data_short %>%
+          select(Security_FA_cont) %>% 
+          mutate(Year = "Pooled")) %>% 
+  rename(Security_FA = Security_FA_cont) %>% 
+  mutate(Mode = "Continous") %>% 
+  bind_rows(Factor_graph_data)
+
+graph_by_year_cont <- Factor_graph_data_cont %>% 
+  mutate(Year = factor(Year, levels = c("Pooled", "2025", "2024", "2023", "2022"))) %>% 
+  ggplot(aes(x = Security_FA, y = Year, group = c(Year)
+  )) +
+  facet_wrap(~Mode) +
+  #geom_density_ridges2() + 
+  geom_boxplot(fill = "lightgrey") +
+  labs(y = "Year",
+       x = NULL) + 
+  scale_x_continuous( breaks = seq(-1.5, 1.5, length.out = 9),
+                      limits = c(-1.5, 1.5), 
+                      labels = c("", "",  "", "", "", "", "", "", ""))+ 
+  theme_custom 
+
+
+factor_graph_cont <- EUI_data_short %>% 
+  ggplot(aes(x = Security_FA_cont)) +
+  geom_density(fill = "lightgrey", alpha = 0.4) +
+  labs(x = "Defence-Normalization Dimension\n(Higher valued indicate more normalization-focused)",
+       y = "Density") + 
+  scale_x_continuous( breaks = seq(-1.5, 1.5, length.out = 9),
+                      limits = c(-1.5, 1.5), 
+                      labels = c("", "(-1.3) Defence-Focused",  "", "", "- 0.0 -", "", "", "Normalization-Focused (1.3)", "")) +
+  theme_custom
+
+
+  ggsave("plots/factor_scores_density_cont.png", graph_by_year_cont, width = 8, height = 4)
 
 ##### Factor Score Left- Right ####
 security_mid <- mean(c(max(EUI_data_short$Security_FA, na.rm = TRUE), min(EUI_data_short$Security_FA, na.rm = TRUE)))
@@ -246,8 +299,8 @@ factor_test_plot <- FA_test_df %>%
   scale_colour_manual(values = c("grey", "black")) + 
   guides(colour = guide_legend(reverse = TRUE,
                                ncol = 1)) +
-  labs(x = "MLM Coefficients and 95% Confidence Intervals \n for the Relationship Between Other Cleavages and the \n Defence-Normalization Dimension",
-      y = NULL) + 
+  labs(x = "MLM Coefficients and 95% Confidence Intervals \n for the Relationship Between Existing Cleavages at the Individual Level and the \n Defence-Normalization Dimension",
+      y = "Existing Cleavages\n(Measured at individual level)") + 
   theme_custom
   
 ggsave("plots/factor_test_plot.png", factor_test_plot, width = 8, height = 4)
@@ -1141,7 +1194,7 @@ ggsave("plots/Portugal_parties.png", width = 7, height = 4, Portugal_parties)
 
 #### Party Family ####
 
-EUI_data_short <- EUI_data_short %>% 
+EUI_data_short <- EUI_data_short %>%
   mutate(Security_FA = as.numeric(Security_FA),
          family = factor(family, levels = c("11", "1", "2", "3" , "4",
                                             "5",
@@ -1153,7 +1206,8 @@ EUI_data_short <- EUI_data_short %>%
                                             ))
          )
 
-EUI_data_short <- EUI_data_short %>% 
+
+EUI_data_short <- EUI_data_short %>%
   mutate(gal = ifelse(galtan <= 5, 1, 0))
 EUI_data_short <- EUI_data_short %>% 
   mutate(Pro_Ukraine = ifelse(UA_EU > 5, 1, 0))
@@ -1349,13 +1403,13 @@ families_normalization_plot <- parties_normalization_df %>%
                                               "Agrarian/Centre",
                                               "No Family",
                                               "Pro-Normalization Parties",
-                                              "Pro-EU Parties",
+                                             # "Pro-EU Parties",
                                               "Pro-Ukraine Parties",
                                               "GAL Parties",
                                               "Supports Trade and Diplomacy w/ Russia"))),
          term = recode_values(term,
                               "GAL_TAN" ~ "GAL-TAN Dimension (A)",
-                              "Q9" ~ "Support for EU Membership (A)",
+                              #"Q9" ~ "Support for EU Membership (A)",
                               "Q62" ~ "Left-Right Self-Placement (A)",
                               "Security_FA" ~ "Defence-Normalization Dimension (B)"
          )) %>% 
@@ -2311,7 +2365,7 @@ ggsave("plots/Russian_EU_position.png", Party_distribution, width = 8, height = 
 test <- EUI_data_short %>% 
   group_by(country, Past_vote) %>% 
   summarise(Pro_Russia_individual = mean(Security_FA),
-            Russia_party = 10 - mean(Kremlin_ties),
+            Russia_party = mean(Securtiy_FA_party),
             Past_vote = mean(Past_vote))
 
 lm(formula = Russia_party ~ Pro_Russia_individual, data = test)
@@ -2567,7 +2621,7 @@ Social_group_year <- lmer(reformulate(c("( Econ_comparison + Radicalized + Emplo
                                   Generalized_trust = relevel(factor(Generalized_trust), "Untrusting"))
 )
 
-Social_group <- lmer(reformulate(c("( Econ_comparison + Employed + Woman + Education + Age + median_income + Employed)", "as.factor(Year)", "(1 | country)"),
+Social_group <- lmer(reformulate(c("( Econ_comparison + Employed + Woman + Education + Age + income_ppp_usd_log + Employed)", "as.factor(Year)", "(1 | country)"),
                                       response = "Security_FA"),
                           data = EUI_data_short %>%
                             filter(country %in% COUNTRIES_2022) %>% 
@@ -2590,7 +2644,41 @@ Social_group <- lmer(reformulate(c("( Econ_comparison + Employed + Woman + Educa
                                                                          "Latvia", "Lithuania"), 1, 0)),
                    weights = balanced_weights
 )
-vif(Social_group)
+
+
+#### VIF Table for the Social Bases Model ####
+
+vif_raw <- vif(Social_group)
+
+vif_tbl <- if (is.matrix(vif_raw)) {
+  as.data.frame(vif_raw) %>%
+    tibble::rownames_to_column("Variable")
+} else {
+  tibble(Variable = names(vif_raw),
+         GVIF = as.numeric(vif_raw),
+         Df = 1,
+         `GVIF^(1/(2*Df))` = sqrt(as.numeric(vif_raw)))
+}
+
+vif_tbl <- vif_tbl %>%
+  mutate(Variable = case_match(Variable,
+                               "Econ_comparison" ~ "Economic comparison",
+                               "Employed" ~ "Employment status",
+                               "Woman" ~ "Gender",
+                               "Education" ~ "Education",
+                               "Age" ~ "Age (generation)",
+                               "income_ppp_usd_log" ~ "Household income (log PPP USD)",
+                               "as.factor(Year)" ~ "Survey year",
+                               .default = Variable),
+         across(where(is.numeric), ~ round(.x, 2)))
+
+vif_tbl %>%
+  kable(format = "latex", booktabs = TRUE, linesep = "", escape = FALSE,
+        caption = "Generalized variance inflation factors for the social bases model.",
+        col.names = c("Variable", "GVIF", "Df", "GVIF$^{1/(2\\cdot\\text{Df})}$"),
+        align = c("l", "r", "r", "r")) %>%
+  kable_styling(latex_options = "hold_position") %>%
+  save_kable(file.path(GLOBAL_DIR, "tables", "social_bases_vif.tex"))
 
 social_group_vars <- c( "Econ_comparison", "Radicalized", "Employed", "Woman", "Education", "Age", "Urban")
 Social_group_year_df <- data.frame()
@@ -2675,7 +2763,7 @@ social_group_plot_year <- Social_group_year_df %>%
   geom_hline(yintercept = c(1.5, 3.5, 6.5, 8.5, 11.5, 12.5), col = "grey80", lty = "dotted") +
   scale_x_continuous( breaks = seq(-0.3, 0.4, length.out = 8),
                       labels = c("-0.3", "-0.25 (Most Defence Focused)",  "", "0.0", "0.1", "", "", "0.5 (Most Normalization Focused)")) +
-  labs(x = "MLM Estimates and 95% Confidence Intervals \n Higher Values Represent the more Normalization Position",
+  labs(x = "MLM Estimates and 95% Confidence Intervals \n Higher Values Represent the More Normalization Position",
        y = NULL,
        col = "Year") + 
   guides(colour = guide_legend(reverse = TRUE)) + 
@@ -2692,59 +2780,53 @@ Social_group_df <- Social_group %>%
   filter(!term %in% c("(Intercept)", "as.factor(Year)2023", "as.factor(Year)2024", "as.factor(Year)2025", "IndustryUnemployed")) %>% 
   filter(str_starts(term, "country", negate = TRUE)) %>% 
   mutate(term = case_match(term,
-                           "AgeGen Z" ~ "Age: Gen Z (Ref. Cold War+)",
-                           "AgeSocialized during the Cold War" ~ "Age: Socialized during the Cold War",
-                           "AgeYoung Milenials" ~ "Age: Young Milenials",
+                           "AgeGen Z" ~ "Age: Gen Z (Ref. Cold War Adults)",
+                           "AgeYoung Millennials" ~ "Age: Young Millennials",
                            "AgeTransition Generation" ~ "Age: Transition Generation",
-                           "AgeCold War Generation" ~ "Age: Cold War Generation",
+                           "AgeCold War Children" ~ "Age: Cold War Children",
                            "Former_soviet" ~ "Location: Former Eastern Bloc Countries",
                            "WomanWoman" ~ "Gender: Woman",
                            "UrbanUrban/Suburban" ~ "Urban: Urban (Ref. Suburban)",
                            "RadicalizedRadical Left" ~ "Ideology: Radical Left (Ref. Moderate)",
                            "RadicalizedRadical Right" ~ "Ideology: Radical Right",
                            "RadicalizedDon't Know" ~ "Ideology: Don't Know",
-                           "Econ_comparisonBetter off" ~ "Comparision: Better off (Ref. The Same)",
-                           "median_income" ~ "Income: Above Median Income",
-                           "Econ_comparisonWorse off" ~ "Comparision: Worse off",
+                           "Econ_comparisonBetter off" ~ "Comparision: Subjectively Better off (Ref. The Same)",
+                           "income_ppp_usd_log" ~ "Income: Logged Income in PPP USD",
+                           "Econ_comparisonWorse off" ~ "Comparision: Subjectively Worse off",
                            "EmployedUnemployed" ~ "Employment: Unemployed (Ref. Employed)",
                            "EmployedStudent" ~ "Employment: Student",
                            "EmployedRetired" ~ "Employment: Retired",
-                           #"EmployedOther" ~ "Employment: Other",
                            "EducationLess than Primary" ~ "Education: Less than Primary (Ref. Secondary Education)",
                            "EducationTertiary" ~ "Education: Tertiary",
                            "Above_median" ~ "Income: Above Median Income",
-                           "Generalized_trustTrusting" ~ "Trust: Trusting (Ref. Untrusting)",
-                          # "Generalized_trustDon't Know" ~ "Trust: Don't Know"
+                           "Generalized_trustTrusting" ~ "Trust: Trusting (Ref. Untrusting)"
   )
   ) 
 
 
 Social_group_plot <- Social_group_df %>% 
-  mutate(
-         term = factor(term, levels = rev(c("Age: Gen Z (Ref. Cold War Adults)",
-                                            "Age: Young Milenials",
-                                            "Age: Transition Generation",
-                                            "Age: Cold War Children",
-                                            "Location: Former Eastern Bloc Countries",
-                                            "Gender: Woman",
-                                            "Urban: Urban (Ref. Suburban)",
-                                            "Ideology: Radical Left (Ref. Moderate)",
-                                            "Ideology: Radical Right",
-                                            "Ideology: Don't Know",
-                                            "Comparision: Better off (Ref. The Same)",
-                                            "Comparision: Don't Know",
-                                            "Comparision: Worse off",
-                                            "Income: Above Median Income",
-                                            "Employment: Unemployed (Ref. Employed)",
-                                            "Employment: Student",
-                                            "Employment: Retired",
-                                            "Employment: Other",
-                                            "Education: Less than Primary (Ref. Secondary Education)",
-                                            "Education: Tertiary",
-                                            "Trust: Trusting (Ref. Untrusting)",
-                                            "Trust: Don't Know"))),
-         group = str_extract(term, "^[^:]+"),
-         term = str_remove(term, "^[^:]*:\\s*")
+  mutate(group = str_extract(term, "^[^:]+"),
+         term = str_remove(term, "^[^:]*:\\s*"),
+         term = factor(term, levels = rev(c("Gen Z (Ref. Cold War Adults)",
+                                            "Young Millennials",
+                                            "Transition Generation",
+                                            "Cold War Children",
+                                            "Former Eastern Bloc Countries",
+                                            "Woman",
+                                            "Urban (Ref. Suburban)",
+                                            "Radical Left (Ref. Moderate)",
+                                            "Radical Right",
+                                            "Subjectively Better off (Ref. The Same)",
+                                            "Don't Know",
+                                            "Subjectively Worse off",
+                                            "Logged Income in PPP USD",
+                                            "Unemployed (Ref. Employed)",
+                                            "Student",
+                                            "Retired",
+                                            "Other",
+                                            "Less than Primary (Ref. Secondary Education)",
+                                            "Tertiary",
+                                            "Trusting (Ref. Untrusting)")))
          ) %>%
  # filter(!effect %in% c("ran_pars")) %>% 
   filter(!is.na(term)) %>% 
@@ -2757,8 +2839,8 @@ Social_group_plot <- Social_group_df %>%
   scale_x_continuous( breaks = seq(-0.3, 0.4, length.out = 8),
                       limits = c(-0.25, 0.25),
                       labels = c("-0.3", "-0.2 (Defence Focused)",  "", "0.0", "", "(Normalization Focused) 0.2" , "", "")) +
-  labs(x = "MLM Estimates and 95% Confidence Intervals \n Higher Values Represent the more Normalization Position",
-       y = NULL) + 
+  labs(x = "MLM Estimates and 95% Confidence Intervals \n Higher Values Represent the More Normalization Position",
+       y = "Demographic Group") + 
   theme_custom + 
   theme(panel.grid.major.x = element_blank(),
         panel.grid.minor.x = element_blank(),
@@ -2769,7 +2851,7 @@ Social_group_plot <- Social_group_df %>%
   
 
 
-ggsave("plots/Social_group_plot.png", Social_group_plot, width = 12, height = 6)
+ggsave(file.path(GLOBAL_DIR, "figures", "Social_group_plot.png"), Social_group_plot, width = 12, height = 6)
 
 Social_base_countries <- lm_robust(reformulate(c(paste0("(", "Above_median +",  "Econ_comparison +", "Radicalized +", "Employed +", "Generalized_trust +", "Woman +", "Education +", "Age +", "Urban", ")", "*country"), "as.factor(Year)"),
                                      response = "Security_FA"),
@@ -2878,7 +2960,7 @@ ideology_country <- Ideology_model_df %>%
   geom_point() + 
   geom_linerange() +
   facet_wrap(~country) + 
-  labs(x = "Predicted Value on the Defence-Normalization Dimension \n (Higher values indicate more defence focused)",
+  labs(x = "Predicted Value on the Defence-Normalization Dimension \n (Higher values indicate more normalization focused)",
        caption = "Countries ordered by average defence-normalization index score",
        y = NULL) + 
   theme_custom
@@ -2886,7 +2968,7 @@ ideology_country <- Ideology_model_df %>%
 ggsave("plots/ideology_country.png", ideology_country, width = 8, height = 8)
 
 data_social_base <- EUI_data_short %>% 
-  filter(country %in% COUNTRIES_2022) %>% 
+  #filter(country %in% COUNTRIES_2022) %>% 
   mutate(
          Radicalized = relevel(factor(Radicalized), "Moderate"),
          Education = relevel(factor(Education), "Higher Secondary"),
@@ -2899,7 +2981,7 @@ data_social_base <- EUI_data_short %>%
                                                "Hungary", "Poland", "Romania", "Estonia",
                                                "Latvia", "Lithuania"), 1, 0))
 #### Subjective Economic Position by Country #####
-econ_position_mod <- lm(reformulate(c("Econ_comparison * country", "( Employed + Woman + Education + Age + median_income)", "as.factor(Year)"),
+econ_position_mod <- lm(reformulate(c("Econ_comparison * country", "as.factor(Year)"),
                                  response = "Security_FA"),
                      data = data_social_base 
                        ,
@@ -2916,13 +2998,14 @@ econ_position_country <- econ_position_df %>%
   geom_point() + 
   geom_linerange() +
   facet_wrap(~country) + 
-  labs(x = "Predicted Value on the Defence-Normalization Dimension \n (Higher values indicate more defence focused)",
+  labs(x = "Predicted Value on the Defence-Normalization Dimension \n (Higher values indicate more normalization-focused)",
        caption = "Countries ordered by average defence-normalization index score",
        y = NULL) + 
   theme_custom +
   theme(plot.margin = margin(1,1,1,1, "cm"))
 
 ggsave("plots/econ_position_country.png", econ_position_country, width = 8, height = 8)
+
 #### Affective Polarization ####
 
 affective_polarization_model <- lm_robust(reformulate(c("as.factor(Affective_Polarization)",

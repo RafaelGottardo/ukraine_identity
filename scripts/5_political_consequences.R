@@ -53,7 +53,7 @@ Chi_squared_test_df %>%
 
 EUI_data_short <- EUI_data_short %>% 
   mutate(GAL_TAN_values = case_when(GAL_TAN < 1.6 ~ "TAN",
-                                    GAL_TAN > 1.6 & GAL_TAN < 2.5 ~ "Centre",
+                                    GAL_TAN >= 1.6 & GAL_TAN < 2.5 ~ "Centre",
                                     GAL_TAN >= 2.5 ~ "GAL"))
   
 gal_tan_countries <- lm(reformulate(c("country * GAL_TAN_values", "as.factor(Year)", CONTROLS),
@@ -64,9 +64,9 @@ gal_tan_countries <- lm(reformulate(c("country * GAL_TAN_values", "as.factor(Yea
 gal_tan_countries_df <- avg_predictions(gal_tan_countries, variables = c("GAL_TAN_values", "country"))
 
 gal_tan_countries_plot <- gal_tan_countries_df %>% 
-  mutate(GAL_TAN_values = factor(GAL_TAN_values, levels = c("GAL", "Centre", "TAN")),
+  mutate(GAL_TAN_values = factor(GAL_TAN_values, levels = rev(c("GAL", "Centre", "TAN"))),
          country = factor(country, levels = country_order)) %>% 
-  ggplot(aes(x = GAL_TAN_values, y = estimate, ymin = conf.low, ymax = conf.high)) + 
+  ggplot(aes(y = GAL_TAN_values, x = estimate, xmin = conf.low, xmax = conf.high)) + 
   geom_point() + 
   geom_linerange() + 
   facet_wrap(~country) + 

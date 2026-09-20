@@ -140,92 +140,92 @@ m_threat_NC <- lmer(reformulate(c("as.factor(Q68)", "as.factor(Year)","(1|countr
                  weights = balanced_weights)
 
 
-m_threat_df <- tidy(m_threat, conf.int = TRUE) %>% 
-  mutate(Controls = "Demographic Covariates")
-
-m_threat_df <- tidy(m_threat_NC, conf.int = TRUE) %>% 
-  mutate(Controls = "Fixed Effects Only") %>% 
-  bind_rows(m_threat_df)
-
-m_threat_df <- m_threat_df %>% 
-  mutate(term = recode_values(term,
-                              "as.factor(Q68)2" ~ "Russia \n (Ref. Terrorism)",
-                              "as.factor(Q68)3" ~ "The US",
-                              "as.factor(Q68)4" ~ "China",
-                              "as.factor(Q68)5" ~ "Nuclear Proliferation",
-                              "Q686" ~ "Other",
-                              "Q687" ~ "Don't Know"
-                              ),
-         term = factor(term, levels = rev(c("Russia \n (Ref. Terrorism)", "The US", "China","Nuclear Proliferation",
-                                            "Other", "Don't Know")))) 
-
-threat_plot <- m_threat_df %>% 
-  filter(!is.na(term)) %>% 
-  filter(Controls == "Demographic Covariates") %>% 
-  ggplot(aes(x = estimate, y = term, xmin = conf.low, xmax = conf.high, col = Controls)) +
-  geom_point(position = position_dodge(width = 0.6)) +
-  geom_linerange(position = position_dodge(width = 0.6)) +
-  geom_vline(xintercept = 0, lty = 4, col = "grey45") +
-  scale_colour_manual(values = c("darkblue", "darkred")) +
-  guides(colour =  guide_legend(reverse = TRUE,
-                                ncol = 1)) +
-  labs(x = "MLM Coefficents and 95% Confidence Intervals",
-       y = NULL) +
-  theme_custom
-
-ggsave("plots/threat_plot.png", threat_plot, width = 8, height = 4)
-
-m_threat_year <- lmer(reformulate(c("as.factor(Q68) * as.factor(Year)", CONTROLS,"(1|country)"), response = "Security_FA"), 
-                 data = EUI_data_short %>% filter(country %in% COUNTRIES_2022),
-                 weights = balanced_weights)
-
-m_threat_year_NC <- lmer(reformulate(c("as.factor(Q68) * as.factor(Year)","(1|country)"), response = "Security_FA"), 
-                    data = EUI_data_short,
-                    weights = balanced_weights)
-
-
-m_threat_year_df <- avg_slopes(m_threat_year, variables = "Q68", by = "Year") %>% 
-  mutate(Controls = "Demographic Covariates")
-
-m_threat_year_df <- avg_slopes(m_threat_year_NC, variables = "Q68", by = "Year") %>% 
-  mutate(Controls = "Fixed Effects Only") %>% 
-  bind_rows(m_threat_year_df)
-
-threat_plot_year <- m_threat_year_df %>% 
-  mutate(contrast = recode_values(contrast,
-                              "2 - 1" ~ "Russia \n (Ref. Terrorism)",
-                              "3 - 1" ~ "The US",
-                              "4 - 1" ~ "China",
-                              "5 - 1" ~ "Nuclear Proliferation",
-                              "6 - 1" ~ "Other",
-                              "7 - 1" ~ "Don't Know"
-  ),
-  contrast = factor(contrast, levels = rev(c("Russia \n (Ref. Terrorism)", "The US", "China","Nuclear Proliferation",
-                                     "Other", "Don't Know"))),
-  Year = factor(Year, levels = rev(c("2022", "2023", "2024", "2025")))) %>% 
-  filter(!is.na(contrast)) %>% 
-  filter(Controls == "Demographic Covariates") %>% 
-  ggplot(aes(x = estimate, y = contrast, xmin = conf.low, xmax = conf.high, col = Year)) +
-  geom_point(position = position_dodge(width = 0.6)) +
-  geom_linerange(position = position_dodge(width = 0.6)) +
-  geom_vline(xintercept = 0, lty = 4, col = "grey45") +
-  scale_colour_manual(values = c("purple4", "orange2", "seagreen", "skyblue")) +
-  guides(colour =  guide_legend(reverse = TRUE,
-                                ncol = 2)) +
-  labs(x = "MLM Coefficents and 95% Confidence Intervals",
-       y = NULL,
-       col = NULL) +
-  theme_custom
-
-ggsave("plots/threat_plot_year.png", threat_plot_year, width = 8, height = 4)
+# m_threat_df <- tidy(m_threat, conf.int = TRUE) %>% 
+#   mutate(Controls = "Demographic Covariates")
+# 
+# m_threat_df <- tidy(m_threat_NC, conf.int = TRUE) %>% 
+#   mutate(Controls = "Fixed Effects Only") %>% 
+#   bind_rows(m_threat_df)
+# 
+# m_threat_df <- m_threat_df %>% 
+#   mutate(term = recode_values(term,
+#                               "as.factor(Q68)2" ~ "Russia \n (Ref. Terrorism)",
+#                               "as.factor(Q68)3" ~ "The US",
+#                               "as.factor(Q68)4" ~ "China",
+#                               "as.factor(Q68)5" ~ "Nuclear Proliferation",
+#                               "Q686" ~ "Other",
+#                               "Q687" ~ "Don't Know"
+#                               ),
+#          term = factor(term, levels = rev(c("Russia \n (Ref. Terrorism)", "The US", "China","Nuclear Proliferation",
+#                                             "Other", "Don't Know")))) 
+# 
+# threat_plot <- m_threat_df %>% 
+#   filter(!is.na(term)) %>% 
+#   filter(Controls == "Demographic Covariates") %>% 
+#   ggplot(aes(x = estimate, y = term, xmin = conf.low, xmax = conf.high, col = Controls)) +
+#   geom_point(position = position_dodge(width = 0.6)) +
+#   geom_linerange(position = position_dodge(width = 0.6)) +
+#   geom_vline(xintercept = 0, lty = 4, col = "grey45") +
+#   scale_colour_manual(values = c("darkblue", "darkred")) +
+#   guides(colour =  guide_legend(reverse = TRUE,
+#                                 ncol = 1)) +
+#   labs(x = "MLM Coefficents and 95% Confidence Intervals",
+#        y = NULL) +
+#   theme_custom
+# 
+# ggsave("plots/threat_plot.png", threat_plot, width = 8, height = 4)
+# 
+# m_threat_year <- lmer(reformulate(c("as.factor(Q68) * as.factor(Year)", CONTROLS,"(1|country)"), response = "Security_FA"), 
+#                  data = EUI_data_short %>% filter(country %in% COUNTRIES_2022),
+#                  weights = balanced_weights)
+# 
+# m_threat_year_NC <- lmer(reformulate(c("as.factor(Q68) * as.factor(Year)","(1|country)"), response = "Security_FA"), 
+#                     data = EUI_data_short,
+#                     weights = balanced_weights)
+# 
+# 
+# m_threat_year_df <- avg_slopes(m_threat_year, variables = "Q68", by = "Year") %>% 
+#   mutate(Controls = "Demographic Covariates")
+# 
+# m_threat_year_df <- avg_slopes(m_threat_year_NC, variables = "Q68", by = "Year") %>% 
+#   mutate(Controls = "Fixed Effects Only") %>% 
+#   bind_rows(m_threat_year_df)
+# 
+# threat_plot_year <- m_threat_year_df %>% 
+#   mutate(contrast = recode_values(contrast,
+#                               "2 - 1" ~ "Russia \n (Ref. Terrorism)",
+#                               "3 - 1" ~ "The US",
+#                               "4 - 1" ~ "China",
+#                               "5 - 1" ~ "Nuclear Proliferation",
+#                               "6 - 1" ~ "Other",
+#                               "7 - 1" ~ "Don't Know"
+#   ),
+#   contrast = factor(contrast, levels = rev(c("Russia \n (Ref. Terrorism)", "The US", "China","Nuclear Proliferation",
+#                                      "Other", "Don't Know"))),
+#   Year = factor(Year, levels = rev(c("2022", "2023", "2024", "2025")))) %>% 
+#   filter(!is.na(contrast)) %>% 
+#   filter(Controls == "Demographic Covariates") %>% 
+#   ggplot(aes(x = estimate, y = contrast, xmin = conf.low, xmax = conf.high, col = Year)) +
+#   geom_point(position = position_dodge(width = 0.6)) +
+#   geom_linerange(position = position_dodge(width = 0.6)) +
+#   geom_vline(xintercept = 0, lty = 4, col = "grey45") +
+#   scale_colour_manual(values = c("purple4", "orange2", "seagreen", "skyblue")) +
+#   guides(colour =  guide_legend(reverse = TRUE,
+#                                 ncol = 2)) +
+#   labs(x = "MLM Coefficents and 95% Confidence Intervals",
+#        y = NULL,
+#        col = NULL) +
+#   theme_custom
+# 
+# ggsave("plots/threat_plot_year.png", threat_plot_year, width = 8, height = 4)
 
 #### Preferred Outcome ####
 
 m_pref_outcome <- lmer(reformulate(c("EUI_Ukraine_Outcome", CONTROLS, "as.factor(Year)","(1|country)"), response = "Security_FA"), 
-     data = EUI_data_short %>% filter(country %in% COUNTRIES_2022) %>% mutate(EUI_Ukraine_Outcome = case_when(EUI_Ukraine_Outcome %in% c(1, 2) ~ "Russia Gains Territory",
-                                                                                                              EUI_Ukraine_Outcome == 3 ~ "Return to 2022 Stalemate",
-                                                                                                              EUI_Ukraine_Outcome %in% c(4, 5) ~ "Ukraine Gains Territory"),
-                                                                              EUI_Ukraine_Outcome = factor(EUI_Ukraine_Outcome, levels = c("Return to 2022 Stalemate", "Russia Gains Territory", "Ukraine Gains Territory"))),
+     data = EUI_data_short %>% filter(country %in% COUNTRIES_2022) %>% mutate(EUI_Ukraine_Outcome = case_when(EUI_Ukraine_Outcome %in% c(1, 2) ~ "Russia Takes Territory",
+                                                                                                              EUI_Ukraine_Outcome == 3 ~ "Return to 2022 Frontline",
+                                                                                                              EUI_Ukraine_Outcome %in% c(4, 5) ~ "Ukraine Re-gains Territory"),
+                                                                              EUI_Ukraine_Outcome = factor(EUI_Ukraine_Outcome, levels = c("Return to 2022 Frontline", "Russia Takes Territory", "Ukraine Re-gains Territory"))),
      weights = balanced_weights)
 
 m_pref_outcome_df <- tidy(m_pref_outcome, conf.int = TRUE) %>% 
@@ -233,8 +233,8 @@ m_pref_outcome_df <- tidy(m_pref_outcome, conf.int = TRUE) %>%
 
 m_pref_outcome_df <- m_pref_outcome_df %>% 
   mutate(term = recode_values(term,
-                               "EUI_Ukraine_OutcomeRussia Gains Territory" ~ "Russia Gains Territory (A)\n (Ref. Return to 2022 Stalemate)",
-                              "EUI_Ukraine_OutcomeUkraine Gains Territory" ~ "Ukraine Gains Territory (A)"
+                               "EUI_Ukraine_OutcomeRussia Takes Territory" ~ "Russia Takes Territory (A)\n (Ref. Return to 2022 Frontline)",
+                              "EUI_Ukraine_OutcomeUkraine Re-gains Territory" ~ "Ukraine Re-gains Territory (A)"
                                ))
 
 #### Refugee Support #####
@@ -317,8 +317,8 @@ horizontial_coherence_plot <- Horizontial_coherence_df %>%
                                         #"More Russia than NATO (A)",                             
                                         #"Entirely Russia (A)",                                   
                                         #"Don't Know (A)",                                        
-           "Russia Gains Territory (A)\n (Ref. Return to 2022 Stalemate)",
-           "Ukraine Gains Territory (A)"  ,                        
+           "Russia Takes Territory (A)\n (Ref. Return to 2022 Frontline)",
+           "Ukraine Re-gains Territory (A)"  ,                        
                                         "Ukraine Partial Victory (A)",                           
                                         "Ukraine Full Victory (A)",                              
                                        # "The US (C)",                                            
@@ -334,9 +334,11 @@ horizontial_coherence_plot <- Horizontial_coherence_df %>%
   geom_linerange(position = position_dodge(width = 0.6), size = 2) +
   geom_vline(xintercept = 0, lty = 4, col = "grey45") +
   scale_colour_manual(values = c("orange2", "purple4", "seagreen4")) +
+  scale_x_continuous(limits = c(-1.5, 1.5),
+                     breaks = seq(-1.5, 1.5, 0.25)) + 
   guides(colour =  guide_legend(reverse = TRUE,
                                 ncol = 1)) +
-  labs(x = "MLM Coefficents and 95% Confidence Intervals\n(Higher values greater normalization-focus)",
+  labs(x = "MLM Coefficents and 95% Confidence Intervals\n(Higher values indicate greater normalization-focus)",
        y = NULL) +
   theme_custom
   

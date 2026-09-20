@@ -64,7 +64,7 @@ Group_composition_overtime_country <- Group_composition_overtime_df %>%
   facet_wrap(~country) + 
   geom_vline(xintercept = 2021.75, lty = 4, col = "grey50") +
   #annotate("text", x = 2020.65, y = 0.5, label = "Russian Invaison of Ukraine", col = "black" ) +
-  labs(x = NULL, y = NULL, col = "Group") + 
+  labs(x = "Year", y = "Percentage of Europeans", col = "Group") + 
   guides(colour = guide_legend(ncol = 2,
                                reverse = TRUE)) +
   scale_colour_manual(values = rev(c("darkblue", "lightblue", "forestgreen", "darkred"))) + 
@@ -74,6 +74,6 @@ Group_composition_overtime_country <- Group_composition_overtime_df %>%
         panel.grid.major.y = element_blank(),
         panel.grid.minor.y = element_blank())
 
-ggsave("plots/Group_composition_overtime_country.png", Group_composition_overtime_country,
+ggsave(file.path(GLOBAL_DIR, "figures" ," Group_composition_overtime_country.png"), Group_composition_overtime_country,
        width = 12, height = 10)
 

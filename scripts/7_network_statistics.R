@@ -48,13 +48,13 @@ horizontal_gexf <- list(
   "2023"   = "data_clean/horizontial_coherence_network2023.gexf",
   "2024"   = "data_clean/horizontial_coherence_network2024.gexf",
   "2025"   = "data_clean/horizontial_coherence_network2025.gexf",
-  "Pooled" = "data_clean/horizontial_coherence_network.gexf"
+  "2025 - full" = "data_clean/horizontial_coherence_network.gexf"
 )
 horizontal_csv <- list(
   "2023"   = "data_clean/horizontial_df2023.csv",
   "2024"   = "data_clean/horizontial_df2024.csv",
   "2025"   = "data_clean/horizontial_df2025.csv",
-  "Pooled" = "data_clean/horizontial_df.csv"
+  "2025 - full" = "data_clean/horizontial_df.csv"
 )
 
 vertical_gexf <- list(
@@ -62,14 +62,14 @@ vertical_gexf <- list(
   "2023"   = "data_clean/vertical_extension_network_2023.gexf",
   "2024"   = "data_clean/vertical_extension_network_2024.gexf",
   "2025"   = "data_clean/vertical_extension_network_2025.gexf",
-  "Pooled" = "data_clean/vertical_extension_network.gexf"
+  "2025 - full" = "data_clean/vertical_extension_network.gexf"
 )
 vertical_csv <- list(
   "2022"   = "data_clean/vertical_extension2022.csv",
   "2023"   = "data_clean/vertical_extension2023.csv",
   "2024"   = "data_clean/vertical_extension2024.csv",
   "2025"   = "data_clean/vertical_extension2025.csv",
-  "Pooled" = "data_clean/vertical_extension.csv"
+  "2025 - full" = "data_clean/vertical_extension.csv"
 )
 
 for (f in c(unlist(horizontal_gexf), unlist(horizontal_csv),

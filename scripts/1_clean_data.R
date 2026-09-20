@@ -635,115 +635,100 @@ cross_walk <- cross_walk %>%
          ches_id = as.numeric(ches_id)) %>% 
   filter(!is.na(new_q59))
 
-parl_gov_data <- read_csv("Data_raw/view_cabinet.csv")
 
-parl_gov_data <- parl_gov_data %>% 
-  filter(start_date < as.Date("2022-04-01")) %>% 
-  group_by(country_name) %>% 
-  slice_max(order_by = start_date, n = 1) %>% 
-  ungroup() %>% 
-  filter(country_name %in% NEW_COUNTRIES)
-
-parl_gov_data <- left_join(parl_gov_data, cross_walk, by = c("party_id" = "parlgov_id")) %>% 
-  filter(!is.na(vote_variable_2022) | !is.na(vote_values_2022))
-
-
-
-ches_data <- read_dta("Data_raw/CHES_Ukraine_March_2024.dta") %>% 
-  select(-country)
-
-ches_data <- left_join(ches_data, cross_walk, by = c("party_id" = "ches_id"))
-
-# EUI_data <- EUI_data %>% 
-#   left_join(ches_data %>% filter(!is.na(new_q59)), by = c("Past_vote" = "new_q59"))
-
-table(ches_data$Kremlin_ties, ches_data$party)
-EUI_2025 <- EUI_2025 %>% 
-  left_join(ches_data, by = c("New_Q59" = "new_q59"))
-
-EUI_2025 <- EUI_2025 %>% 
-  mutate(Kremlin_ties = ifelse(Kremlin_ties <= 5, 1, 0))
-
-
-
-Incumbent_parties_2025 <- data.frame(country = c("Bulgaria", "Bulgaria", "Bulgaria", "Croatia", "Croatia",
-                                                 "Denmark", "Denmark", "Denmark", "Finland", "Finland", "Finland",
-                                                 "Finland", "France", "Germany", "Germany", "Greece", "Hungary",
-                                                 "Italy", "Italy", "Italy", "Lithuania", "Lithuania", "Lithuania",
-                                                 "Netherlands", "Netherlands", "Netherlands", "Netherlands", "Poland", 
-                                                 "Poland", "Poland", "Romania", "Romania", "Romania", "Spain", "Spain", "Sweden",
-                                                 "Sweden", "Sweden", "UK", "Slovakia", "Slovakia", "Slovakia" ),
-                                     New_Q59 = c(125, 319, 271, 141, 139, 160, 61, 71, 83, 87, 88, 89, 308, 20, 19, 118,
-                                                 103, 43, 44, 45, 113, 326, 194, 50, 49, 260, 259, 95, 93, 261,
-                                                 96, 97, 100, 25, 255, 74, 77, 76, 2, 132, 196, 197),
-                                     Incumbent = c(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-                                                   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1)
-                                     )
-
-cross_walk <- cross_walk %>% 
-  mutate(Incumbent_2022 = case_when(new_q59 %in% c(1, 139, 62, 63, 67, 82, 89, 90, 83, 13, 20, 19, 119, 120, 103, 112, 
-                                                   113, 114, 116, 49, 51, 52, 56, 92, 97, 132, 181, 79, 78 ) ~ 1,
-                                    TRUE ~ 0),
-         Incumbent_2025 = case_when(new_q59 %in% c(125, 319, 271, 141, 139, 160, 61, 71, 83, 87, 88, 89, 308, 20, 19, 118,
-                                                   103, 43, 44, 45, 113, 326, 194, 50, 49, 260, 259, 95, 93, 261,
-                                                   96, 97, 100, 25, 255, 74, 77, 76, 2, 132, 196, 197) ~ 1,
-                                    TRUE ~ 0),
-  )
-
-table(cross_walk$vote_variable_2022, cross_walk$country_name
-      )
-
-
-       
-
-
-
-
-EUI_2022_incumbent <- read_spss("Data_raw/yg_april_2022_processed.sav") %>% 
-  mutate(country = case_match(country,
-                              180 ~ "Romania",
-                              153 ~ "Netherlands",
-                              125 ~ "Lithuania",
-                              108 ~ "Italy",
-                              60 ~ "Denmark",
-                              175 ~ "Poland",
-                              74 ~ "Finland",
-                              75 ~ "France",
-                              210 ~ "Sweden",
-                              82 ~ "Germany",
-                              1 ~ "UK",
-                              85 ~ "Greece",
-                              99 ~ "Hungary",
-                              204 ~ "Spain",
-                              56 ~ "Croatia",
-                              197 ~ "Slovakia",
-                              35 ~ "Bulgaria",
-                              23 ~ "Belgium"),
-         Year = 2022)
-
-
-EUI_2022_2025 <- bind_rows(EUI_2022_incumbent, EUI_2025) %>% 
-  filter(!is.na(New_Q59))
-
-EUI_2022_2025 <- EUI_2022_2025 %>% 
-  left_join(parl_gov_data, by = c("New_Q59" = "new_q59"))
-
-EUI_2022_2025 <- EUI_2022_2025 %>% 
-  left_join(Incumbent_parties_2025, by = "New_Q59")
-
-test <- read_dta("Data_raw/trendfile_dataset_2023 (pastvote_recoded_parlgov)_v4 (1).dta")
-
-
-
-test <- read_xlsx("Data_raw/Results for EUI, SOU and Solidarity 2022 OMGLOB 041 - Merged - CSV (2).xlsx", sheet = 3)
-
+ ches_data <- read_dta("Data_raw/CHES_Ukraine_March_2024.dta") %>% 
+   select(-country)
+ 
+ ches_data <- left_join(ches_data, cross_walk, by = c("party_id" = "ches_id"))
+ 
+ # EUI_data <- EUI_data %>% 
+ #  left_join(ches_data %>% filter(!is.na(new_q59)), by = c("Past_vote" = "new_q59"))
+ # 
+ # table(ches_data$Kremlin_ties, ches_data$party)
+ # EUI_2025 <- EUI_2025 %>% 
+ #   left_join(ches_data, by = c("New_Q59" = "new_q59"))
+ # 
+ # EUI_2025 <- EUI_2025 %>% 
+ #  mutate(Kremlin_ties = ifelse(Kremlin_ties <= 5, 1, 0))
+ 
+# Incumbent_parties_2025 <- data.frame(country = c("Bulgaria", "Bulgaria", "Bulgaria", "Croatia", "Croatia",
+#                                                  "Denmark", "Denmark", "Denmark", "Finland", "Finland", "Finland",
+#                                                  "Finland", "France", "Germany", "Germany", "Greece", "Hungary",
+#                                                  "Italy", "Italy", "Italy", "Lithuania", "Lithuania", "Lithuania",
+#                                                  "Netherlands", "Netherlands", "Netherlands", "Netherlands", "Poland", 
+#                                                  "Poland", "Poland", "Romania", "Romania", "Romania", "Spain", "Spain", "Sweden",
+#                                                  "Sweden", "Sweden", "UK", "Slovakia", "Slovakia", "Slovakia" ),
+#                                      New_Q59 = c(125, 319, 271, 141, 139, 160, 61, 71, 83, 87, 88, 89, 308, 20, 19, 118,
+#                                                  103, 43, 44, 45, 113, 326, 194, 50, 49, 260, 259, 95, 93, 261,
+#                                                  96, 97, 100, 25, 255, 74, 77, 76, 2, 132, 196, 197),
+#                                      Incumbent = c(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+#                                                    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1)
+#                                      )
+# 
+# cross_walk <- cross_walk %>% 
+#   mutate(Incumbent_2022 = case_when(new_q59 %in% c(1, 139, 62, 63, 67, 82, 89, 90, 83, 13, 20, 19, 119, 120, 103, 112, 
+#                                                    113, 114, 116, 49, 51, 52, 56, 92, 97, 132, 181, 79, 78 ) ~ 1,
+#                                     TRUE ~ 0),
+#          Incumbent_2025 = case_when(new_q59 %in% c(125, 319, 271, 141, 139, 160, 61, 71, 83, 87, 88, 89, 308, 20, 19, 118,
+#                                                    103, 43, 44, 45, 113, 326, 194, 50, 49, 260, 259, 95, 93, 261,
+#                                                    96, 97, 100, 25, 255, 74, 77, 76, 2, 132, 196, 197) ~ 1,
+#                                     TRUE ~ 0),
+#   )
+# 
+# table(cross_walk$vote_variable_2022, cross_walk$country_name
+#       )
 # 
 # 
-# europe <- europe %>% 
-#   filter(!is.na(vote_variable) & !is.na(vote_partycode)) %>% 
-#   left_join(cross_walk, by = c("vote_partycode" = "new_q59"))
-
-
-summer_2023 <- read_spss("Data_raw/data/survey/raw/eui-yg/2023-11/eui-yg-2023-11.sav")
-
-#write_sav(EUI_data, "data_raw/data//EUI_data.sav")
+#        
+# 
+# 
+# 
+# 
+# EUI_2022_incumbent <- read_spss("Data_raw/yg_april_2022_processed.sav") %>% 
+#   mutate(country = case_match(country,
+#                               180 ~ "Romania",
+#                               153 ~ "Netherlands",
+#                               125 ~ "Lithuania",
+#                               108 ~ "Italy",
+#                               60 ~ "Denmark",
+#                               175 ~ "Poland",
+#                               74 ~ "Finland",
+#                               75 ~ "France",
+#                               210 ~ "Sweden",
+#                               82 ~ "Germany",
+#                               1 ~ "UK",
+#                               85 ~ "Greece",
+#                               99 ~ "Hungary",
+#                               204 ~ "Spain",
+#                               56 ~ "Croatia",
+#                               197 ~ "Slovakia",
+#                               35 ~ "Bulgaria",
+#                               23 ~ "Belgium"),
+#          Year = 2022)
+# 
+# 
+# EUI_2022_2025 <- bind_rows(EUI_2022_incumbent, EUI_2025) %>% 
+#   filter(!is.na(New_Q59))
+# 
+# EUI_2022_2025 <- EUI_2022_2025 %>% 
+#   left_join(parl_gov_data, by = c("New_Q59" = "new_q59"))
+# 
+# EUI_2022_2025 <- EUI_2022_2025 %>% 
+#   left_join(Incumbent_parties_2025, by = "New_Q59")
+# 
+# test <- read_dta("Data_raw/trendfile_dataset_2023 (pastvote_recoded_parlgov)_v4 (1).dta")
+# 
+# 
+# 
+# test <- read_xlsx("Data_raw/Results for EUI, SOU and Solidarity 2022 OMGLOB 041 - Merged - CSV (2).xlsx", sheet = 3)
+# 
+# # 
+# # 
+# # europe <- europe %>% 
+# #   filter(!is.na(vote_variable) & !is.na(vote_partycode)) %>% 
+# #   left_join(cross_walk, by = c("vote_partycode" = "new_q59"))
+# 
+# 
+# summer_2023 <- read_spss("Data_raw/data/survey/raw/eui-yg/2023-11/eui-yg-2023-11.sav")
+# 
+# #write_sav(EUI_data, "data_raw/data//EUI_data.sav")

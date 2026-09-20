@@ -182,7 +182,8 @@ party_type_correlates <- party_type_models_df %>%
   guides(colour = guide_legend(ncol = 1)) +
   scale_x_continuous(labels = c("-0.75", "-0.5", "-0.25", "0.0", "0.25"),
                      breaks = c(-0.75, -0.5, -0.25, 0, 0.25)) + 
-  theme_custom
+  theme_custom +
+  theme(plot.margin = margin(1,1,1,1, "cm"))
 
 ggsave("plots/party_type_correlates.png", party_type_correlates, width = 8, height = 4)
 #### By individual level attitudes 
@@ -233,49 +234,112 @@ LW_correlates_correlates <- LW_proRussia_attitudes_df %>%
   geom_linerange(position = position_dodge(width = 0.6)) + 
   geom_vline(xintercept = 0, lty = 4, col = "grey40") + 
   scale_colour_manual(values = c("black", "darkred", "purple4", "darkblue")) + 
-  labs(colour = "Ideology and Placement on the Defence-Normalization Dimension",
+  labs(colour = "Ideology and Placement\non the Defence-Normalization\nDimension",
        x = "Marginal effect of the defence-normalization dimension\nRef. Centrist", 
        y = "Outcome Variable",
        caption = "Model includes only countries surveyed since 2022 and country and year fixed effects."
   ) +
   guides(colour = guide_legend(ncol = 1)) +
-  scale_x_continuous(labels = c("-0.75", "-0.5", "-0.25", "0.0", "0.25"),
-                     breaks = c(-0.75, -0.5, -0.25, 0, 0.25)) + 
-  theme_custom
+  scale_x_continuous(labels = c("-0.5", "-0.25", "0.0", "0.25", "0.5", "0.75", "1.0"),
+                     breaks = c(-0.5, -0.25, 0, 0.25, 0.5, 0.75, 1.0),
+                     limits = c(-0.5, 1)) + 
+  theme_custom +
+  theme(plot.margin = margin(1,1,1,1, "cm"))
 
 ggsave("plots/LW_correlates_correlates.png", LW_correlates_correlates, width = 8, height = 4)
 
 #### Party Switching ####
 
-EUI_data_short <- EUI_data_short %>% 
-  mutate(Right_wing_pro_russia = ifelse(Party_position == "Right-wing pro-Russia", 1, 0),
-         Left_wing_pro_russia = ifelse(Party_position == "Left-wing pro-Russia", 1, 0),
-         LW_RW_pro_russia = case_when(country %in% c("Bulgaria", "Greece", "Hungary",  "Lithuania",
-                                                     "Poland", "Romania", "Slovakia") ~ "No Left-wing Pro Russia Party",
-                                      country %in% c("Croatia", "Denmark", "Finland", "Sweden", "UK") ~ "No Pro Russia Party",
-                                      TRUE ~ "Left and Right-wing Pro-Russia Party"))
+EUI_data_short <- EUI_data_short %>%
+  mutate(#Right_wing_pro_russia = ifelse(Party_position == "Right-wing pro-Russia", 1, 0),
+  #        Left_wing_pro_russia = ifelse(Party_position == "Left-wing pro-Russia", 1, 0),
+         ## voted for a pro-normalization party (party index Securtiy_FA_party > 0),
+         ## split by the party's economic (lrecon) or GAL-TAN (galtan) placement
+         econ_RW_PR    = as.integer(lrecon > 5  & Securtiy_FA_party > 0),
+         econ_LW_PR    = as.integer(lrecon <= 5 & Securtiy_FA_party > 0),
+         GAL_TAN_RW_PR = as.integer(galtan > 5  & Securtiy_FA_party > 0),
+         GAL_TAN_LW_PR = as.integer(galtan <= 5 & Securtiy_FA_party > 0))
 
+## --- Country-level party supply -------------------------------------------------
+## A "pro-normalization" party scores above 0 on the party-level defence-normalization
+## index (Securtiy_FA_party > 0). "Economically left-wing" = CHES lrecon <= 5 ;
+## "GAL" = CHES galtan <= 5. The two flags mark countries that offer voters NO such
+## party to switch to.
+party_supply_flags <- EUI_data_short %>%
+  filter(country %in% COUNTRIES_2022, !is.na(Past_vote), !is.na(Securtiy_FA_party)) %>%
+  distinct(country, Past_vote, Securtiy_FA_party, lrecon, galtan) %>%
+  group_by(country) %>%
+  summarise(
+    no_econ_LW_norm_party = !any(lrecon <= 5 & Securtiy_FA_party > 0, na.rm = TRUE),
+    no_GAL_norm_party     = !any(galtan <= 5 & Securtiy_FA_party > 0, na.rm = TRUE),
+    .groups = "drop"
+  )
 
-LW_RW_country_pro_Russia_mod <- lm_robust(reformulate(c("(Security_FA * ideology * LW_RW_pro_russia)", CONTROLS, "as.factor(Year)"), 
-                                           response = "Right_wing_pro_russia"), data = EUI_data_short)
-
-
-No_LW_party_df <- avg_slopes(LW_RW_country_pro_Russia_mod, variables = "Security_FA", by = c("ideology", "LW_RW_pro_russia"))
-
-
-No_LW_party_plot <- RW_pro_Russia_df %>% 
-  filter(LW_RW_pro_russia != "No Pro Russia Party") %>% 
+Party_switch_data <- EUI_data_short %>%
+  filter(country %in% COUNTRIES_2022) %>%
+  left_join(party_supply_flags, by = "country") %>%
   mutate(
-         ideology = factor(ideology, levels = c("Don't Know", "Left-wing", "Centre", "Right-wing"))) %>% 
-  ggplot(aes(x = ideology, y = estimate, ymin = conf.low, ymax = conf.high)) + 
-  geom_point() + 
-  geom_linerange() + 
-  geom_hline(yintercept = 0, lty = 4, col = "grey60") + 
-  facet_wrap(~LW_RW_pro_russia) + 
-  labs(x = NULL, y = "Marginal Effect of being more Normalization focused") + 
-  theme_custom
+    ## respondent GAL-TAN placement - same cut-offs as gal_tan_countries_plot.png
+    GAL_TAN_values = case_when(GAL_TAN < 1.6 ~ "TAN",
+                               GAL_TAN >= 1.6 & GAL_TAN < 2.5 ~ "Centre",
+                               GAL_TAN >= 2.5 ~ "GAL"),
+    GAL_TAN_values = factor(GAL_TAN_values, levels = c("GAL", "Centre", "TAN")),
+    ## respondent left-right self-placement (Q62: 1-2 left, 3-5 centre, 6-7 right)
+    LR_self = case_when(Q62 %in% c(1, 2) ~ "Left-wing",
+                        Q62 %in% c(3, 4, 5) ~ "Centre",
+                        Q62 %in% c(6, 7) ~ "Right-wing"),
+    LR_self = factor(LR_self, levels = c("Left-wing", "Centre", "Right-wing"))
+  )
 
-ggsave("plots/No_LW_party_plot.png", No_LW_party_plot, width = 8, height = 5)
+## One model per row facet x column facet (4 fits): each column is a standalone
+## moderation of the Security_FA effect by that placement measure, within the
+## countries that lack the relevant pro-normalization party. The outcome matches
+## the row - voting an economic-right pro-normalization party where no economic-left
+## one exists, voting a TAN pro-normalization party where no GAL one exists.
+fit_switch <- function(dat, moderator, response){
+  lm_robust(reformulate(c(paste0("Security_FA * ", moderator), CONTROLS, "as.factor(Year)"),
+                        response = response),
+            data = dat)
+}
+
+switch_slopes <- function(dat, row_lab, response){
+  bind_rows(
+    as.data.frame(avg_slopes(fit_switch(dat, "LR_self", response),
+                             variables = "Security_FA", by = "LR_self")) %>%
+      transmute(row = row_lab, col = "Left-Right Self-Placement",
+                x = as.character(LR_self), estimate, conf.low, conf.high),
+    as.data.frame(avg_slopes(fit_switch(dat, "GAL_TAN_values", response),
+                             variables = "Security_FA", by = "GAL_TAN_values")) %>%
+      transmute(row = row_lab, col = "GAL-TAN Placement",
+                x = as.character(GAL_TAN_values), estimate, conf.low, conf.high)
+  )
+}
+
+No_LW_party_df <- bind_rows(
+  switch_slopes(filter(Party_switch_data, no_econ_LW_norm_party),
+                "No economically left-wing\npro-normalization party", "econ_RW_PR"),
+  switch_slopes(filter(Party_switch_data, no_GAL_norm_party),
+                "No GAL pro-normalization party", "GAL_TAN_RW_PR")
+) %>%
+  filter(!is.na(x)) %>%
+  mutate(x = factor(x, levels = c("Left-wing", "GAL", "Centre", "Right-wing", "TAN")),
+         col = factor(col, levels = c("Left-Right Self-Placement", "GAL-TAN Placement")),
+         row = factor(row, levels = c("No economically left-wing\npro-normalization party",
+                                      "No GAL pro-normalization party")))
+
+No_LW_party_plot <- No_LW_party_df %>%
+  ggplot(aes(x = x, y = estimate, ymin = conf.low, ymax = conf.high)) +
+  geom_hline(yintercept = 0, lty = 4, col = "grey60") +
+  geom_point() +
+  geom_linerange() +
+  facet_grid(row ~ col, scales = "free_x", switch = "y") +
+  labs(x = NULL,
+       y = "Marginal effect of being more normalization-focused\non the probability of voting for a right-wing pro-normalization party") +
+  theme_custom +
+  theme(strip.placement = "outside",
+        strip.text.y.left = element_text(angle = 90))
+
+ggsave("plots/No_LW_party_plot.png", No_LW_party_plot, width = 8, height = 6)
 
 RW_pro_Russia_mod <- lm_robust(reformulate(c("(Security_FA * ideology * country)", CONTROLS, "as.factor(Year)"), 
                                            response = "Right_wing_pro_russia"), data = EUI_data_short)
@@ -499,10 +563,12 @@ Dont_know_df %>%
 
 slopes_df
 
-Dispersion_df <- EUI_data_short %>% 
-  group_by(country) %>% 
-  summarise(Dispersion = max(Securtiy_FA_party, na.rm = TRUE) - min(Securtiy_FA_party, na.rm = TRUE)) %>% 
-  left_join(slopes_df %>% select(country, `Average Absolute Slope`), by = "country")
+Dispersion_df <- EUI_data_short %>%
+  group_by(country) %>%
+  summarise(Dispersion = sd(Securtiy_FA_party, na.rm = TRUE)) %>%
+  left_join(slopes_df %>%
+              mutate(country = str_remove(country, "^\\s*\\*+\\s*")) %>%
+              select(country, `Average Absolute Slope`, `Wieghted Slope`), by = "country")
 
 lm(Average_slope ~ Dispersion, Dispersion_df %>% rename(Average_slope = `Average Absolute Slope`)) %>% 
   summary()
@@ -522,19 +588,46 @@ Dispersion_plot <- Dispersion_df  %>%
     size = 3.5,
     col = "black"
   ) + 
-  scale_x_continuous(limits = c(0, 4)) +
-  labs(x = "Difference in the Defence-Normalization Scores of Parties") + 
+  scale_x_continuous(limits = c(0.1, 1.7)) +
+  labs(x = "Standard Deviation of the Defence-Normalization Scores of Parties") + 
   theme_custom
 
 ggsave("plots/Dispersion_plot.png", Dispersion_plot, width = 8, height = 4)
 
 
+lm(Average_slope ~ Dispersion, Dispersion_df %>% rename(Average_slope =  `Wieghted Slope`)) %>% 
+  summary()
+
+Dispersion_wt_plot <- Dispersion_df  %>% 
+  ggplot(aes(x = Dispersion, y =  `Wieghted Slope`)) + 
+  geom_smooth(method = "lm", col = "grey50") + 
+  geom_point() + 
+  geom_text_repel(  # only label the last point
+    aes(label = country),
+    hjust = 0,
+   # direction = "x",           # only nudge vertically, keeps labels aligned to their point
+    #nudge_x = 0.05,             # push labels to the right of the last point
+    xlim = c(-Inf, Inf),
+    segment.size = 0.3,
+    segment.color = "grey50",
+    size = 3.5,
+    col = "black"
+  ) + 
+  scale_x_continuous(limits = c(0.1, 1.7)) +
+  labs(x = "Standard Deviation of the Defence-Normalization Scores of Parties") + 
+  theme_custom
+
+ggsave("plots/Dispersion_wt_plot.png", Dispersion_wt_plot, width = 8, height = 4)
+
+
 #### Country Average Plot ####
 
-average_DN_df <- EUI_data_short %>% 
-  group_by(country) %>% 
-  summarise(Average = mean(Security_FA, na.rm = TRUE)) %>% 
-  left_join(slopes_df %>% select(country, `Average Absolute Slope`), by = "country")
+average_DN_df <- EUI_data_short %>%
+  group_by(country) %>%
+  summarise(Average = mean(Security_FA, na.rm = TRUE)) %>%
+  left_join(slopes_df %>%
+              mutate(country = str_remove(country, "^\\s*\\*+\\s*")) %>%
+              select(country, `Average Absolute Slope`, `Wieghted Slope`), by = "country")
 
 lm(Average_slope ~ Average, average_DN_df %>% rename(Average_slope = `Average Absolute Slope`)) %>% 
   summary()
@@ -559,3 +652,27 @@ Average_DN_plot <- average_DN_df  %>%
   theme_custom
 
 ggsave("plots/Average_DN_plot.png", Average_DN_plot, width = 8, height = 4)
+
+lm(Average_slope ~ Average, average_DN_df %>% rename(Average_slope = `Wieghted Slope`)) %>% 
+  summary()
+
+Average_DN_wt_plot <- average_DN_df  %>% 
+  ggplot(aes(x = Average, y = `Wieghted Slope`)) + 
+  geom_smooth(method = "lm", col = "grey50") + 
+  geom_point() + 
+  geom_text_repel(  # only label the last point
+    aes(label = country),
+    hjust = 0,
+    # direction = "x",           # only nudge vertically, keeps labels aligned to their point
+    nudge_x = 0.03,             # push labels to the right of the last point
+    xlim = c(-Inf, Inf),
+    segment.size = 0.3,
+    segment.color = "grey50",
+    size = 3.5,
+    col = "black"
+  ) + 
+  scale_x_continuous(limits = c(-0.75, 1)) +
+  labs(x = "Average Country Level Defence-Normalization Position") + 
+  theme_custom
+
+ggsave("plots/Average_DN_wt_plot.png", Average_DN_wt_plot, width = 8, height = 4)

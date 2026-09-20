@@ -1,4 +1,7 @@
 
+if (!exists("Models_Vote_choice")) source("scripts/2_main_analysis.R")
+if (!exists("UK_model")) source("scripts/3_country_vote_plots.R")
+
 Models_Vote_choice_df <- data.frame()
 for(i in 1:length(Models_Vote_choice)){
   
@@ -9,19 +12,13 @@ for(i in 1:length(Models_Vote_choice)){
   
 }
 
-UK_model_df <- avg_slopes(UK_model, variables = "Security_FA", by = "Year") 
+UK_model_df <- avg_slopes(UK_model, variables = "Security_FA", by = "Year",
+                          newdata = me_newdata(UK_model, UK_data))
 Models_Vote_choice_df <- bind_rows(Models_Vote_choice_df,
                                    UK_model_df %>% 
                                      mutate(country = "UK",
                                             Year = as.factor(Year)))
 
-
-Models_Vote_choice_df %>% 
-  arrange(-Security_FA) %>% 
-  select(Security_FA, country) %>% 
-  kable(format = "latex", col.names = c("Party Number", "Slope", "Country"),
-        booktabs = TRUE, longtable = TRUE) %>% 
-  save_kable("tables/slopes_parties.tex")
 
 country_average_2025 <- EUI_data_short %>% 
   filter(Year == 2025) %>% 

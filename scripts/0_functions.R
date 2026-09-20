@@ -1,6 +1,10 @@
 ###################################################################################### 
-##### Functions and Objects for the European Identity Related to Ukriane Project #####
+##### Functions and Objects for the European Identity Related to Ukraine Project #####
 ###################################################################################### 
+
+#### Set File Directory ####
+
+GLOBAL_DIR <<- "~/Library/CloudStorage/Dropbox/Apps/Overleaf/Security_collaboration"
 
 #### Load Packages ####
 
@@ -82,6 +86,19 @@ theme_custom =   theme_minimal() + theme(legend.position = "bottom",
                                          axis.line.x = element_line(color = "grey80"),
                                          axis.line.y = element_line(color = "grey80"),)
 
+#### Colours for Social Bases ####
+
+group_colors <- c(
+  "Age"         = "#004488",  # deep blue
+  "Gender"      = "#BB5566",  # muted rose
+  "Urban"       = "#6699CC",  # dark maroon (alt if too close to Gender: "#6699CC")
+  "Ideology"    = "#117733",  # forest green
+  "Comparision" = "#882255",  # plum
+  "Employment"  = "#44AA99",  # teal
+  "Education"   = "#332288",  # indigo
+  "Income"      = "#88CCEE",  # light sky blue
+  "Trust"       = "#555555"   # neutral grey
+)
 
 #### List of Countries ####
 
@@ -96,9 +113,10 @@ COUNTRIES_2022 <- c("UK", "Denmark", "Greece", "Hungary", "Lithuania",
                     "Croatia", "Bulgaria", "Spain", "Finland", "France",
                     "Germany", "Sweden")
 
-NEW_COUNTRIES_2024 <- c("UK", "Slovakia", "Netherlands", "Denmark", "Hungary",
+NEW_COUNTRIES_2024 <- c("Slovakia", "Netherlands", "Denmark", "Hungary",
                         "Croatia", "Bulgaria", "Lithuania", "Romania", "Greece", 
-                        "Poland", "Spain", "Germany", "Sweden", "Italy", "France", "Finland", "Belgium")
+                        "Poland", "Spain", "Germany", "Sweden", "Italy", "France",
+                        "Finland", "Belgium", "UK")
 
 
 CONTROLS <- c("Woman", "Education", "Age", "Urban")
@@ -126,7 +144,7 @@ ggplot(aes(x = Security_FA, y = estimate, color = group)) +
                      limits = c(0, 0.7)) +
     scale_x_continuous( breaks = seq(-1.5, 1.5, length.out = 9),
                         limits = c(-1.5, 1.5), 
-                        labels = c("", "Highest Defence Focus",  "", "", "- Relations with Russia -", "", "", "Highest Nomaralization Focus", "")) +
+                        labels = c("", "Highest Defence Focus",  "", "", "- Relations with Russia -", "", "", "Highest Normalization Focus", "")) +
   labs(
     y = "Predicted Probabilty of Supporting Each Party",
     color = "Previous Vote Choice",
@@ -141,7 +159,61 @@ ggplot(aes(x = Security_FA, y = estimate, color = group)) +
 #### Rescale 0 - 1 ####
 range01 <- function(x){(x-min(x, na.rm = TRUE))/(max(x, na.rm = TRUE)-min(x, na.rm = TRUE))}
 
+#### marginaleffects newdata ####
+
+## Without an explicit `newdata`, avg_slopes()/avg_predictions() rebuild it from the
+## model call's full data frame - all 300+ columns of EUI_data_short - which makes
+## them ~15x slower on the multinom fits (and memory-hungry). This returns the rows
+## the model was actually fitted on (complete cases on every variable in its formula),
+## restricted to the columns it uses plus any `extra` ones (e.g. a `by` variable).
+## The estimates are identical to the default; keeping rows with a missing outcome
+## would NOT be, so the complete-case step matters.
+me_newdata <- function(model, data, extra = NULL){
+  model_vars <- all.vars(formula(model))
+  data %>%
+    select(all_of(unique(c(model_vars, extra)))) %>%
+    drop_na(all_of(model_vars))
+}
 
 
+#### Party Switch Functions ####
+
+## One model per row facet x column facet (4 fits): each column is a standalone
+## moderation of the Security_FA effect by that placement measure, within the
+## countries that lack the relevant pro-normalization party. The outcome matches
+## the row - voting an economic-right pro-normalization party where no economic-left
+## one exists, voting a TAN pro-normalization party where no GAL one exists.
+## `dat` here is already restricted to the (sometimes very few) countries where
+## a given party-supply flag holds, so `moderator` can end up with only one
+## level actually present once NAs are dropped - `Security_FA * moderator`
+## can't build contrasts for that, so this skips the panel (with a warning)
+## instead of letting the whole script crash on "contrasts need 2 or more levels".
+fit_switch <- function(dat, moderator, response){
+  n_levels <- dplyr::n_distinct(dat[[moderator]], na.rm = TRUE)
+  if (n_levels < 2) {
+    warning("fit_switch(): '", moderator, "' has only ", n_levels,
+            " level(s) among countries ", paste(unique(dat$country), collapse = ", "),
+            " - skipping this panel.", call. = FALSE)
+    return(NULL)
+  }
+  lm_robust(reformulate(c(paste0("Security_FA * ", moderator), CONTROLS, "as.factor(Year)"),
+                        response = response),
+            data = dat)
+}
+
+switch_slopes <- function(dat, row_lab, response){
+  m_lr <- fit_switch(dat, "LR_self", response)
+  m_galtan <- fit_switch(dat, "GAL_TAN_values", response)
+  bind_rows(
+    if (!is.null(m_lr)) as.data.frame(avg_slopes(m_lr, variables = "Security_FA", by = "LR_self",
+                                                 newdata = me_newdata(m_lr, dat, "LR_self"))) %>%
+      transmute(row = row_lab, col = "Left-Right Self-Placement",
+                x = as.character(LR_self), estimate, conf.low, conf.high),
+    if (!is.null(m_galtan)) as.data.frame(avg_slopes(m_galtan, variables = "Security_FA", by = "GAL_TAN_values",
+                                                     newdata = me_newdata(m_galtan, dat, "GAL_TAN_values"))) %>%
+      transmute(row = row_lab, col = "GAL-TAN Placement",
+                x = as.character(GAL_TAN_values), estimate, conf.low, conf.high)
+  )
+}
 
 
